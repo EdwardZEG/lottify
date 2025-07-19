@@ -1,0 +1,33 @@
+{
+  "name": "lottify",
+  "version": "1.0.0",
+  "description": "Juego de lotería multijugador en tiempo real",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "build": "echo 'No build step required'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["lottery", "game", "socketio", "realtime"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "bootstrap": "^5.3.0",
+    "connect-mongo": "^5.1.0",
+    "dotenv": "^17.0.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "mercadopago": "^2.8.0",
+    "mongoose": "^8.16.1",
+    "multer": "^2.0.1",
+    "nodemailer": "^7.0.4",
+    "socket.io": "^4.8.1"
+  }
+}
