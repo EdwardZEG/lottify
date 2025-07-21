@@ -4,14 +4,38 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel de Administración - Móvil</title>
+    <title>Lottify - Panel Principal Móvil</title>
+    <link rel="icon" type="image/svg+xml" href="/img/logo_header.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
     <style>
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         body {
-            background: #fff;
+            background: #f8f9fa;
+            /* Mismo fondo que PC */
             font-family: 'Poppins', Arial, sans-serif;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            /* Eliminar scroll vertical */
+            height: 100vh;
+            /* Altura fija al viewport */
+            width: 100%;
         }
 
         .mobile-header {
@@ -41,8 +65,6 @@
             width: auto;
             display: block;
             max-width: 120px;
-            margin-top: 0;
-            margin-bottom: 0;
         }
 
         #mobile-hamburger {
@@ -53,151 +75,106 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            height: 100%;
         }
 
         #hamburger-icon {
             color: #fff;
             font-size: 2.2rem;
-            display: flex;
-            align-items: center;
+            transition: all 0.3s ease;
         }
 
         .sidebar {
-            background: #000 !important;
-            color: #fff;
             position: fixed;
-            top: 60px !important;
+            top: 60px;
             left: -100vw;
-            width: 100vw !important;
-            min-width: 0 !important;
-            max-width: 100vw !important;
-            height: calc(100vh - 60px) !important;
-            padding: 0 !important;
-            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
-            transition: left 0.3s, width 0.3s;
-            display: flex !important;
-            flex-direction: column !important;
-            min-height: 320px;
-            z-index: 3001;
+            width: 100vw;
+            height: calc(100vh - 60px);
+            background: #000;
+            color: #fff;
+            padding: 1rem;
+            z-index: 2500;
+            transition: left 0.3s;
+            overflow-y: auto;
         }
 
-        .sidebar.expanded {
-            left: 0 !important;
+        .sidebar.show {
+            left: 0;
         }
 
         #sidebar-backdrop {
             display: none;
-            opacity: 0;
             position: fixed;
-            top: 0;
+            top: 60px;
             left: 0;
             width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.32);
-            z-index: 1999;
-            transition: opacity 0.3s;
+            height: calc(100vh - 60px);
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
         }
 
-        .content,
-        .content.expanded {
-            margin-top: 64px !important;
-            background: #fff;
-        }
-
-        @media (min-width: 601px) {
-            .sidebar {
-                left: 0 !important;
-                width: 80px;
-                height: 100vh !important;
-                top: 0 !important;
-                position: fixed;
-            }
-
-            .sidebar.expanded {
-                width: 300px;
-            }
-
-            #sidebar-backdrop {
-                display: none !important;
-            }
-
-            .content,
-            .content.expanded {
-                margin-top: 0 !important;
-                margin-left: 80px;
-            }
+        .content {
+            position: fixed;
+            /* Posición fija para controlar completamente */
+            top: 60px;
+            /* Exactamente bajo el header */
+            left: 0;
+            width: 100vw;
+            height: calc(100vh - 60px);
+            /* Altura exacta disponible */
+            padding: 0;
+            /* Sin padding */
+            background: #f8f9fa;
+            /* Mismo fondo que PC */
+            overflow: hidden;
+            /* Sin scroll */
+            z-index: 1000;
         }
 
         .sidebar-logo-container {
-            width: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            min-height: 60px;
+            margin-bottom: 2rem;
         }
 
         .sidebar-logo-container .logo {
-            width: 180px !important;
-            height: 60px !important;
-            max-width: 100%;
-            max-height: 100%;
+            width: 180px;
+            height: 60px;
             object-fit: contain;
-            display: block;
-            margin: 0 auto;
         }
 
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
         }
 
         .sidebar-link {
-            color: #fff !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.65rem 1.2rem;
-            border-radius: 0.7rem;
-            margin-bottom: 0.1rem;
             display: flex;
             align-items: center;
-            gap: 0.7rem;
+            padding: 0.75rem 1rem;
+            color: #fff;
             text-decoration: none;
-            width: 100%;
-            min-width: 0;
-            max-width: 300px;
-            background: none;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            transition: background 0.18s, color 0.18s;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background 0.3s;
+            cursor: pointer;
         }
 
-        .sidebar-link.active,
-        .sidebar-link:hover {
-            background: #23233a !important;
-            color: #fff !important;
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
         .sidebar-link i {
-            color: #fff !important;
-            flex-shrink: 0;
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
         }
 
         .sidebar-footer {
             margin-top: auto;
-            border-top: 1.5px solid #23233a;
-            padding-top: 0.7rem;
-            display: flex !important;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.7rem;
-            width: 100%;
-            position: relative;
-            background: #000;
         }
 
         .sidebar-footer-btn {
@@ -208,30 +185,21 @@
             display: flex;
             align-items: center;
             gap: 0.7rem;
-            padding: 0.3rem 0.5rem;
+            padding: 0.75rem;
             border-radius: 0.7rem;
             cursor: pointer;
             font-family: 'Poppins', Arial, sans-serif;
-            font-size: 0.97rem;
-            font-weight: 400;
-            transition: background 0.18s;
-            position: relative;
-        }
-
-        .sidebar-footer-btn:hover,
-        .sidebar-footer-btn:focus {
-            background: #181818;
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: #444;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             color: #fff;
             font-weight: 600;
             flex-shrink: 0;
@@ -240,273 +208,2991 @@
         .user-info {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-            min-width: 0;
+            flex: 1;
         }
 
         .user-name {
             font-weight: 500;
-            font-size: 0.97rem;
             color: #fff;
-            line-height: 1.1;
-            font-family: 'Poppins', Arial, sans-serif;
         }
 
         .user-email {
-            font-size: 0.81rem;
+            font-size: 0.85rem;
             color: #bdbdbd;
-            margin-top: -2px;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-family: 'Poppins', Arial, sans-serif;
         }
 
-        .arrow {
-            margin-left: auto;
-            font-size: 1.1rem;
-            transition: transform 0.2s;
-        }
-
-        .sidebar-footer-btn[aria-expanded="true"] .arrow {
-            transform: rotate(180deg);
-        }
-
-        /* Dropdown usuario: debajo del sidebar, igual que en PC */
-        .sidebar-footer-dropdown {
-            display: none;
-            margin: 0.7rem 1.2rem 0 1.2rem;
-            width: auto;
+        .dropdown-menu-mobile {
+            margin-top: 1rem;
             background: #181818;
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.32);
-            padding: 1.1rem 1.1rem 0.7rem 1.1rem !important;
-            z-index: 4000;
-            font-family: 'Poppins', Arial, sans-serif;
-            animation: fadeIn 0.18s;
-            animation-fill-mode: both;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
         }
 
-        .sidebar-footer-dropdown.show {
-            display: block;
-            animation: fadeIn 0.18s;
-            animation-fill-mode: both;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .sidebar-footer-dropdown .user-avatar {
-            width: 32px;
-            height: 32px;
-            font-size: 0.95rem;
-            margin-bottom: 0.1rem;
-            background: #444;
-        }
-
-        .sidebar-footer-dropdown .user-name {
-            font-size: 0.93rem;
-            font-weight: 500;
+        .dropdown-item-mobile {
             color: #fff;
-            font-family: 'Poppins', Arial, sans-serif;
-        }
-
-        .sidebar-footer-dropdown .user-email {
-            font-size: 0.8rem;
-            color: #bdbdbd;
-            margin-bottom: 0.5rem;
-            font-family: 'Poppins', Arial, sans-serif;
-            word-break: break-all;
-            white-space: normal;
-            max-width: 100%;
-            overflow: visible;
-        }
-
-        .sidebar-footer-dropdown .dropdown-divider {
-            border-top: 1px solid #23233a;
-            margin: 0.4rem 0;
-        }
-
-        .sidebar-footer-dropdown .dropdown-item {
-            color: #fff;
-            padding: 0.45rem 0.5rem;
+            padding: 0.75rem;
             border-radius: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.7rem;
-            font-size: 0.95rem;
+            gap: 0.75rem;
             cursor: pointer;
-            font-family: 'Poppins', Arial, sans-serif;
-            font-weight: 400;
-            transition: background 0.18s, color 0.18s;
+            transition: background 0.18s;
+            margin-bottom: 0.5rem;
         }
 
-        .sidebar-footer-dropdown .dropdown-item:hover,
-        .sidebar-footer-dropdown .dropdown-item:focus,
-        .sidebar-footer-dropdown .dropdown-item:active {
+        .dropdown-item-mobile:last-child {
+            margin-bottom: 0;
+        }
+
+        .dropdown-item-mobile:hover {
             background: rgb(7, 10, 243);
+        }
+
+        /* Content sections - corregido para navegación */
+        .content-section {
+            display: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .content-section.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        /* Sección inicio específica */
+        #inicio-section {
+            padding: 0.75rem 0 !important;
+        }
+
+        /* Otras secciones con padding básico */
+        #jugar-section,
+        #unirse-section,
+        #vocabulario-section {
+            display: none;
+        }
+
+        #jugar-section.active,
+        #unirse-section.active,
+        #vocabulario-section.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3b82f6;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Game configuration styles */
+        .game-category {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
             color: #fff;
+        }
+
+        .category-icon.beginner {
+            background: #10b981;
+        }
+
+        .category-icon.intermediate {
+            background: #f59e0b;
+        }
+
+        .category-icon.advanced {
+            background: #ef4444;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .level-card {
+            background: #fff;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .level-card:hover,
+        .level-card.selected {
+            border-color: #3b82f6;
+            background: #dbeafe;
+        }
+
+        .mode-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mode-card {
+            background: #fff;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-card:hover,
+        .mode-card.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .mode-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary-custom:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary-custom {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #22c55e;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .vocab-card {
+            background: #fff;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s;
+        }
+
+        .vocab-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .vocab-card img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Modal de categoría bloqueada - Estilo push desde arriba */
+        .blocked-category-modal {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            border: 2px solid #fbbf24;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+            padding: 1rem 1.5rem;
+            margin: 1rem 1rem 1rem 1rem;
+            /* Añadir margen superior y laterales */
+            transform: translateY(-100%);
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform, opacity, max-height;
+        }
+
+        .blocked-category-modal.show {
+            transform: translateY(0);
+            opacity: 1;
+            max-height: 200px;
+        }
+
+        .blocked-category-modal.hide {
+            transform: translateY(-100%);
+            opacity: 0;
+            max-height: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Estilos para el carrusel de inicio */
+        .mobile-carousel {
+            margin: 1.5rem 0;
+        }
+
+        /* ESTILOS REDISEÑADOS PARA SECCIÓN INICIO - SIN MÁRGENES EXCESIVOS */
+        .inicio-carousel-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            position: relative;
+            min-height: 410px;
+            /* Ajustado para el nuevo largo */
+            max-height: 530px;
+            /* Ajustado para el nuevo largo */
+        }
+
+        .carousel-content {
+            flex: 1;
+            max-width: 340px;
+            /* Reducido de 360px a 340px */
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-content .carousel-track {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-content .carousel-card {
+            position: absolute;
+            width: 280px;
+            /* Reducido de 300px a 280px */
+            height: 430px;
+            /* Aumentado de 420px a 430px */
+            border-radius: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            overflow: hidden;
+            background: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .carousel-content .carousel-card .card {
+            width: 100%;
+            height: 100%;
+            border: none !important;
+            box-shadow: none !important;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .carousel-content .carousel-card .card-body {
+            padding: 0.75rem !important;
+            /* Aumentado el padding interno */
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            /* Ligeramente más pequeño para que quepa más texto */
+            line-height: 1.4;
+            /* Mejor legibilidad */
+        }
+
+        .carousel-content .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 1rem;
+            display: block;
+        }
+
+        .carousel-content .carousel-card.active {
+            z-index: 10;
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+
+        .carousel-content .carousel-card.prev {
+            z-index: 5;
+            transform: translateX(-80px) scale(0.85);
+            opacity: 0.6;
+        }
+
+        .carousel-content .carousel-card.next {
+            z-index: 5;
+            transform: translateX(80px) scale(0.85);
+            opacity: 0.6;
+        }
+
+        .carousel-content .carousel-card.hidden {
+            opacity: 0;
+            transform: translateX(0) scale(0.7);
+        }
+
+        .carousel-counter-wrapper {
+            padding: 0.25rem;
+            text-align: center;
+        }
+
+        .carousel-counter-wrapper .carousel-counter {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .action-button-wrapper {
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .carousel-container {
+            overflow: hidden;
+            border-radius: 1rem;
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            display: flex;
+        }
+
+        .carousel-card {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .card-image {
+            width: 120px;
+            height: 160px;
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            text-align: center;
+        }
+
+        .card-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-content p {
+            font-size: 1rem;
+            color: #6b7280;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .carousel-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: #f8fafc;
+        }
+
+        .carousel-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #6b7280;
+        }
+
+        .carousel-btn:hover {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .carousel-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #d1d5db;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dot.active {
+            background: #3b82f6;
+            transform: scale(1.25);
+        }
+
+        /* Botones principales optimizados */
+        .action-button-wrapper .btn-primary-custom.large {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: auto;
+            min-width: 200px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-button-wrapper .btn-primary-custom.large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Acciones rápidas */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: #3b82f6;
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .action-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-card p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Carrusel de vocabulario */
+        .vocab-carousel {
+            margin-top: 1.5rem;
+        }
+
+        .vocab-main-card {
+            background: #fff;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .vocab-card-wrapper {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .vocab-card-image {
+            width: 150px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .vocab-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .vocab-card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .vocab-card-number {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .vocab-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: #f8fafc;
+        }
+
+        .nav-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.25rem;
+        }
+
+        .nav-btn:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Estilos específicos para botones de carrusel deshabilitados */
+        #inicio-carousel-prev:disabled,
+        #inicio-carousel-next:disabled {
+            background: #cbd5e1 !important;
+            color: #475569 !important;
+            cursor: not-allowed !important;
+            opacity: 1 !important;
+            transform: scale(1) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #94a3b8 !important;
+        }
+
+        #inicio-carousel-prev:disabled:hover,
+        #inicio-carousel-next:disabled:hover {
+            background: #cbd5e1 !important;
+            color: #475569 !important;
+            transform: scale(1) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Asegurar que las flechas del carrusel siempre mantengan opacidad completa */
+        #inicio-carousel-prev,
+        #inicio-carousel-next {
+            opacity: 1 !important;
+            z-index: 100 !important;
+            position: relative !important;
+        }
+
+        /* ESTILOS VOCABULARIO - RÉPLICA EXACTA DEL CARRUSEL INICIO */
+        .vocab-carousel-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 0.5rem;
+            position: relative;
+            min-height: 410px;
+            max-height: 530px;
+        }
+
+        .vocab-carousel-content {
+            flex: 1;
+            max-width: 340px;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vocab-carousel-track {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vocab-carousel-content .carousel-card {
+            position: absolute;
+            width: 260px;
+            height: 380px;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        .vocab-carousel-content .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .vocab-carousel-content .carousel-card.active {
+            z-index: 10;
+            transform: translateX(0) scale(1);
+            opacity: 1;
+            filter: none;
+            /* Sin filtros para la carta activa */
+        }
+
+        .vocab-carousel-content .carousel-card.prev {
+            z-index: 5;
+            transform: translateX(-70px) scale(0.85);
+            opacity: 0.7;
+            filter: brightness(0.6) saturate(0.8);
+        }
+
+        .vocab-carousel-content .carousel-card.next {
+            z-index: 5;
+            transform: translateX(70px) scale(0.85);
+            opacity: 0.7;
+            filter: brightness(0.6) saturate(0.8);
+        }
+
+        .vocab-carousel-content .carousel-card.hidden {
+            opacity: 0.4;
+            transform: translateX(0) scale(0.6);
+            filter: brightness(0.4) saturate(0.6);
+        }
+
+        .vocab-counter-wrapper {
+            padding: 0.25rem;
+            text-align: center;
+        }
+
+        .vocab-counter-wrapper .vocab-counter {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .vocab-action-wrapper {
+            padding: 0.75rem;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .vocab-counter-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vocab-counter {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .vocab-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Estilos específicos para botones de carrusel de vocabulario deshabilitados */
+        #vocab-carousel-prev:disabled,
+        #vocab-carousel-next:disabled {
+            background: #cbd5e1 !important;
+            color: #475569 !important;
+            cursor: not-allowed !important;
+            opacity: 1 !important;
+            transform: scale(1) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #94a3b8 !important;
+        }
+
+        #vocab-carousel-prev:disabled:hover,
+        #vocab-carousel-next:disabled:hover {
+            background: #cbd5e1 !important;
+            color: #475569 !important;
+            transform: scale(1) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Asegurar que las flechas del carrusel de vocabulario siempre mantengan opacidad completa */
+        #vocab-carousel-prev,
+        #vocab-carousel-next {
+            opacity: 1 !important;
+            z-index: 100 !important;
+            position: relative !important;
+        }
+
+        /* Botones de audio y play */
+        .vocab-audio-button,
+        .vocab-play-button {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .vocab-audio-button:hover,
+        .vocab-play-button:hover {
+            background: #2563eb;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .vocab-play-button.playing {
+            background: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .vocab-play-button.playing:hover {
+            background: #dc2626;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .vocab-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vocab-counter {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .sound-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #10b981;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sound-btn:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+
+        /* Toggle y controles */
+        .vocab-toggle {
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .toggle-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .vocab-grid-card {
+            background: #fff;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .vocab-grid-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border-color: #3b82f6;
+        }
+
+        .vocab-grid-card img {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+        }
+
+        .grid-card-info {
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .grid-card-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+
+        .grid-card-number {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .vocab-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.75rem;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 70px;
+            font-size: 0.75rem;
+            color: #374151;
+        }
+
+        .control-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .control-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .control-btn i {
+            font-size: 1.25rem;
+        }
+
+        /* Estilos específicos para "Unirse a partida" - Replicando diseño PC */
+        .unirse-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo-container img {
+            width: 120px;
+            height: auto;
+        }
+
+        .codigo-input-container {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .codigo-input {
+            width: 100%;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.3em;
+            text-align: center;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .codigo-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .codigo-input::placeholder {
+            color: #94a3b8;
+            font-weight: normal;
+        }
+
+        .codigo-input:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .success-banner {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .success-banner i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .success-banner h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .success-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .btn-unirse {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-unirse:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-unirse:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary-mobile {
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 0.75rem;
+        }
+
+        .btn-secondary-mobile:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+
+        .btn-compartir {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-compartir:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-1px);
+        }
+
+        .host-buttons {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            text-align: center;
+        }
+
+        .copied-feedback {
+            color: #10b981 !important;
         }
     </style>
 </head>
 
-<body>
-    <!-- Header móvil: negro, logo a la izquierda, menú hamburguesa a la derecha -->
-    <header id="mobile-header" class="mobile-header d-block d-md-none">
-        <div class="d-flex align-items-center justify-content-between w-100">
-            <img src="/img/logo_header.svg" alt="Logo del proyecto">
-            <button id="mobile-hamburger" aria-label="Abrir menú lateral">
+<body x-data="dashboardApp()" x-init="init()" @set-room-code.window="
+    const unirseSectionDiv = document.querySelector('#unirse-section');
+    if (unirseSectionDiv && Alpine.$data) {
+        const unirseSectionData = Alpine.$data(unirseSectionDiv);
+        if (unirseSectionData) {
+            unirseSectionData.codigo = $event.detail.roomCode;
+            unirseSectionData.esHost = $event.detail.esHost || false;
+            unirseSectionData.showSuccessMessage = $event.detail.showSuccessMessage || false;
+        }
+    }
+">>
+    <!-- Header móvil -->
+    <header class="mobile-header">
+        <div class="d-flex">
+            <img src="/img/logo_formularios.svg" alt="Logo del proyecto">
+            <button id="mobile-hamburger">
                 <i id="hamburger-icon" class="bi bi-list"></i>
             </button>
         </div>
     </header>
-    <!-- Fondo semitransparente para cubrir el contenido cuando el sidebar está abierto en móvil -->
-    <div id="sidebar-backdrop"
-        style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.32);z-index:1999;transition:opacity 0.3s;">
-    </div>
-    <!-- Barra lateral con navegación -->
+
+    <!-- Fondo del sidebar -->
+    <div id="sidebar-backdrop"></div>
+
+    <!-- Sidebar -->
     <div id="sidebar" class="sidebar">
-        <div class="text-center mb-4 sidebar-logo-container">
-            <img src="/img/logo_sidebar.svg" alt="Logo del proyecto" class="logo" id="sidebar-toggle">
+        <div class="sidebar-logo-container">
+            <img src="/img/logo_formularios.svg" alt="Logo" class="logo">
         </div>
-        <nav class="sidebar-menu d-flex flex-column w-100">
-            <a href="#" class="sidebar-link active"><i class="bi bi-rocket me-2"></i> <span
-                    class="sidebar-link-text">Inicio</span></a>
-            <a href="#" class="sidebar-link"><i class="bi bi-controller me-2"></i> <span
-                    class="sidebar-link-text">Jugar</span></a>
-            <a href="#" class="sidebar-link"><i class="bi bi-people me-2"></i> <span class="sidebar-link-text">Unirse a
-                    partida</span></a>
-            <a href="#" class="sidebar-link"><i class="bi bi-book me-2"></i> <span class="sidebar-link-text">Estudiar
-                    Vocabulario</span></a>
-        </nav>
-        <% if (user && user.fullname) { %>
-            <div class="sidebar-user-link" style="width:100%;margin-top:0.7rem;">
-                <button class="sidebar-footer-btn w-100" id="sidebar-user-btn" aria-expanded="false" type="button"
-                    style="background:none;border:none;display:flex;align-items:center;gap:0.7rem;padding:0.65rem 1.2rem;width:100%;">
+
+        <div class="sidebar-menu">
+            <div class="sidebar-link active" @click="showSection('inicio')" data-section="inicio">
+                <i class="bi bi-rocket"></i><span>Inicio</span>
+            </div>
+            <div class="sidebar-link" @click="showSection('jugar')" data-section="jugar">
+                <i class="bi bi-controller"></i><span>Jugar</span>
+            </div>
+            <div class="sidebar-link" @click="showSection('unirse')" data-section="unirse">
+                <i class="bi bi-plus-circle"></i><span>Unirse a sala</span>
+            </div>
+            <div class="sidebar-link" @click="showSection('vocabulario')" data-section="vocabulario">
+                <i class="bi bi-book"></i><span>Estudiar Vocabulario</span>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <% if (user && user.fullname) { %>
+                <button class="sidebar-footer-btn" @click="dropdownOpen = !dropdownOpen">
                     <div class="user-avatar">
-                        <%= user.fullname ?
-                            user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : '
-                            ?' %>
+                        <% if (user && user.profilePicture) { %>
+                            <img src="<%= user.profilePicture %>" alt="Avatar"
+                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            <% } else { %>
+                                <%= user.fullname ? user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2)
+                                    : ' ?' %>
+                                    <% } %>
                     </div>
                     <div class="user-info">
-                        <span class="user-name">
+                        <div class="user-name">
                             <%= user.fullname %>
-                        </span>
+                        </div>
+                        <div class="user-email">
+                            <%= user.email || 'correo@ejemplo.com' %>
+                        </div>
                     </div>
-                    <i class="bi bi-chevron-down arrow"></i>
+                    <i class="bi bi-chevron-down"></i>
                 </button>
-                <div class="sidebar-footer-dropdown" id="sidebar-user-dropdown">
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="user-avatar me-2">
-                            <%= user.fullname ?
-                                user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : '
-                                ?' %>
-                        </div>
-                        <div style="min-width:0;">
-                            <div class="user-name">
-                                <%= user.fullname %>
-                            </div>
-                            <div class="user-email">
-                                <%= user.email ? user.email : 'correo@ejemplo.com' %>
-                            </div>
-                        </div>
+
+                <div x-show="dropdownOpen" x-transition class="dropdown-menu-mobile">
+                    <div class="dropdown-item-mobile" onclick="location.href='/config'">
+                        <i class="bi bi-gear"></i>Configuración
                     </div>
-                    <div class="dropdown-divider" id="dropdown-divider" style="display:none;"></div>
-                    <div class="dropdown-item"><i class="bi bi-gear me-2"></i>Configuración</div>
-                    <div class="dropdown-item" onclick="location.href='/logout'">
-                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                    <div class="dropdown-item-mobile" onclick="location.href='/logout'">
+                        <i class="bi bi-box-arrow-right"></i>Cerrar sesión
+                    </div>
+                </div>
+                <% } %>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div class="content">
+        <!-- Inicio -->
+        <div class="content-section active" id="inicio-section">
+            <!-- Carrusel de contenidos de inicio - Rediseñado -->
+            <div class="inicio-carousel-wrapper">
+                <button
+                    class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    id="inicio-carousel-prev">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+
+                <div class="carousel-content">
+                    <div class="carousel-track" id="inicio-carousel-track">
+                        <!-- Las cartas se generarán dinámicamente con JavaScript -->
+                    </div>
+                </div>
+
+                <button
+                    class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    id="inicio-carousel-next">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Controles del carrusel -->
+            <div class="carousel-counter-wrapper">
+                <span class="carousel-counter" id="inicio-carousel-counter">1 / 3</span>
+            </div>
+
+            <!-- Botón principal -->
+            <div class="action-button-wrapper">
+                <button class="btn-primary-custom large" @click="showSection('jugar')">
+                    <i class="fas fa-play"></i>
+                    ¡Empezar a Jugar!
+                </button>
+            </div>
+        </div>
+
+        <!-- Jugar -->
+        <div class="content-section" id="jugar-section" x-data="gameConfigMobile()" style="padding: 0.5rem 1rem;">
+            <!-- Modal temporal para categoría bloqueada -->
+            <div id="blocked-category-modal" class="blocked-category-modal">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-yellow-400 rounded-full p-1.5">
+                        <svg class="w-5 h-5 text-yellow-800" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-yellow-800 font-semibold text-sm">Categoría bloqueada</p>
+                        <p class="text-yellow-700 text-xs">Estará disponible pronto</p>
                     </div>
                 </div>
             </div>
-            <% } else { %>
-                <div style="color:yellow;font-weight:bold;">Usuario no definido</div>
-                <% } %>
+
+            <!-- Título principal -->
+            <div class="text-center mb-1" style="margin-top: 1rem;">
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Configurar Partida</h1>
+            </div>
+
+            <!-- 1. Selector de Categoría -->
+            <div class="text-center mb-3">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Selecciona la categoría</h2>
+
+                <div class="flex items-center justify-center gap-2">
+                    <button @click="anteriorCategoria()"
+                        class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div class="relative">
+                        <div class="w-64 h-20 bg-black rounded-xl shadow-2xl flex items-center justify-center transition-all duration-300 border-2 border-yellow-400"
+                            :class="animandoCategoria ? 'scale-95 opacity-70' : 'scale-100 opacity-100'"
+                            :style="!categorias[categoriaActual].disponible ? 'opacity: 0.6' : ''">
+
+                            <!-- Icono de candado para categorías bloqueadas -->
+                            <div x-show="!categorias[categoriaActual].disponible"
+                                class="absolute top-2 right-2 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center">
+                                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+
+                            <div class="text-center text-yellow-400">
+                                <div class="mb-1">
+                                    <i :class="categorias[categoriaActual].icono" class="text-lg"></i>
+                                </div>
+                                <h3 class="text-lg font-bold mb-0.5" x-text="categorias[categoriaActual].codigo"></h3>
+                                <p class="text-xs opacity-90" x-text="categorias[categoriaActual].nombre"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="siguienteCategoria()"
+                        class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Selector de Nivel -->
+            <div class="text-center mb-3">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Selecciona el nivel</h2>
+
+                <div class="flex items-center justify-center gap-2">
+                    <button @click="anteriorNivel()"
+                        class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div class="relative">
+                        <div class="w-64 h-16 bg-black rounded-xl shadow-2xl flex items-center justify-center transition-all duration-300 border-2 border-cyan-400"
+                            :class="animandoNivel ? 'scale-95 opacity-70' : 'scale-100 opacity-100'"
+                            :style="(!puedeJugar() || !puedeJugarNivel(nivelActual)) ? 'opacity: 0.6' : ''">
+
+                            <!-- Icono de candado para niveles bloqueados -->
+                            <div x-show="!puedeJugar() || !puedeJugarNivel(nivelActual)"
+                                class="absolute top-1 right-2 bg-red-500 rounded-full w-4 h-4 flex items-center justify-center">
+                                <svg class="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+
+                            <div class="text-center text-cyan-400">
+                                <h3 class="text-lg font-bold"
+                                    x-text="getNivelesDisponibles()[nivelActual]?.nombre || 'Nivel no disponible'"></h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="siguienteNivel()"
+                        class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Selector de Modo de Juego -->
+            <div class="text-center mb-3">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">Modo de juego</h2>
+
+                <div class="flex items-center justify-center gap-2">
+                    <button @click="anteriorModo()"
+                        class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg>
+                    </button>
+
+                    <div class="relative">
+                        <div class="w-64 h-18 bg-black rounded-xl shadow-2xl flex items-center justify-center transition-all duration-300 border-2 border-pink-400"
+                            :class="animandoModo ? 'scale-95 opacity-70' : 'scale-100 opacity-100'"
+                            :style="!modos[modoActual].disponible ? 'opacity: 0.6' : ''">
+
+                            <!-- Icono de candado si no está disponible -->
+                            <div x-show="!modos[modoActual].disponible"
+                                class="absolute top-2 right-2 bg-red-500 rounded-full w-5 h-5 flex items-center justify-center">
+                                <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+
+                            <div class="text-center text-pink-400">
+                                <div class="mb-1">
+                                    <i :class="modos[modoActual].icono" class="text-lg"></i>
+                                </div>
+                                <h3 class="text-sm font-bold mb-0.5" x-text="modos[modoActual].nombre"></h3>
+                                <p class="text-xs opacity-90" x-text="modos[modoActual].descripcion"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="siguienteModo()"
+                        class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botón JUGAR -->
+            <div class="flex justify-center items-center mt-4 px-4" style="margin-bottom: 1rem;">
+                <button @click="crearPartida()" :disabled="!puedeJugarCompleto()"
+                    class="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-40 text-base flex items-center justify-center space-x-2 mx-auto">
+                    <span>JUGAR</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Unirse -->
+        <div class="content-section" id="unirse-section" x-data="{ 
+                codigo: '',
+                copied: false,
+                esHost: false,
+                loading: false,
+                errorMessage: '',
+                showSuccessMessage: false,
+                verificacionInterval: null,
+                init() {
+                    this.resetSection();
+                    // Iniciar verificación automática cada 30 segundos
+                    this.iniciarVerificacionAutomatica();
+                },
+                iniciarVerificacionAutomatica() {
+                    // Limpiar cualquier intervalo previo
+                    if (this.verificacionInterval) {
+                        clearInterval(this.verificacionInterval);
+                    }
+                    
+                    // Crear nuevo intervalo de verificación
+                    this.verificacionInterval = setInterval(() => {
+                        // Solo verificar si la página está visible
+                        if (document.hidden) return;
+                        
+                        const gameCode = localStorage.getItem('gameCode');
+                        const isHost = localStorage.getItem('isHost') === 'true';
+                        
+                        // Solo verificar si tenemos un código y somos host o si estamos en una sala
+                        if (gameCode && (isHost || this.codigo)) {
+                            this.verificarSalaActivaSilenciosa(gameCode);
+                        }
+                    }, 30000); // Verificar cada 30 segundos
+
+                    // Agregar listener para cambios de visibilidad de la página
+                    document.addEventListener('visibilitychange', () => {
+                        if (!document.hidden) {
+                            // Página visible, verificar inmediatamente
+                            const gameCode = localStorage.getItem('gameCode');
+                            if (gameCode && (localStorage.getItem('isHost') === 'true' || this.codigo)) {
+                                this.verificarSalaActivaSilenciosa(gameCode);
+                            }
+                        }
+                    });
+                },
+                verificarSalaActivaSilenciosa(code) {
+                    // Verificación silenciosa sin mostrar loading
+                    fetch(`/api/game-rooms/room-info/${code}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success || data.room.status !== 'waiting') {
+                            // La sala ya no está disponible, limpiar automáticamente
+                            console.log('Sala detectada como inactiva, limpiando automáticamente...');
+                            this.resetSection(true); // Reset forzado
+                        }
+                    })
+                    .catch(() => {
+                        // Error de red, posiblemente sala no disponible
+                        console.log('Error verificando sala, limpiando por seguridad...');
+                        this.resetSection(true); // Reset forzado
+                    });
+                },
+                resetSection(forced = false) {
+                    // Si es un reset forzado (por ejemplo, después de terminar una partida)
+                    if (forced) {
+                        this.codigo = '';
+                        this.copied = false;
+                        this.esHost = false;
+                        this.loading = false;
+                        this.errorMessage = '';
+                        this.showSuccessMessage = false;
+                        this.limpiarLocalStorage();
+                        return;
+                    }
+                    
+                    // Restablecer completamente la sección
+                    this.codigo = '';
+                    this.copied = false;
+                    this.esHost = false;
+                    this.loading = false;
+                    this.errorMessage = '';
+                    this.showSuccessMessage = false;
+                    
+                    // Verificar si hay un código de partida creado solo si es host
+                    const gameCode = localStorage.getItem('gameCode');
+                    const isHost = localStorage.getItem('isHost') === 'true';
+                    if (gameCode && isHost) {
+                        // Verificar en el servidor si la sala sigue activa
+                        this.verificarSalaActiva(gameCode);
+                    } else {
+                        // Limpiar localStorage si no es host
+                        this.limpiarLocalStorage();
+                    }
+                },
+                verificarSalaActiva(code) {
+                    fetch(`/api/game-rooms/room-info/${code}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.room.status === 'waiting') {
+                            this.codigo = code;
+                            this.esHost = data.room.isHost;
+                            this.showSuccessMessage = this.esHost;
+                        } else {
+                            // La sala no existe o ya no está disponible
+                            this.limpiarLocalStorage();
+                        }
+                    })
+                    .catch(() => {
+                        // Error de red, limpiar por seguridad
+                        this.limpiarLocalStorage();
+                    });
+                },
+                limpiarLocalStorage() {
+                    localStorage.removeItem('gameCode');
+                    localStorage.removeItem('gameConfig');
+                    localStorage.removeItem('isHost');
+                },
+                copiarCodigo() {
+                    const codigoACopiar = this.codigo || '657-934';
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(codigoACopiar).then(() => {
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        }).catch(() => {
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        });
+                    } else {
+                        // Fallback para navegadores sin clipboard API
+                        this.copied = true;
+                        setTimeout(() => { this.copied = false; }, 2000);
+                    }
+                },
+                unirseAPartida() {
+                    if (this.codigo.length < 6) {
+                        this.errorMessage = 'El código debe tener al menos 6 caracteres';
+                        setTimeout(() => { this.errorMessage = ''; }, 3000);
+                        return;
+                    }
+                    
+                    this.loading = true;
+                    this.errorMessage = '';
+                    
+                    // Determinar si crear o unirse a sala
+                    const endpoint = this.esHost ? '/api/game-rooms/room-info/' + this.codigo : '/api/game-rooms/join-room';
+                    const method = this.esHost ? 'GET' : 'POST';
+                    const body = this.esHost ? null : JSON.stringify({ code: this.codigo });
+                    
+                    const options = {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    };
+                    
+                    if (body) {
+                        options.body = body;
+                    }
+                    
+                    fetch(endpoint, options)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.loading = false;
+                        
+                        if (data.success) {
+                            console.log('Uniéndose/iniciando partida con código:', this.codigo);
+                            
+                            // Guardar información de la sala
+                            localStorage.setItem('gameCode', this.codigo);
+                            localStorage.setItem('isHost', data.room.isHost ? 'true' : 'false');
+                            
+                            // Redirigir al juego
+                            window.location.href = '/jugar?code=' + this.codigo;
+                        } else {
+                            this.errorMessage = data.error || 'Error desconocido';
+                            setTimeout(() => { this.errorMessage = ''; }, 5000);
+                        }
+                    })
+                    .catch(error => {
+                        this.loading = false;
+                        console.error('Error:', error);
+                        this.errorMessage = 'Error de conexión. Inténtalo de nuevo.';
+                        setTimeout(() => { this.errorMessage = ''; }, 5000);
+                    });
+                },
+                compartirCodigo() {
+                    if (navigator.share && this.codigo) {
+                        navigator.share({
+                            title: 'Juego de Lotería',
+                            text: 'Únete a mi partida con el código: ' + this.codigo,
+                            url: window.location.origin + '/jugar?code=' + this.codigo
+                        });
+                    } else {
+                        this.copiarCodigo();
+                    }
+                },
+                destroy() {
+                    // Limpiar el intervalo cuando se destruye el componente
+                    if (this.verificacionInterval) {
+                        clearInterval(this.verificacionInterval);
+                        this.verificacionInterval = null;
+                    }
+                }
+            }" @destroy="destroy()">
+            <!-- Diseño móvil replicando PC exactamente -->
+            <div class="w-full h-full flex flex-col items-center px-4">
+
+                <!-- Logo superior con separación -->
+                <div class="mb-4 mt-20 transform hover:scale-105 transition-all duration-300">
+                    <img src="/img/logo_formularios.svg" alt="Logo"
+                        class="w-24 h-24 mx-auto drop-shadow-xl filter saturate-110">
+                </div>
+
+                <!-- Campo de código replicando diseño PC exactamente -->
+                <div class="mb-6 w-full px-3 mt-12">
+                    <div class="relative w-full">
+                        <div class="flex w-full">
+                            <input type="text" x-model="codigo" :placeholder="esHost ? codigo : '657-934'"
+                                @input="codigo = codigo.toUpperCase()"
+                                class="w-full max-w-full px-3 py-2 text-base font-bold text-gray-800 bg-white border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-200 focus:outline-none placeholder-gray-400"
+                                maxlength="6" :readonly="esHost" style="min-width:0;">
+                            <button @click="copiarCodigo()"
+                                class="px-3 py-2 bg-gray-100 border border-l-0 border-gray-300 rounded-r-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
+                                :class="{ 'text-green-600 bg-green-50': copied }" title="Copiar código">
+                                <i class="fas text-base transition-transform duration-300 group-hover:scale-110"
+                                    :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                            </button>
+                        </div>
+
+                        <!-- Mensaje de copiado -->
+                        <div x-show="copied" x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                            x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 transform translate-y-2 scale-95"
+                            class="absolute -bottom-7 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold shadow-xl">
+                            <i class="fas fa-check mr-1"></i>¡Copiado!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensajes y botones -->
+                <div class="w-full px-3">
+                    <!-- Mensaje de éxito para host -->
+                    <div x-show="showSuccessMessage && esHost" x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                        x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                        class="mb-4 text-center w-full">
+                        <div class="bg-green-50 border border-green-200 rounded-md p-3 shadow-sm">
+                            <div class="flex items-center justify-center space-x-2 text-green-800 mb-1">
+                                <i class="fas fa-crown text-lg"></i>
+                                <span class="font-semibold text-base">¡Partida creada!</span>
+                            </div>
+                            <p class="text-green-700 text-sm">Comparte el código con otros jugadores</p>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de error -->
+                    <div x-show="errorMessage" x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                        x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                        class="mb-4 text-center w-full">
+                        <div class="bg-red-50 border border-red-200 rounded-md p-3 shadow-sm">
+                            <div class="flex items-center justify-center space-x-2 text-red-800 mb-1">
+                                <i class="fas fa-exclamation-triangle text-lg"></i>
+                                <span class="font-semibold text-base">Error</span>
+                            </div>
+                            <p class="text-red-700 text-sm" x-text="errorMessage"></p>
+                        </div>
+                    </div>
+
+                    <!-- Botones principales -->
+                    <div class="flex flex-col space-y-4 w-full max-w-sm mx-auto">
+                        <button @click="unirseAPartida()"
+                            class="group relative px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold text-base rounded-md transition-all duration-300 hover:shadow-md disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-200 shadow w-full"
+                            :disabled="codigo.length < 6 || loading">
+                            <div class="flex items-center justify-center space-x-2">
+                                <!-- Spinner de carga -->
+                                <div x-show="loading" class="animate-spin">
+                                    <i class="fas fa-spinner text-base"></i>
+                                </div>
+                                <!-- Ícono normal -->
+                                <i x-show="!loading"
+                                    class="fas fa-rocket text-base transition-transform duration-300 group-hover:translate-x-1"></i>
+                                <!-- Texto del botón -->
+                                <span x-show="!loading" x-text="esHost ? 'Iniciar Partida' : 'Unirse a Partida'"
+                                    class="font-bold"></span>
+                                <span x-show="loading">Procesando...</span>
+                            </div>
+                        </button>
+
+                        <!-- Botón compartir (solo para host) -->
+                        <button x-show="esHost && codigo.length >= 6" @click="compartirCodigo()"
+                            class="group relative px-3 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold text-base rounded-md transition-all duration-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-200 shadow w-full">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="fas fa-share-alt text-base"></i>
+                                <span class="font-bold">Compartir Código</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Indicador de estado -->
+                <div class="text-center w-full px-3 mt-4" x-show="codigo.length > 0 && codigo.length < 6">
+                    <div
+                        class="w-full text-amber-600 text-base font-bold bg-amber-50/90 backdrop-blur-sm px-3 py-2 rounded-md shadow border border-amber-200">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        El código debe tener al menos 6 caracteres
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Vocabulario -->
+        <div class="content-section" id="vocabulario-section" x-data="vocabApp()" x-init="init()"
+            style="padding: 0.75rem 0;">
+
+            <!-- Título principal -->
+            <div class="text-center mb-1" style="margin-top: 1rem;">
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">Nivel A1</h1>
+            </div>
+
+            <!-- Carrusel de vocabulario - Exactamente igual al de Inicio -->
+            <div class="vocab-carousel-wrapper">
+                <button
+                    class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    id="vocab-carousel-prev" @click="prevCard()"
+                    :disabled="!vocabCarousel || !vocabCarousel.canGoPrevious()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+
+                <div class="vocab-carousel-content">
+                    <div class="vocab-carousel-track" id="vocab-carousel-track">
+                        <!-- Las cartas se generarán dinámicamente con JavaScript -->
+                    </div>
+                </div>
+
+                <button
+                    class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    id="vocab-carousel-next" @click="nextCard()"
+                    :disabled="!vocabCarousel || !vocabCarousel.canGoNext()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Controles del carrusel -->
+            <div class="vocab-counter-wrapper">
+                <div class="vocab-counter-info">
+                    <span class="vocab-counter" id="vocab-carousel-counter"
+                        x-text="`${currentIndex + 1} / ${cards.length}`">1 / 54</span>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="vocab-action-wrapper">
+                <div class="vocab-buttons">
+                    <button class="vocab-audio-button" @click="reproducirAudio()" title="Escuchar pronunciación">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="vocab-play-button" @click="toggleAutoPlay()" :class="{ 'playing': autoPlaying }"
+                        :title="autoPlaying ? 'Pausar reproducción automática' : 'Iniciar reproducción automática'">
+                        <i class="fas" :class="autoPlaying ? 'fa-pause' : 'fa-play'"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div id="content" class="content">
-        <!-- Contenido principal vacío, listo para personalizar -->
-    </div>
-    <!-- Scripts Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // Sidebar hamburguesa con header móvil
-        const sidebar = document.getElementById('sidebar');
-        const content = document.getElementById('content');
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        const mobileHamburger = document.getElementById('mobile-hamburger');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-        // Mostrar/ocultar sidebar en móvil
-        function openSidebar() {
-            sidebar.classList.add('expanded');
-            content.classList.add('expanded');
-            sidebarBackdrop.style.display = 'block';
-            setTimeout(() => { sidebarBackdrop.style.opacity = '1'; }, 10);
-            hamburgerIcon.classList.remove('bi-list');
-            hamburgerIcon.classList.add('bi-x');
+        function dashboardApp() {
+            const instance = {
+                dropdownOpen: false,
+
+                init() {
+                    // Escuchar eventos de finalización de juego
+                    window.addEventListener('game-finished', () => {
+                        const unirseSectionDiv = document.querySelector('#unirse-section');
+                        if (unirseSectionDiv && Alpine.$data) {
+                            const unirseSectionData = Alpine.$data(unirseSectionDiv);
+                            if (unirseSectionData && unirseSectionData.resetSection) {
+                                unirseSectionData.resetSection(true);
+                            }
+                        }
+                    });
+                },
+
+                showSection(section) {
+                    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                    document.getElementById(section + '-section').classList.add('active');
+
+                    document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+                    event.target.classList.add('active');
+
+                    closeSidebar();
+
+                    // Inicializar carrusel de inicio si es necesario
+                    if (section === 'inicio' && !inicioCarousel) {
+                        setTimeout(() => {
+                            inicioCarousel = new InicioCarousel();
+                        }, 100);
+                    }
+
+                    // Manejar verificación automática para sección Unirse
+                    const unirseSectionDiv = document.getElementById('unirse-section');
+                    if (unirseSectionDiv && Alpine.$data(unirseSectionDiv)) {
+                        const unirseSectionData = Alpine.$data(unirseSectionDiv);
+                        if (section === 'unirse') {
+                            // Activar verificación automática cuando se muestra la sección
+                            if (unirseSectionData.iniciarVerificacionAutomatica) {
+                                unirseSectionData.iniciarVerificacionAutomatica();
+                            }
+                        } else {
+                            // Pausar verificación automática cuando se oculta la sección
+                            if (unirseSectionData.verificacionInterval) {
+                                clearInterval(unirseSectionData.verificacionInterval);
+                                unirseSectionData.verificacionInterval = null;
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Hacer la instancia disponible globalmente
+            window.dashboardAppInstance = instance;
+            return instance;
         }
-        function closeSidebar() {
-            sidebar.classList.remove('expanded');
-            content.classList.remove('expanded');
-            sidebarBackdrop.style.opacity = '0';
-            setTimeout(() => { sidebarBackdrop.style.display = 'none'; }, 300);
-            hamburgerIcon.classList.remove('bi-x');
-            hamburgerIcon.classList.add('bi-list');
-        }
-        mobileHamburger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!sidebar.classList.contains('expanded')) {
-                openSidebar();
-            } else {
-                closeSidebar();
+
+        function gameConfigMobile() {
+            return {
+                // Estados de las animaciones
+                animandoCategoria: false,
+                animandoNivel: false,
+                animandoModo: false,
+
+                // Control del modal
+                modalTimeout: null,
+                modalShowing: false,
+
+                // Índices actuales
+                categoriaActual: 0,
+                nivelActual: 0,
+                modoActual: 0, // Empezar con Partida Offline (bloqueada)
+
+                // Datos de las categorías (exactos del dashboard PC)
+                categorias: [
+                    {
+                        codigo: 'A1',
+                        nombre: 'Principiante',
+                        icono: 'fas fa-seedling',
+                        disponible: true
+                    },
+                    {
+                        codigo: 'A2',
+                        nombre: 'Básico',
+                        icono: 'fas fa-leaf',
+                        disponible: false
+                    },
+                    {
+                        codigo: 'B1',
+                        nombre: 'Intermedio',
+                        icono: 'fas fa-tree',
+                        disponible: false
+                    },
+                    {
+                        codigo: 'B2',
+                        nombre: 'Intermedio Alto',
+                        icono: 'fas fa-mountain',
+                        disponible: false
+                    },
+                    {
+                        codigo: 'C1',
+                        nombre: 'Avanzado',
+                        icono: 'fas fa-crown',
+                        disponible: false
+                    },
+                    {
+                        codigo: 'C2',
+                        nombre: 'Experto',
+                        icono: 'fas fa-trophy',
+                        disponible: false
+                    }
+                ],
+
+                // Datos de los niveles (exactos del dashboard PC)
+                niveles: {
+                    0: [ // A1 - Solo nivel 1 desbloqueado
+                        { nombre: 'Nivel 1', disponible: true },
+                        { nombre: 'Nivel 2', disponible: false },
+                        { nombre: 'Nivel 3', disponible: false },
+                        { nombre: 'Nivel 4', disponible: false },
+                        { nombre: 'Nivel 5', disponible: false },
+                        { nombre: 'Nivel 6', disponible: false },
+                        { nombre: 'Nivel 7', disponible: false },
+                        { nombre: 'Nivel 8', disponible: false },
+                        { nombre: 'Nivel 9', disponible: false },
+                        { nombre: 'Nivel 10', disponible: false }
+                    ],
+                    1: [ // A2 - Todos bloqueados
+                        { nombre: 'Nivel 1', disponible: false },
+                        { nombre: 'Nivel 2', disponible: false },
+                        { nombre: 'Nivel 3', disponible: false },
+                        { nombre: 'Nivel 4', disponible: false },
+                        { nombre: 'Nivel 5', disponible: false },
+                        { nombre: 'Nivel 6', disponible: false },
+                        { nombre: 'Nivel 7', disponible: false },
+                        { nombre: 'Nivel 8', disponible: false },
+                        { nombre: 'Nivel 9', disponible: false },
+                        { nombre: 'Nivel 10', disponible: false }
+                    ],
+                    2: [ // B1 - Todos bloqueados
+                        { nombre: 'Nivel 1', disponible: false },
+                        { nombre: 'Nivel 2', disponible: false },
+                        { nombre: 'Nivel 3', disponible: false },
+                        { nombre: 'Nivel 4', disponible: false },
+                        { nombre: 'Nivel 5', disponible: false },
+                        { nombre: 'Nivel 6', disponible: false },
+                        { nombre: 'Nivel 7', disponible: false },
+                        { nombre: 'Nivel 8', disponible: false },
+                        { nombre: 'Nivel 9', disponible: false },
+                        { nombre: 'Nivel 10', disponible: false }
+                    ],
+                    3: [ // B2 - Todos bloqueados
+                        { nombre: 'Nivel 1', disponible: false },
+                        { nombre: 'Nivel 2', disponible: false },
+                        { nombre: 'Nivel 3', disponible: false },
+                        { nombre: 'Nivel 4', disponible: false },
+                        { nombre: 'Nivel 5', disponible: false },
+                        { nombre: 'Nivel 6', disponible: false },
+                        { nombre: 'Nivel 7', disponible: false },
+                        { nombre: 'Nivel 8', disponible: false },
+                        { nombre: 'Nivel 9', disponible: false },
+                        { nombre: 'Nivel 10', disponible: false }
+                    ],
+                    4: [ // C1 - Todos bloqueados
+                        { nombre: 'Nivel 1', disponible: false },
+                        { nombre: 'Nivel 2', disponible: false },
+                        { nombre: 'Nivel 3', disponible: false },
+                        { nombre: 'Nivel 4', disponible: false },
+                        { nombre: 'Nivel 5', disponible: false },
+                        { nombre: 'Nivel 6', disponible: false },
+                        { nombre: 'Nivel 7', disponible: false },
+                        { nombre: 'Nivel 8', disponible: false },
+                        { nombre: 'Nivel 9', disponible: false },
+                        { nombre: 'Nivel 10', disponible: false }
+                    ],
+                    5: [ // C2 - Todos bloqueados
+                        { nombre: 'Nivel 1', disponible: false },
+                        { nombre: 'Nivel 2', disponible: false },
+                        { nombre: 'Nivel 3', disponible: false },
+                        { nombre: 'Nivel 4', disponible: false },
+                        { nombre: 'Nivel 5', disponible: false },
+                        { nombre: 'Nivel 6', disponible: false },
+                        { nombre: 'Nivel 7', disponible: false },
+                        { nombre: 'Nivel 8', disponible: false },
+                        { nombre: 'Nivel 9', disponible: false },
+                        { nombre: 'Nivel 10', disponible: false }
+                    ]
+                },
+
+                // Datos de los modos (exactos del dashboard PC)
+                modos: [
+                    {
+                        nombre: 'Partida Offline',
+                        descripcion: 'Juega sin conexión',
+                        icono: 'fas fa-user',
+                        disponible: false
+                    },
+                    {
+                        nombre: 'Partida Online',
+                        descripcion: 'Juega con otros usuarios',
+                        icono: 'fas fa-users',
+                        disponible: true
+                    }
+                ],
+
+                // Métodos de navegación de categoría
+                anteriorCategoria() {
+                    if (this.animandoCategoria) return;
+                    this.animandoCategoria = true;
+                    setTimeout(() => {
+                        this.categoriaActual = this.categoriaActual > 0 ? this.categoriaActual - 1 : this.categorias.length - 1;
+                        // Siempre empezar en el primer nivel de la categoría
+                        this.nivelActual = 0;
+                        // Verificar si la nueva categoría está bloqueada
+                        if (!this.puedeJugar()) {
+                            this.showBlockedMessage();
+                        }
+                        setTimeout(() => { this.animandoCategoria = false; }, 200);
+                    }, 150);
+                },
+
+                siguienteCategoria() {
+                    if (this.animandoCategoria) return;
+                    this.animandoCategoria = true;
+                    setTimeout(() => {
+                        this.categoriaActual = this.categoriaActual < this.categorias.length - 1 ? this.categoriaActual + 1 : 0;
+                        // Siempre empezar en el primer nivel de la categoría
+                        this.nivelActual = 0;
+                        // Verificar si la nueva categoría está bloqueada
+                        if (!this.puedeJugar()) {
+                            this.showBlockedMessage();
+                        }
+                        setTimeout(() => { this.animandoCategoria = false; }, 200);
+                    }, 150);
+                },
+
+                // Métodos de navegación de nivel
+                anteriorNivel() {
+                    if (this.animandoNivel) return;
+                    this.animandoNivel = true;
+                    setTimeout(() => {
+                        const nivelesDisponibles = this.getNivelesDisponibles();
+                        // Navegar entre todos los niveles, no solo los disponibles
+                        this.nivelActual = this.nivelActual > 0 ? this.nivelActual - 1 : nivelesDisponibles.length - 1;
+                        // NO mostrar modal para cambios de nivel
+                        setTimeout(() => { this.animandoNivel = false; }, 200);
+                    }, 150);
+                },
+
+                siguienteNivel() {
+                    if (this.animandoNivel) return;
+                    this.animandoNivel = true;
+                    setTimeout(() => {
+                        const nivelesDisponibles = this.getNivelesDisponibles();
+                        // Navegar entre todos los niveles, no solo los disponibles
+                        this.nivelActual = this.nivelActual < nivelesDisponibles.length - 1 ? this.nivelActual + 1 : 0;
+                        // NO mostrar modal para cambios de nivel
+                        setTimeout(() => { this.animandoNivel = false; }, 200);
+                    }, 150);
+                },
+
+                // Métodos de navegación de modo
+                anteriorModo() {
+                    if (this.animandoModo) return;
+                    this.animandoModo = true;
+                    setTimeout(() => {
+                        // Navegar entre todos los modos, no solo los disponibles
+                        this.modoActual = this.modoActual > 0 ? this.modoActual - 1 : this.modos.length - 1;
+                        // NO mostrar modal para cambios de modo
+                        setTimeout(() => { this.animandoModo = false; }, 200);
+                    }, 150);
+                },
+
+                siguienteModo() {
+                    if (this.animandoModo) return;
+                    this.animandoModo = true;
+                    setTimeout(() => {
+                        // Navegar entre todos los modos, no solo los disponibles
+                        this.modoActual = this.modoActual < this.modos.length - 1 ? this.modoActual + 1 : 0;
+                        // NO mostrar modal para cambios de modo
+                        setTimeout(() => { this.animandoModo = false; }, 200);
+                    }, 150);
+                },
+
+                // Métodos auxiliares
+                getNivelesDisponibles() {
+                    return this.niveles[this.categoriaActual] || [];
+                },
+
+                puedeJugarNivel(nivelIndex) {
+                    const niveles = this.getNivelesDisponibles();
+                    return niveles[nivelIndex] && niveles[nivelIndex].disponible;
+                },
+
+                puedeJugar() {
+                    return this.categorias[this.categoriaActual].disponible;
+                },
+
+                puedeJugarCompleto() {
+                    return this.puedeJugar() && this.puedeJugarNivel(this.nivelActual) && this.modos[this.modoActual].disponible;
+                },
+
+                // Crear partida
+                async crearPartida() {
+                    // Verificar que la categoría, nivel y modo estén disponibles
+                    if (!this.puedeJugarCompleto()) {
+                        this.showBlockedMessage();
+                        return;
+                    }
+
+                    const categoria = this.categorias[this.categoriaActual].codigo;
+                    const nivel = this.niveles[this.categoriaActual][this.nivelActual].nombre;
+                    const modo = this.modos[this.modoActual].nombre;
+
+                    console.log(`Creando partida: ${categoria} - ${nivel} - ${modo}`);
+
+                    try {
+                        // Usar la misma API que en PC
+                        const response = await fetch('/api/game-rooms/create-room', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                categoria: categoria,
+                                nivel: nivel,
+                                modo: modo
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            console.log('Sala creada exitosamente:', data.room.code);
+
+                            // Guardar información en localStorage como respaldo (igual que PC)
+                            localStorage.setItem('gameCode', data.room.code);
+                            localStorage.setItem('gameConfig', JSON.stringify({
+                                categoria,
+                                nivel,
+                                modo,
+                                codigo: data.room.code
+                            }));
+                            localStorage.setItem('isHost', 'true');
+
+                            // Llenar el código en la sección "Unirse a partida" usando Alpine.js
+                            this.$dispatch('set-room-code', {
+                                roomCode: data.room.code,
+                                esHost: true,
+                                showSuccessMessage: true
+                            });
+
+                            // Cambiar a la sección "Unirse a partida"
+                            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                            document.getElementById('unirse-section').classList.add('active');
+
+                            // Actualizar sidebar activo
+                            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+                            document.querySelector('[data-section="unirse"]').classList.add('active');
+
+                        } else {
+                            console.error('Error al crear partida:', data.error);
+                            alert('Error al crear la partida: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error de conexión:', error);
+                        alert('Error de conexión. Verifica tu internet e inténtalo de nuevo.');
+                    }
+                },
+
+                // Mostrar modal temporal para contenido bloqueado
+                showBlockedMessage() {
+                    // Evitar múltiples modales simultáneos
+                    if (this.modalShowing) return;
+
+                    const modal = document.getElementById('blocked-category-modal');
+                    if (modal) {
+                        this.modalShowing = true;
+
+                        // Limpiar timeout anterior si existe
+                        if (this.modalTimeout) {
+                            clearTimeout(this.modalTimeout);
+                        }
+
+                        // Limpiar cualquier animación previa
+                        modal.classList.remove('show', 'hide');
+
+                        // Forzar reflow para asegurar que la clase se remueva
+                        modal.offsetHeight;
+
+                        // Mostrar el modal
+                        modal.classList.add('show');
+
+                        // Ocultar después de 3 segundos
+                        this.modalTimeout = setTimeout(() => {
+                            modal.classList.remove('show');
+                            modal.classList.add('hide');
+
+                            // Limpiar después de la animación
+                            setTimeout(() => {
+                                modal.classList.remove('hide');
+                                this.modalShowing = false;
+                            }, 500);
+                        }, 3000);
+                    }
+                },
+
+                // Inicialización
+                init() {
+                    // NO mostrar modal al inicializar - solo para cambios de categoría
+                }
             }
-        });
-        // Cerrar sidebar al tocar el fondo
-        sidebarBackdrop.addEventListener('click', closeSidebar);
-        // Cerrar sidebar con logo (en móvil y PC)
-        sidebarToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // En móvil siempre cerrar inmediatamente
-            closeSidebar();
-        });
-        // Dropdown usuario sidebar
-        const userBtn = document.getElementById('sidebar-user-btn');
-        const userDropdown = document.getElementById('sidebar-user-dropdown');
-        const dropdownDivider = document.getElementById('dropdown-divider');
-        if (userBtn && userDropdown && dropdownDivider) {
-            userBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                const expanded = userBtn.getAttribute('aria-expanded') === 'true';
-                userBtn.setAttribute('aria-expanded', !expanded);
-                if (!expanded) {
-                    userDropdown.classList.add('show');
-                } else {
-                    userDropdown.classList.remove('show');
-                }
-                if (userDropdown.classList.contains('show')) {
-                    dropdownDivider.style.display = 'block';
-                } else {
-                    dropdownDivider.style.display = 'none';
-                }
-            });
-            document.addEventListener('click', function () {
-                if (userDropdown.classList.contains('show')) {
-                    userDropdown.classList.remove('show');
-                    userBtn.setAttribute('aria-expanded', false);
-                    dropdownDivider.style.display = 'none';
-                }
-            });
-            userDropdown.addEventListener('click', function (e) { e.stopPropagation(); });
         }
+
+        function vocabApp() {
+            return {
+                cards: [],
+                currentIndex: 0,
+                currentCard: null,
+                vocabCarousel: null,
+
+                init() {
+                    this.loadVocabulary();
+                    // Inicializar carrusel después de un pequeño delay
+                    setTimeout(() => {
+                        if (!this.vocabCarousel) {
+                            this.vocabCarousel = new VocabCarousel();
+                        }
+                    }, 500);
+                },
+
+                loadVocabulary() {
+                    // Datos de las cartas con traducciones en inglés para estudiar vocabulario
+                    this.cards = [
+                        { number: 1, name: "Rooster", translation: "Gallo" },
+                        { number: 2, name: "Devil", translation: "Diablito" },
+                        { number: 3, name: "Lady", translation: "Dama" },
+                        { number: 4, name: "Gentleman", translation: "Catrín" },
+                        { number: 5, name: "Umbrella", translation: "Paraguas" },
+                        { number: 6, name: "Mermaid", translation: "Sirena" },
+                        { number: 7, name: "Ladder", translation: "Escalera" },
+                        { number: 8, name: "Bottle", translation: "Botella" },
+                        { number: 9, name: "Barrel", translation: "Barril" },
+                        { number: 10, name: "Tree", translation: "Árbol" },
+                        { number: 11, name: "Melon", translation: "Melón" },
+                        { number: 12, name: "Brave", translation: "Valiente" },
+                        { number: 13, name: "Hat", translation: "Gorrito" },
+                        { number: 14, name: "Death", translation: "Muerte" },
+                        { number: 15, name: "Pear", translation: "Pera" },
+                        { number: 16, name: "Flag", translation: "Bandera" },
+                        { number: 17, name: "Mandolin", translation: "Bandolón" },
+                        { number: 18, name: "Cello", translation: "Violoncello" },
+                        { number: 19, name: "Heron", translation: "Garza" },
+                        { number: 20, name: "Bird", translation: "Pájaro" },
+                        { number: 21, name: "Hand", translation: "Mano" },
+                        { number: 22, name: "Boot", translation: "Bota" },
+                        { number: 23, name: "Moon", translation: "Luna" },
+                        { number: 24, name: "Parrot", translation: "Cotorro" },
+                        { number: 25, name: "Drunk", translation: "Borracho" },
+                        { number: 26, name: "Black man", translation: "Negrito" },
+                        { number: 27, name: "Heart", translation: "Corazón" },
+                        { number: 28, name: "Watermelon", translation: "Sandía" },
+                        { number: 29, name: "Drum", translation: "Tambor" },
+                        { number: 30, name: "Shrimp", translation: "Camarón" },
+                        { number: 31, name: "Arrows", translation: "Jaras" },
+                        { number: 32, name: "Musician", translation: "Músico" },
+                        { number: 33, name: "Spider", translation: "Araña" },
+                        { number: 34, name: "Soldier", translation: "Soldado" },
+                        { number: 35, name: "Star", translation: "Estrella" },
+                        { number: 36, name: "Pot", translation: "Cazo" },
+                        { number: 37, name: "World", translation: "Mundo" },
+                        { number: 38, name: "Apache", translation: "Apache" },
+                        { number: 39, name: "Cactus", translation: "Nopal" },
+                        { number: 40, name: "Scorpion", translation: "Alacrán" },
+                        { number: 41, name: "Rose", translation: "Rosa" },
+                        { number: 42, name: "Skull", translation: "Calavera" },
+                        { number: 43, name: "Bell", translation: "Campana" },
+                        { number: 44, name: "Little pitcher", translation: "Cantarito" },
+                        { number: 45, name: "Deer", translation: "Venado" },
+                        { number: 46, name: "Sun", translation: "Sol" },
+                        { number: 47, name: "Crown", translation: "Corona" },
+                        { number: 48, name: "Boat", translation: "Chalupa" },
+                        { number: 49, name: "Pine", translation: "Pino" },
+                        { number: 50, name: "Fish", translation: "Pescado" },
+                        { number: 51, name: "Palm", translation: "Palma" },
+                        { number: 52, name: "Flower pot", translation: "Maceta" },
+                        { number: 53, name: "Harp", translation: "Arpa" },
+                        { number: 54, name: "Frog", translation: "Rana" }
+                    ];
+                    this.currentCard = this.cards[0];
+                },
+
+                nextCard() {
+                    if (this.vocabCarousel) {
+                        this.vocabCarousel.goToNext();
+                        this.currentIndex = this.vocabCarousel.currentIndex;
+                        this.currentCard = this.cards[this.currentIndex];
+                    }
+                },
+
+                prevCard() {
+                    if (this.vocabCarousel) {
+                        this.vocabCarousel.goToPrevious();
+                        this.currentIndex = this.vocabCarousel.currentIndex;
+                        this.currentCard = this.cards[this.currentIndex];
+                    }
+                },
+
+                // Funciones de audio y autoplay
+                autoPlaying: false,
+                autoPlayInterval: null,
+
+                reproducirAudio() {
+                    if (this.currentCard && 'speechSynthesis' in window) {
+                        // Cancelar cualquier síntesis en curso
+                        speechSynthesis.cancel();
+
+                        const utterance = new SpeechSynthesisUtterance(this.currentCard.name);
+                        utterance.lang = 'en-US';
+                        utterance.rate = 0.8;
+                        utterance.pitch = 1;
+                        utterance.volume = 0.8;
+
+                        speechSynthesis.speak(utterance);
+                    }
+                },
+
+                toggleAutoPlay() {
+                    if (this.autoPlaying) {
+                        this.stopAutoPlay();
+                    } else {
+                        this.startAutoPlay();
+                    }
+                },
+
+                startAutoPlay() {
+                    this.autoPlaying = true;
+                    this.reproducirAudio(); // Reproducir la carta actual
+
+                    this.autoPlayInterval = setInterval(() => {
+                        this.nextCard();
+                        setTimeout(() => {
+                            this.reproducirAudio();
+                        }, 300); // Delay para que termine la transición
+                    }, 3000); // Cambiar cada 3 segundos
+                },
+
+                stopAutoPlay() {
+                    this.autoPlaying = false;
+                    if (this.autoPlayInterval) {
+                        clearInterval(this.autoPlayInterval);
+                        this.autoPlayInterval = null;
+                    }
+                    speechSynthesis.cancel(); // Detener cualquier reproducción en curso
+                }
+            }
+        }
+
+        // Clase para el carrusel de inicio adaptado de PC
+        let inicioCarousel = null;
+
+        class VocabCarousel {
+            constructor() {
+                this.container = document.querySelector('.vocab-carousel-track');
+                this.cards = [];
+                this.currentIndex = 0;
+                this.cardWidth = 0;
+                this.isTransitioning = false;
+
+                this.init();
+            }
+
+            init() {
+                this.generateCards();
+                this.setupCards();
+                this.updateCardPositions(false);
+            }
+
+            generateCards() {
+                if (!this.container) return;
+
+                this.container.innerHTML = '';
+
+                // Generar todas las cartas de vocabulario (54 cartas)
+                for (let i = 1; i <= 54; i++) {
+                    const card = document.createElement('div');
+                    card.className = 'carousel-card';
+                    card.innerHTML = `<img src="/img/carrusel/CARTA ${i}.svg" alt="Carta ${i}">`;
+                    this.container.appendChild(card);
+                }
+
+                this.cards = this.container.querySelectorAll('.carousel-card');
+            }
+
+            setupCards() {
+                if (this.cards.length === 0) return;
+
+                this.cardWidth = this.cards[0].offsetWidth + 20;
+
+                this.cards.forEach((card, index) => {
+                    // Aplicar estilos mínimos sin contenedores
+                    card.style.position = 'absolute';
+                    card.style.width = '260px';
+                    card.style.height = '380px';
+                    card.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    card.style.cursor = 'pointer';
+                    card.style.border = 'none';
+                    card.style.background = 'none';
+                    card.style.padding = '0';
+                });
+            }
+
+            updateCardPositions(animate = true) {
+                if (this.cards.length === 0) return;
+
+                this.cards.forEach((card, index) => {
+                    const offset = index - this.currentIndex;
+                    let translateX = offset * 160;
+                    let scale = 1;
+                    let opacity = 1;
+                    let zIndex = 10;
+
+                    if (offset === 0) {
+                        scale = 1;
+                        zIndex = 30;
+                        opacity = 1;
+                        card.classList.add('active');
+                        card.classList.remove('prev', 'next', 'hidden');
+                        card.style.filter = 'none'; // Sin filtros para la carta activa
+                    } else if (offset === -1) {
+                        scale = 0.85;
+                        zIndex = 20;
+                        opacity = 0.7; // Como versión PC
+                        translateX = -70;
+                        card.classList.add('prev');
+                        card.classList.remove('active', 'next', 'hidden');
+                        card.style.filter = 'brightness(0.6) saturate(0.8)'; // Igual a PC
+                    } else if (offset === 1) {
+                        scale = 0.85;
+                        zIndex = 20;
+                        opacity = 0.7; // Como versión PC
+                        translateX = 70;
+                        card.classList.add('next');
+                        card.classList.remove('active', 'prev', 'hidden');
+                        card.style.filter = 'brightness(0.6) saturate(0.8)'; // Igual a PC
+                    } else if (Math.abs(offset) === 2) {
+                        scale = 0.7;
+                        zIndex = 10;
+                        opacity = 0.4; // Progresión coherente
+                        card.classList.add('hidden');
+                        card.classList.remove('active', 'prev', 'next');
+                        card.style.filter = 'brightness(0.4) saturate(0.6)'; // Progresión coherente
+                    } else {
+                        scale = 0.6;
+                        zIndex = 5;
+                        opacity = 0.2; // Muy transparente pero visible
+                        card.classList.add('hidden');
+                        card.classList.remove('active', 'prev', 'next');
+                        card.style.filter = 'brightness(0.3) saturate(0.4)'; // Muy oscuras pero progresivas
+                    }
+
+                    if (!animate) {
+                        card.style.transition = 'none';
+                    } else {
+                        card.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    }
+
+                    card.style.transform = `translateX(${translateX}px) scale(${scale})`;
+                    card.style.opacity = opacity;
+                    card.style.zIndex = zIndex;
+
+                    if (!animate) {
+                        setTimeout(() => {
+                            card.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        }, 50);
+                    }
+                });
+            }
+
+            goToNext() {
+                if (this.isTransitioning || this.currentIndex >= this.cards.length - 1) return;
+
+                this.isTransitioning = true;
+                this.currentIndex++;
+                this.updateCardPositions();
+
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                }, 600);
+            }
+
+            goToPrevious() {
+                if (this.isTransitioning || this.currentIndex <= 0) return;
+
+                this.isTransitioning = true;
+                this.currentIndex--;
+                this.updateCardPositions();
+
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                }, 600);
+            }
+
+            goToCard(index) {
+                if (this.isTransitioning || index < 0 || index >= this.cards.length) return;
+
+                this.isTransitioning = true;
+                this.currentIndex = index;
+                this.updateCardPositions();
+
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                }, 600);
+            }
+
+            canGoNext() {
+                return this.currentIndex < this.cards.length - 1;
+            }
+
+            canGoPrevious() {
+                return this.currentIndex > 0;
+            }
+        }
+
+        class InicioCarousel {
+            constructor() {
+                this.currentIndex = 0;
+                this.totalCards = 3;
+                this.track = document.getElementById('inicio-carousel-track');
+                this.prevBtn = document.getElementById('inicio-carousel-prev');
+                this.nextBtn = document.getElementById('inicio-carousel-next');
+                this.counter = document.getElementById('inicio-carousel-counter');
+                this.cards = [];
+                this.cardContents = [
+                    {
+                        title: 'Tips de Aprendizaje',
+                        icon: 'bi-lightbulb',
+                        color: 'warning',
+                        content: `
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-clock text-primary me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 0.9rem;">
+                                        <strong>Estudia diariamente:</strong> La constancia es clave para el aprendizaje efectivo.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-mic text-success me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 0.9rem;">
+                                        <strong>Practica hablando:</strong> Mejora pronunciación y fluidez.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-headphones text-info me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 0.9rem;">
+                                        <strong>Escucha contenido:</strong> Podcasts y videos en inglés.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-people text-warning me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 0.9rem;">
+                                        <strong>Conversa con otros:</strong> Acelera tu aprendizaje.
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-film text-danger me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 0.9rem;">
+                                        <strong>Ve películas:</strong> Con subtítulos para mejorar.
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Palabra Destacada',
+                        icon: 'bi-star',
+                        color: 'primary',
+                        content: `
+                            <div class="mb-3">
+                                <h4 class="fw-bold mb-1">Grateful</h4>
+                                <span class="text-muted">/ ˈɡreɪtfəl /</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Significado:</strong> <span class="text-success">Agradecido</span>
+                            </div>
+                            <div class="mb-2">
+                                <em>Ejemplo:</em> <span class="text-primary">I'm grateful for your help.</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Sinónimos:</strong>
+                                <ul class="list-unstyled mt-1" style="font-size: 0.9rem;">
+                                    <li>• Thankful</li>
+                                    <li>• Appreciative</li>
+                                    <li>• Obliged</li>
+                                </ul>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-success">Nivel Intermedio</span>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Recursos Útiles',
+                        icon: 'bi-link-45deg',
+                        color: 'info',
+                        content: `
+                            <div class="mb-3">
+                                <h6 class="fw-semibold mb-2">Diccionarios:</h6>
+                                <div class="mb-2">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-book text-primary me-2"></i>
+                                        <div>
+                                            <a href="https://www.wordreference.com" target="_blank" style="text-decoration: none; color: #3b82f6;">
+                                                <strong>WordReference</strong><br>
+                                                <small class="text-muted">Diccionario bilingüe completo</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-translate text-info me-2"></i>
+                                        <div>
+                                            <a href="https://www.deepl.com" target="_blank" style="text-decoration: none; color: #3b82f6;">
+                                                <strong>DeepL</strong><br>
+                                                <small class="text-muted">Traductor avanzado</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="fw-semibold mb-2">Práctica:</h6>
+                                <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-headphones text-warning me-2"></i>
+                                        <div>
+                                            <a href="https://www.elllo.org" target="_blank" style="text-decoration: none; color: #3b82f6;">
+                                                <strong>ELLLO</strong><br>
+                                                <small class="text-muted">Escucha inglés real</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-phone text-success me-2"></i>
+                                        <div>
+                                            <strong>Duolingo</strong><br>
+                                            <small class="text-muted">Lecciones diarias</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.createCards();
+                this.updateCarousel();
+                this.updateCounter();
+                this.updateButtons();
+                this.bindEvents();
+            }
+
+            createCards() {
+                this.cardContents.forEach((content, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'carousel-card';
+                    card.dataset.index = index;
+
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card dashboard-card h-100 border-0 shadow-sm';
+                    cardElement.style.width = '100%';
+                    cardElement.style.height = '100%';
+                    cardElement.style.background = '#fff';
+                    cardElement.style.borderRadius = '15px';
+                    cardElement.style.padding = '1.5rem';
+                    cardElement.style.display = 'flex';
+                    cardElement.style.flexDirection = 'column';
+
+                    cardElement.innerHTML = `
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi ${content.icon} text-${content.color} me-2" style="font-size: 1.5rem;"></i>
+                            <h5 class="mb-0 text-${content.color} fw-bold">${content.title}</h5>
+                        </div>
+                        <div class="flex-grow-1" style="font-size: 0.9rem;">
+                            ${content.content}
+                        </div>
+                    `;
+
+                    card.appendChild(cardElement);
+                    this.track.appendChild(card);
+                    this.cards.push(card);
+                });
+            }
+
+            updateCarousel() {
+                this.cards.forEach((card, index) => {
+                    card.classList.remove('active', 'prev', 'next', 'hidden');
+
+                    if (index === this.currentIndex) {
+                        card.classList.add('active');
+                    } else if (index === this.currentIndex - 1) {
+                        card.classList.add('prev');
+                    } else if (index === this.currentIndex + 1) {
+                        card.classList.add('next');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            }
+
+            bindEvents() {
+                this.prevBtn.addEventListener('click', () => this.goToPrevious());
+                this.nextBtn.addEventListener('click', () => this.goToNext());
+
+                // Soporte para gestos touch
+                let startX = 0;
+                this.track.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                });
+
+                this.track.addEventListener('touchend', (e) => {
+                    const endX = e.changedTouches[0].clientX;
+                    const diff = startX - endX;
+
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                            this.goToNext();
+                        } else {
+                            this.goToPrevious();
+                        }
+                    }
+                });
+
+                // Click en cartas laterales para navegar
+                this.cards.forEach((card, index) => {
+                    card.addEventListener('click', () => {
+                        if (index !== this.currentIndex) {
+                            this.goToCard(index);
+                        }
+                    });
+                });
+            }
+
+            goToNext() {
+                if (this.currentIndex < this.totalCards - 1) {
+                    this.currentIndex++;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            goToPrevious() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            goToCard(index) {
+                if (index >= 0 && index < this.totalCards) {
+                    this.currentIndex = index;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            updateCounter() {
+                this.counter.textContent = `${this.currentIndex + 1} / ${this.totalCards}`;
+            }
+
+            updateButtons() {
+                this.prevBtn.disabled = this.currentIndex === 0;
+                this.nextBtn.disabled = this.currentIndex === this.totalCards - 1;
+            }
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('show');
+            document.getElementById('sidebar-backdrop').style.display = 'none';
+            document.getElementById('hamburger-icon').className = 'bi bi-list';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburger = document.getElementById('mobile-hamburger');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+
+            hamburger.addEventListener('click', function () {
+                sidebar.classList.toggle('show');
+                if (sidebar.classList.contains('show')) {
+                    backdrop.style.display = 'block';
+                    hamburgerIcon.className = 'bi bi-x';
+                } else {
+                    backdrop.style.display = 'none';
+                    hamburgerIcon.className = 'bi bi-list';
+                }
+            });
+
+            backdrop.addEventListener('click', closeSidebar);
+
+            // Inicializar carrusel de inicio cuando la página carga
+            setTimeout(() => {
+                if (!inicioCarousel) {
+                    inicioCarousel = new InicioCarousel();
+                }
+            }, 500);
+        });
     </script>
 </body>
 

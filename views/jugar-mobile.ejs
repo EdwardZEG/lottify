@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottify - Jugar Lotería Móvil</title>
+    <link rel="icon" type="image/svg+xml" href="/img/logo_header.svg">
+
+    <!-- CDN de Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- CDN de Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CDN de Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: white;
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* Header móvil optimizado */
+        .game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #000000;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            font-size: 12px;
+            color: #fff;
+            height: 50px;
+        }
+
+        .game-header-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 11px;
+        }
+
+        .game-header-right {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 11px;
+        }
+
+        .sidebar-footer-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: 500;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .arrow-game {
+            font-size: 10px;
+        }
+
+        /* Contenido principal ajustado para móvil */
+        .game-container {
+            margin-top: 50px;
+            height: calc(100vh - 50px);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        /* Carta actual - optimizada para móvil */
+        .current-card-container {
+            background: #111;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #333;
+            margin-bottom: 10px;
+        }
+
+        .current-card {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 10px auto;
+            border-radius: 8px;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .card-counter {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        /* Barra de tiempo - optimizada para móvil */
+        .time-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .time-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+            width: 100%;
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        .time-remaining {
+            font-size: 11px;
+            color: #ccc;
+        }
+
+        /* Tablero del jugador - grid optimizado para móvil */
+        .player-board-container {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .player-board-title {
+            color: #333;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .player-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            height: 100%;
+            max-height: calc(100vh - 280px);
+        }
+
+        .card-slot {
+            aspect-ratio: 3/4;
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .card-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .card-slot.selected {
+            border: 2px solid #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .card-slot.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .card-slot:active {
+            transform: scale(0.95);
+        }
+
+        /* Estados del juego */
+        .game-status {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 200;
+            display: none;
+        }
+
+        .game-status.show {
+            display: block;
+        }
+
+        .status-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .status-message {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .btn-status {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Dropdown del usuario */
+        .user-menu-container {
+            position: relative;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 8px;
+            min-width: 150px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* Animaciones */
+        .card-flip {
+            animation: cardFlip 0.3s ease-in-out;
+        }
+
+        @keyframes cardFlip {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            50% {
+                transform: rotateY(90deg);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 8px;
+                gap: 8px;
+            }
+
+            .current-card {
+                width: 100px;
+                height: 100px;
+            }
+
+            .player-board {
+                gap: 4px;
+            }
+
+            .game-header {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .current-card {
+                width: 80px;
+                height: 80px;
+            }
+
+            .player-board {
+                gap: 3px;
+            }
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body x-data="gameApp()">
+    <!-- Loading overlay -->
+    <div x-show="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Header del juego -->
+    <div class="game-header">
+        <div class="game-header-left">
+            <div x-text="'Sala: ' + roomCode"></div>
+            <div x-text="'Jugadores: ' + playersCount"></div>
+        </div>
+        <div class="game-header-right">
+            <div class="user-menu-container">
+                <button class="sidebar-footer-btn" @click="toggleUserMenu()">
+                    <div class="user-avatar">
+                        <% if (user && user.profilePicture) { %>
+                            <img src="<%= user.profilePicture %>" alt="Avatar">
+                            <% } else { %>
+                                <%= user && user.fullname ?
+                                    user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : 
+                                    ' U' %>
+                                    <% } %>
+                    </div>
+                    <span class="user-name">
+                        <%= user && user.fullname ? user.fullname.split(' ')[0] : ' Usuario' %>
+                    </span>
+                    <i class="bi bi-chevron-down arrow-game"></i>
+                </button>
+
+                <div class="user-dropdown" x-show="showUserMenu" x-transition>
+                    <a href="/dashboard" class="dropdown-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/config" class="dropdown-item">
+                        <i class="bi bi-gear"></i>
+                        <span>Configuración</span>
+                    </a>
+                    <div class="dropdown-item" @click="leaveGame()">
+                        <i class="bi bi-box-arrow-left"></i>
+                        <span>Salir del juego</span>
+                    </div>
+                    <a href="/logout" class="dropdown-item">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Cerrar sesión</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal del juego -->
+    <div class="game-container">
+        <!-- Carta actual -->
+        <div class="current-card-container">
+            <div class="card-counter" x-text="'Carta ' + (currentCardIndex + 1) + ' de 54'"></div>
+
+            <div class="current-card" :class="cardFlipping ? 'card-flip' : ''">
+                <template x-if="currentCard">
+                    <img :src="'/img/carrusel/' + currentCard.filename" :alt="currentCard.name">
+                </template>
+                <template x-if="!currentCard">
+                    <div style="color: #666; font-size: 12px;">Esperando carta...</div>
+                </template>
+            </div>
+
+            <!-- Barra de tiempo -->
+            <div class="time-bar-container">
+                <div class="time-bar" :style="'width: ' + timePercentage + '%'"></div>
+            </div>
+            <div class="time-remaining" x-text="'Tiempo: ' + Math.max(0, Math.ceil(timeRemaining)) + 's'"></div>
+        </div>
+
+        <!-- Tablero del jugador -->
+        <div class="player-board-container">
+            <div class="player-board-title">
+                Mi Tablero (<span x-text="selectedCards"></span>/16)
+            </div>
+
+            <div class="player-board">
+                <template x-for="(card, index) in playerCards" :key="index">
+                    <div class="card-slot" :class="card.selected ? 'selected' : ''" @click="selectCard(card)">
+                        <img :src="'/img/carrusel/' + card.filename" :alt="card.name">
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estados del juego -->
+    <div class="game-status" :class="gameStatus.show ? 'show' : ''">
+        <div class="status-title" x-text="gameStatus.title"></div>
+        <div class="status-message" x-text="gameStatus.message"></div>
+        <template x-if="gameStatus.showButton">
+            <button class="btn-status" @click="handleStatusAction()" x-text="gameStatus.buttonText"></button>
+        </template>
+    </div>
+
+    <script>
+        function gameApp() {
+            return {
+                // Estado del juego
+                loading: true,
+                gameStarted: false,
+                gameFinished: false,
+
+                // Datos de la sala
+                roomCode: '<%= roomCode || "" %>',
+                playersCount: 0,
+
+                // Cartas
+                currentCard: null,
+                currentCardIndex: 0,
+                playerCards: [],
+                selectedCards: 0,
+                cardFlipping: false,
+
+                // Tiempo
+                timeRemaining: 0,
+                timePercentage: 100,
+                timeInterval: null,
+
+                // UI
+                showUserMenu: false,
+                gameStatus: {
+                    show: false,
+                    title: '',
+                    message: '',
+                    showButton: false,
+                    buttonText: '',
+                    action: null
+                },
+
+                // Socket
+                socket: null,
+
+                init() {
+                    this.initSocket();
+                    this.generatePlayerCards();
+                    setTimeout(() => this.loading = false, 1000);
+                },
+
+                initSocket() {
+                    this.socket = io();
+
+                    // Eventos del socket
+                    this.socket.on('connect', () => {
+                        console.log('Conectado al servidor');
+                        if (this.roomCode) {
+                            this.socket.emit('join-room', this.roomCode);
+                        }
+                    });
+
+                    this.socket.on('room-joined', (data) => {
+                        console.log('Unido a la sala:', data);
+                        this.playersCount = data.playersCount || 1;
+                    });
+
+                    this.socket.on('game-started', () => {
+                        this.gameStarted = true;
+                        this.showStatus('¡Juego Iniciado!', 'El juego ha comenzado. ¡Buena suerte!');
+                    });
+
+                    this.socket.on('new-card', (data) => {
+                        this.showNewCard(data);
+                    });
+
+                    this.socket.on('game-finished', (data) => {
+                        this.gameFinished = true;
+                        this.showStatus(
+                            data.winner ? '¡Victoria!' : 'Juego Terminado',
+                            data.winner ? `¡${data.winner} ha ganado!` : 'El juego ha terminado',
+                            true,
+                            'Volver al Dashboard',
+                            () => window.location.href = '/dashboard'
+                        );
+                    });
+
+                    this.socket.on('player-won', (data) => {
+                        if (data.winner === '<%= user ? user.fullname : "" %>') {
+                            this.showStatus('¡Felicidades!', '¡Has ganado la partida!', true, 'Volver al Dashboard', () => window.location.href = '/dashboard');
+                        } else {
+                            this.showStatus('Juego Terminado', `${data.winner} ha ganado la partida`, true, 'Volver al Dashboard', () => window.location.href = '/dashboard');
+                        }
+                    });
+
+                    this.socket.on('disconnect', () => {
+                        this.showStatus('Desconectado', 'Se ha perdido la conexión con el servidor', true, 'Reconectar', () => location.reload());
+                    });
+                },
+
+                generatePlayerCards() {
+                    // Generar 16 cartas aleatorias para el jugador
+                    const totalCards = 54;
+                    const selectedNumbers = new Set();
+
+                    while (selectedNumbers.size < 16) {
+                        selectedNumbers.add(Math.floor(Math.random() * totalCards) + 1);
+                    }
+
+                    this.playerCards = Array.from(selectedNumbers).map(num => ({
+                        number: num,
+                        name: `CARTA ${num}`,
+                        filename: `CARTA ${num}.svg`,
+                        selected: false
+                    }));
+                },
+
+                showNewCard(cardData) {
+                    this.cardFlipping = true;
+
+                    setTimeout(() => {
+                        this.currentCard = {
+                            number: cardData.number,
+                            name: cardData.name,
+                            filename: `CARTA ${cardData.number}.svg`
+                        };
+                        this.currentCardIndex = cardData.index || this.currentCardIndex + 1;
+                        this.cardFlipping = false;
+
+                        // Iniciar temporizador
+                        this.startTimer(cardData.duration || 15);
+                    }, 150);
+                },
+
+                startTimer(duration) {
+                    this.timeRemaining = duration;
+                    this.timePercentage = 100;
+
+                    if (this.timeInterval) {
+                        clearInterval(this.timeInterval);
+                    }
+
+                    this.timeInterval = setInterval(() => {
+                        this.timeRemaining -= 0.1;
+                        this.timePercentage = (this.timeRemaining / duration) * 100;
+
+                        if (this.timeRemaining <= 0) {
+                            clearInterval(this.timeInterval);
+                            this.timeRemaining = 0;
+                            this.timePercentage = 0;
+                        }
+                    }, 100);
+                },
+
+                selectCard(card) {
+                    if (!this.currentCard || !this.gameStarted || card.selected) {
+                        return;
+                    }
+
+                    // Verificar si la carta coincide con la actual
+                    if (card.number === this.currentCard.number) {
+                        card.selected = true;
+                        this.selectedCards++;
+
+                        // Agregar efecto visual
+                        this.$nextTick(() => {
+                            const cardElement = event.target.closest('.card-slot');
+                            if (cardElement) {
+                                cardElement.classList.add('pulse');
+                                setTimeout(() => cardElement.classList.remove('pulse'), 1000);
+                            }
+                        });
+
+                        // Verificar victoria
+                        if (this.selectedCards >= 16) {
+                            this.socket.emit('player-won', {
+                                roomCode: this.roomCode,
+                                winner: '<%= user ? user.fullname : "" %>',
+                                selectedCards: this.selectedCards
+                            });
+                        }
+                    }
+                },
+
+                toggleUserMenu() {
+                    this.showUserMenu = !this.showUserMenu;
+                },
+
+                leaveGame() {
+                    if (confirm('¿Estás seguro de que quieres salir del juego?')) {
+                        window.location.href = '/dashboard';
+                    }
+                },
+
+                showStatus(title, message, showButton = false, buttonText = '', action = null) {
+                    this.gameStatus = {
+                        show: true,
+                        title,
+                        message,
+                        showButton,
+                        buttonText,
+                        action
+                    };
+
+                    if (!showButton) {
+                        setTimeout(() => {
+                            this.gameStatus.show = false;
+                        }, 3000);
+                    }
+                },
+
+                handleStatusAction() {
+                    if (this.gameStatus.action) {
+                        this.gameStatus.action();
+                    }
+                    this.gameStatus.show = false;
+                }
+            }
+        }
+
+        // Cerrar el menú de usuario al hacer clic fuera
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.user-menu-container')) {
+                Alpine.store('userMenu', false);
+            }
+        });
+
+        // Prevenir zoom en dispositivos móviles
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gesturechange', function (e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('gestureend', function (e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+
+</html>
