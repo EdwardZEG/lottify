@@ -24,7 +24,6 @@
 
         * {
             margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
@@ -34,6 +33,114 @@
             color: white;
             overflow-x: hidden;
             height: 100vh;
+        }
+
+        /* Animaciones para el reloj */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Animaciones para las cartas - COPIADAS DE PC */
+        .current-card-pure {
+            transition: all 0.6s ease;
+        }
+
+        .current-card-pure.changing {
+            transform: rotateY(90deg) scale(0.8);
+            opacity: 0.5;
+        }
+
+        .current-card-pure.appearing {
+            animation: cardAppear 0.5s ease-out;
+        }
+
+        @keyframes cardAppear {
+            0% {
+                transform: rotateY(-90deg) scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: rotateY(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Estilos para cartilla - COPIADOS DE PC */
+        .cartilla-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .cartilla-card.selected {
+            border-color: #22c55e !important;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+            transform: scale(1.02);
+        }
+
+        .cartilla-card.selectable {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+            animation: cardPulse 1s infinite;
+        }
+
+        @keyframes cardPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .cartilla-card.pulse {
+            animation: selectPulse 1s ease-out;
+        }
+
+        @keyframes selectPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 30px rgba(34, 197, 94, 0.8);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Botones de control - COPIADOS DE PC */
+        .control-button {
+            transition: all 0.2s ease;
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(1.1);
+        }
+
+        .control-button:active {
+            transform: scale(0.95);
         }
 
         /* Header móvil optimizado */
@@ -120,145 +227,567 @@
             font-size: 10px;
         }
 
-        /* Contenido principal ajustado para móvil */
-        .game-container {
-            margin-top: 50px;
-            height: calc(100vh - 50px);
+        /* Mobile Game Screen - New Complete Structure */
+        .mobile-game-screen {
+            height: 100vh;
+            background: #0d1117;
             display: flex;
             flex-direction: column;
-            padding: 10px;
-            gap: 10px;
-        }
-
-        /* Carta actual - optimizada para móvil */
-        .current-card-container {
-            background: #111;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            border: 2px solid #333;
-            margin-bottom: 10px;
-        }
-
-        .current-card {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 10px auto;
-            border-radius: 8px;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #444;
-            position: relative;
             overflow: hidden;
         }
 
-        .current-card img {
+        /* Mobile Game Header */
+        .mobile-game-header {
+            display: flex;
+            align-items: center;
+            padding: clamp(8px, 2vw, 15px);
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            border-bottom: 1px solid #333;
+            gap: clamp(10px, 3vw, 20px);
+            min-height: 80px;
+        }
+
+        .mobile-logo {
+            flex-shrink: 0;
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(40px, 10vw, 60px);
+        }
+
+        .mobile-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Current Card Section */
+        .mobile-current-card-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-current-card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .mobile-card-counter {
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .mobile-current-card {
+            width: clamp(80px, 20vw, 120px);
+            height: clamp(106px, 26vw, 160px);
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            transition: transform 0.6s ease;
+        }
+
+        .mobile-current-card.card-flip {
+            transform: rotateY(360deg);
+        }
+
+        .mobile-current-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 6px;
         }
 
-        .card-counter {
-            font-size: 12px;
-            color: #aaa;
-            margin-bottom: 8px;
+        .no-card-message {
+            color: #666;
+            font-size: clamp(10px, 2.5vw, 12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
         }
 
-        /* Barra de tiempo - optimizada para móvil */
-        .time-bar-container {
+        /* Timer Section */
+        .mobile-timer-section {
             width: 100%;
-            height: 8px;
-            background: #333;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
+            max-width: 200px;
         }
 
-        .time-bar {
+        .mobile-time-bar-container {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .mobile-time-bar {
             height: 100%;
             background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
-            width: 100%;
-            border-radius: 4px;
+            border-radius: 3px;
             transition: width 0.1s linear;
         }
 
-        .time-remaining {
-            font-size: 11px;
+        .mobile-time-text {
+            font-size: clamp(10px, 2.5vw, 11px);
             color: #ccc;
-        }
-
-        /* Tablero del jugador - grid optimizado para móvil */
-        .player-board-container {
-            flex: 1;
-            background: #f8f9fa;
-            border-radius: 12px;
-            padding: 15px;
-            overflow: hidden;
-        }
-
-        .player-board-title {
-            color: #333;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
             text-align: center;
         }
 
-        .player-board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            height: 100%;
-            max-height: calc(100vh - 280px);
-        }
-
-        .card-slot {
-            aspect-ratio: 3/4;
-            border-radius: 6px;
-            background: #fff;
-            border: 1px solid #ddd;
+        /* Mobile Game Content */
+        .mobile-game-content {
+            flex: 1;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            gap: clamp(8px, 2vw, 15px);
+            padding: clamp(8px, 2vw, 15px);
             overflow: hidden;
         }
 
-        .card-slot img {
-            width: 100%;
-            height: 100%;
+        /* Cartilla Section */
+        .mobile-cartilla-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+            border-radius: 9.6px;
+            /* 20% menos que 12px */
+            border: 1px solid #333;
+            overflow: hidden;
+            max-width: 80vw;
+        }
+
+        .mobile-cartilla-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 2vw, 12px);
+            background: #222;
+            border-bottom: 1px solid #333;
+        }
+
+        .mobile-cartilla-header h3 {
+            color: #fff;
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .mobile-card-count {
+            color: #feca57;
+            font-size: clamp(11px, 2.5vw, 13px);
+            font-weight: 600;
+            padding: 4px 8px;
+            background: rgba(254, 202, 87, 0.1);
+            border-radius: 12px;
+        }
+
+        /* Cards Grid */
+        .mobile-cartilla-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(2.4px, 0.8vw, 4.8px);
+            /* 20% menos */
+            padding: clamp(4.8px, 1.2vw, 8px);
+            /* 20% menos */
+            overflow: auto;
+        }
+
+        .mobile-card-slot {
+            aspect-ratio: 3/4;
+            background: #fff;
+            border-radius: 4.8px;
+            /* 20% menos que 6px */
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            border: 1.6px solid transparent;
+            /* 20% menos que 2px */
+            max-width: 16vw;
+        }
+
+        .mobile-card-slot img {
+            width: 80%;
+            height: 80%;
             object-fit: cover;
-            border-radius: 5px;
         }
 
-        .card-slot.selected {
-            border: 2px solid #28a745;
-            background: rgba(40, 167, 69, 0.1);
+        .mobile-card-slot:active {
+            transform: scale(0.95);
         }
 
-        .card-slot.selected::after {
-            content: '✓';
+        .mobile-card-slot.selected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+        }
+
+        .mobile-card-overlay {
             position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #28a745;
-            color: white;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(40, 167, 69, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
+            color: white;
+            font-size: clamp(12px, 3vw, 16px);
         }
 
-        .card-slot:active {
+        /* Lotería Button */
+        .mobile-loteria-section {
+            padding: clamp(8px, 2vw, 12px);
+            background: #222;
+            border-top: 1px solid #333;
+        }
+
+        .mobile-loteria-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: #000;
+            border: none;
+            padding: clamp(10px, 2.5vw, 14px);
+            border-radius: 8px;
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .mobile-loteria-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .mobile-loteria-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Players Section */
+        .mobile-players-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+            border-radius: 12px;
+            border: 1px solid #333;
+            overflow: hidden;
+        }
+
+        .mobile-players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: clamp(8px, 2vw, 12px);
+            background: #222;
+            border-bottom: 1px solid #333;
+        }
+
+        .mobile-players-header h3 {
+            color: #fff;
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .mobile-players-count {
+            color: #48dbfb;
+            font-size: clamp(11px, 2.5vw, 13px);
+            font-weight: 600;
+            padding: 4px 8px;
+            background: rgba(72, 219, 251, 0.1);
+            border-radius: 12px;
+        }
+
+        /* Players List */
+        .mobile-players-list {
+            flex: 1;
+            padding: clamp(6px, 1.5vw, 10px);
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(6px, 1.5vw, 8px);
+        }
+
+        .mobile-player-item {
+            display: flex;
+            align-items: center;
+            padding: clamp(6px, 1.5vw, 8px);
+            background: #333;
+            border-radius: 8px;
+            gap: clamp(6px, 1.5vw, 10px);
+            transition: background 0.2s ease;
+        }
+
+        .mobile-player-item.host {
+            background: linear-gradient(135deg, #feca57, #ff6b6b);
+            color: #000;
+        }
+
+        .mobile-player-avatar {
+            width: clamp(24px, 6vw, 32px);
+            height: clamp(24px, 6vw, 32px);
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .mobile-player-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mobile-avatar-initials {
+            width: 100%;
+            height: 100%;
+            background: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: clamp(10px, 2.5vw, 12px);
+            font-weight: 600;
+        }
+
+        .mobile-host-crown {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            color: #feca57;
+            font-size: clamp(8px, 2vw, 10px);
+            background: #000;
+            border-radius: 50%;
+            width: clamp(12px, 3vw, 14px);
+            height: clamp(12px, 3vw, 14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mobile-player-name {
+            font-size: clamp(11px, 2.5vw, 12px);
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .mobile-player-item.host .mobile-player-name {
+            color: #000;
+        }
+
+        .mobile-player-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: clamp(9px, 2vw, 10px);
+        }
+
+        .mobile-cards-selected {
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .mobile-player-item.host .mobile-cards-selected {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .mobile-connection-status {
+            display: flex;
+            align-items: center;
+        }
+
+        .mobile-connection-status.online {
+            color: #28a745;
+        }
+
+        .mobile-connection-status.offline {
+            color: #dc3545;
+        }
+
+        /* Cartilla y cartas responsivas */
+        .cartilla-container {
+            background: #fff;
+            border-radius: 1.2vw;
+            box-shadow: 0 0.6vw 1.8vw rgba(0, 0, 0, 0.08);
+            padding: clamp(1px, 0.4vw, 4px);
+            width: min(45vw, 130px);
+            max-width: 100vw;
+            margin: 0 auto;
+        }
+
+        .cartilla-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(0.8px, 0.25vw, 2px);
+        }
+
+        .cartilla-card {
+            background: #f8fafc;
+            border-radius: 0.6vw;
+            box-shadow: 0 0.3vw 0.9vw rgba(0, 0, 0, 0.07);
+            border: 1px solid #e5e7eb;
+            aspect-ratio: 140/190;
+            width: 100%;
+            max-width: 100%;
+            cursor: pointer;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cartilla-card img {
+            width: 65%;
+            height: 65%;
+            object-fit: contain;
+            border-radius: 0.3vw;
+        }
+
+
+        @media (max-width: 480px) {
+            .cartilla-container {
+                width: min(60vw, 110px);
+                /* Más reducido para mobile */
+                padding: clamp(0.8px, 0.3vw, 2.5px);
+            }
+
+            .cartilla-grid {
+                gap: clamp(0.5px, 0.2vw, 1.2px);
+            }
+        }
+
+        @media (max-width: 360px) {
+            .cartilla-container {
+                width: min(65vw, 100px);
+                /* Aún más pequeño para pantallas muy pequeñas */
+                padding: 0.5px;
+            }
+
+            .cartilla-grid {
+                gap: 0.5px;
+            }
+        }
+
+
+        .mobile-cartilla-section {
+            flex: none;
+            height: 52.8vh;
+            /* 10% más que 48vh */
+            max-width: 70.4vw;
+            /* 10% más que 64vw */
+            /* 10% más grande que el ajuste anterior */
+        }
+
+        .mobile-players-section {
+            flex: none;
+            height: 25vh;
+        }
+
+
+        @media (max-width: 360px) {
+            .mobile-cartilla-grid {
+                gap: 1.76px;
+                /* 10% más que 1.6px */
+            }
+        }
+
+        /* Additional animations and effects */
+        .pulse {
+            animation: pulseCard 0.6s ease;
+        }
+
+        @keyframes pulseCard {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(40, 167, 69, 0.6);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Cartilla card styles */
+        .cartilla-card.selected {
+            border-color: #22c55e !important;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3) !important;
+        }
+
+        .cartilla-card.selectable {
+            border-color: #fbbf24 !important;
+            box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3) !important;
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.3);
+            }
+
+            to {
+                box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.7);
+            }
+        }
+
+        /* Card flip animation */
+        .current-card-pure.changing {
+            animation: cardFlip 0.6s ease-in-out;
+        }
+
+        @keyframes cardFlip {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            50% {
+                transform: rotateY(90deg);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+            }
+        }
+
+        /* User dropdown hover effects */
+        .user-dropdown a:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Control button hover effects */
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(1.1);
+        }
+
+        .control-button:active {
             transform: scale(0.95);
         }
 
@@ -444,134 +973,803 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Modal de desconexión del host - Diseño compacto y elegante */
+        .host-disconnection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 2rem 1.8rem;
+            max-width: 320px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            animation: modalSlideIn 0.3s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ef4444, #dc2626, #ef4444);
+            animation: redGlow 2s infinite;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes redGlow {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+            animation: iconBounce 2s infinite;
+        }
+
+        @keyframes iconBounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .countdown-display-modal {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: rgb(7, 10, 243);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(7, 10, 243, 0.8);
+            animation: countdownBeat 1s infinite;
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes countdownBeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .modal-button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 10px;
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-button:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15));
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .modal-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-button i {
+            font-size: 0.9rem;
+        }
+
+        /* Modales de victoria y derrota - Pantalla completa para móvil */
+        .game-result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(8px);
+        }
+
+        .game-result-modal.victory {
+            background: rgba(34, 197, 94, 0.75);
+        }
+
+        .game-result-modal.defeat {
+            background: rgba(239, 68, 68, 0.75);
+        }
+
+        .game-result-content {
+            padding: 2rem 1rem;
+            width: 100%;
+            height: 100vh;
+            text-align: center;
+            animation: resultSlideIn 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            gap: 2rem;
+        }
+
+        .game-result-content.victory,
+        .game-result-content.defeat {
+            background: transparent;
+            color: #ffffff;
+        }
+
+        @keyframes resultSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-title {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-family: 'Inter', sans-serif;
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .result-title.victory {
+            color: #ffffff;
+            animation: victoryPulse 2s infinite alternate;
+        }
+
+        .result-title.defeat {
+            color: #ffffff;
+            animation: defeatPulse 2s infinite alternate;
+        }
+
+        @keyframes victoryPulse {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            }
+
+            100% {
+                transform: scale(1.02);
+                text-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        @keyframes defeatPulse {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            }
+
+            100% {
+                transform: scale(1.02);
+                text-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        .result-button {
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: white;
+            border-radius: 50px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .result-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-button i {
+            font-size: 1rem;
+        }
+
+        /* Responsive para móvil */
+        @media (max-width: 480px) {
+            .result-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Pantalla de cuenta regresiva */
+        .countdown-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #000000;
+            padding: 2rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 150;
+        }
+
+        .countdown-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .countdown-display {
+            font-size: 6rem;
+            font-weight: 900;
+            color: rgb(7, 10, 243);
+            text-shadow: 0 0 30px rgba(7, 10, 243, 0.5);
+            animation: pulse 1s infinite;
+        }
+
+        .countdown-message {
+            font-size: 1.5rem;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .countdown-display {
+                font-size: 4rem;
+            }
+
+            .countdown-message {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 
+
+<div id="user-data" data-fullname="<%= user && user.fullname ? user.fullname.replace(/\" /g, '&quot;' ) : '' %>"
+    data-profile-picture="<%= user && user.profilePicture ? user.profilePicture.replace(/\"/g, '&quot;' ) : '' %>"
+        data-email="<%= user && user.email ? user.email.replace(/\"/g, '&quot;' ) : '' %>">
+</div>
+
 <body x-data="gameApp()">
+    <!-- Variables globales de usuario para Alpine.js eliminadas, solo data-* attributes -->
     <!-- Loading overlay -->
-    <div x-show="loading" class="loading-overlay">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <!-- Header del juego -->
-    <div class="game-header">
-        <div class="game-header-left">
-            <div x-text="'Sala: ' + roomCode"></div>
-            <div x-text="'Jugadores: ' + playersCount"></div>
+    <!-- HEADER SUPERIOR SOLO ALPINE.JS, visible solo en playing -->
+    <div x-show="gameState === 'playing'" class="game-header"
+        style="position: fixed; top: 0; left: 0; right: 0; background: #000; padding: 4px 10px; display: flex; justify-content: space-between; align-items: center; z-index: 100; font-size: 12px; color: #fff; height: 44px; min-height: 44px;">
+        <div
+            style="display: flex; align-items: center; gap: 10px; font-size: 11.5px; white-space: nowrap; overflow-x: auto;">
+            <span style="margin-right: 4px;">Sala: <strong style="color: #feca57; font-size: 12px;"
+                    x-text="roomCode"></strong></span>
+            <span style="margin-right: 4px;">Categoría: <strong
+                    style="color: #feca57; font-size: 12px;">A1</strong></span>
+            <span>Nivel: <strong style="color: #feca57; font-size: 12px;">1</strong></span>
         </div>
-        <div class="game-header-right">
-            <div class="user-menu-container">
-                <button class="sidebar-footer-btn" @click="toggleUserMenu()">
-                    <div class="user-avatar">
-                        <% if (user && user.profilePicture) { %>
-                            <img src="<%= user.profilePicture %>" alt="Avatar">
-                            <% } else { %>
-                                <%= user && user.fullname ?
-                                    user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : 
-                                    ' U' %>
-                                    <% } %>
+        <div style="display: flex; align-items: center; gap: 8px; position: relative;">
+            <div class="user-menu-container" style="position: relative;">
+                <button class="sidebar-footer-btn" @click="showUserMenu = !showUserMenu"
+                    style="display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 2px 4px; border-radius: 7px; background: transparent; border: none; color: white; min-height: 32px;">
+                    <div class="user-avatar-game"
+                        style="width: 28px; height: 28px; border-radius: 50%; background: #feca57; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <template x-if="userProfilePicture && userProfilePicture.length > 0">
+                            <img :src="userProfilePicture" :alt="userFullname"
+                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        </template>
+                        <template x-if="!userProfilePicture || userProfilePicture.length === 0">
+                            <span style="color: #000; font-weight: 700; font-size: 12px;" x-text="userInitials"></span>
+                        </template>
                     </div>
-                    <span class="user-name">
-                        <%= user && user.fullname ? user.fullname.split(' ')[0] : ' Usuario' %>
-                    </span>
-                    <i class="bi bi-chevron-down arrow-game"></i>
+                    <span
+                        style="font-size: 11.5px; font-weight: 600; color: #fff; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                        x-text="userFullname && userFullname.length > 0 ? userFullname : 'Usuario'"></span>
+                    <i class="fas fa-chevron-down" style="font-size: 10px; color: #fff;"></i>
                 </button>
-
-                <div class="user-dropdown" x-show="showUserMenu" x-transition>
-                    <a href="/dashboard" class="dropdown-item">
-                        <i class="bi bi-house-door"></i>
-                        <span>Dashboard</span>
-                    </a>
-                    <a href="/config" class="dropdown-item">
-                        <i class="bi bi-gear"></i>
-                        <span>Configuración</span>
-                    </a>
-                    <div class="dropdown-item" @click="leaveGame()">
-                        <i class="bi bi-box-arrow-left"></i>
-                        <span>Salir del juego</span>
+                <div class="game-user-dropdown" x-show="showUserMenu" x-transition
+                    style="position: absolute; top: 100%; right: 0; background: #1a1a1a; border-radius: 8px; padding: 10px; min-width: 150px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000; margin-top: 4px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                        <div class="user-avatar-dropdown"
+                            style="width: 28px; height: 28px; border-radius: 50%; background: #feca57; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <template x-if="userProfilePicture && userProfilePicture.length > 0">
+                                <img :src="userProfilePicture" :alt="userFullname"
+                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            </template>
+                            <template x-if="!userProfilePicture || userProfilePicture.length === 0">
+                                <span style="color: #000; font-weight: 700; font-size: 12px;"
+                                    x-text="userInitials"></span>
+                            </template>
+                        </div>
+                        <div style="min-width: 0; margin-left: 6px;">
+                            <div style="color: #fff; font-size: 11.5px; font-weight: 600;"
+                                x-text="userFullname && userFullname.length > 0 ? userFullname : 'Usuario'"></div>
+                            <div style="color: #999; font-size: 10px;" x-text="userEmail"></div>
+                        </div>
                     </div>
-                    <a href="/logout" class="dropdown-item">
-                        <i class="bi bi-box-arrow-right"></i>
+                    <div style="border-top: 1px solid #333; margin: 6px 0;"></div>
+                    <a href="/dashboard"
+                        style="color: #fff; padding: 6px 0; display: flex; align-items: center; gap: 6px; font-size: 10.5px; text-decoration: none; transition: background 0.2s;">
+                        <i class="fas fa-home"></i>
+                        <span>Inicio</span>
+                    </a>
+                    <a href="/logout"
+                        style="color: #fff; padding: 6px 0; display: flex; align-items: center; gap: 6px; font-size: 10.5px; text-decoration: none; transition: background 0.2s;">
+                        <i class="fas fa-sign-out-alt"></i>
                         <span>Cerrar sesión</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
+    <div x-show="loading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
 
-    <!-- Contenedor principal del juego -->
-    <div class="game-container">
-        <!-- Carta actual -->
-        <div class="current-card-container">
-            <div class="card-counter" x-text="'Carta ' + (currentCardIndex + 1) + ' de 54'"></div>
-
-            <div class="current-card" :class="cardFlipping ? 'card-flip' : ''">
-                <template x-if="currentCard">
-                    <img :src="'/img/carrusel/' + currentCard.filename" :alt="currentCard.name">
+    <!-- SALA DE ESPERA MOBILE MEJORADA -->
+    <template x-if="gameState === 'waiting'">
+        <div class="waiting-screen"
+            style="position: fixed; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; padding: 0;">
+            <!-- Botón salir (X) -->
+            <button @click="leaveGame()"
+                style="position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.08); border: none; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.3rem; z-index: 110;">
+                <i class="fas fa-times"></i>
+            </button>
+            <!-- Logo -->
+            <div class="waiting-logo" style="width: 140px; height: 80px; margin-top: 2.5rem; margin-bottom: 1.2rem;">
+                <img src="/img/logo_formularios.svg" alt="Logo Formularios"
+                    style="width: 100%; height: 100%; object-fit: contain;">
+            </div>
+            <!-- Código de sala -->
+            <div class="room-code-display"
+                style="background: rgba(255,255,255,0.08); border-radius: 16px; padding: 1rem 2rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 1rem;">
+                <span style="color: #073af3; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.1em;"
+                    x-text="roomCode"></span>
+                <button class="copy-code-button" @click="copyRoomCode()" :class="{ 'copy-success': copySuccess }"
+                    style="background: rgba(7,10,243,0.1); border: 2px solid #073af3; border-radius: 10px; color: #073af3; cursor: pointer; padding: 0.5rem; font-size: 1.1rem; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                    <span
+                        style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                        <i class="fas fa-copy" x-show="!copySuccess"></i>
+                        <i class="fas fa-check" x-show="copySuccess"></i>
+                    </span>
+                </button>
+            </div>
+            <!-- Lista de jugadores en forma de lista vertical -->
+            <div class="players-list"
+                style="width: 100%; max-width: 340px; background: rgba(255,255,255,0.04); border-radius: 14px; padding: 1rem 0.5rem 0.5rem 0.5rem; margin-bottom: 1.2rem; min-height: 220px;">
+                <template x-for="(player, idx) in Object.values(players)" :key="player.id || idx">
+                    <div class="player-list-item"
+                        style="display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.7rem; border-radius: 8px; margin-bottom: 0.3rem; background: rgba(255,255,255,0.07);">
+                        <div class="player-avatar-circle"
+                            style="width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.13); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <template x-if="player.avatar">
+                                <img :src="player.avatar" :alt="player.name"
+                                    style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            </template>
+                            <template x-if="!player.avatar">
+                                <span class="avatar-initials"
+                                    x-text="player.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()"
+                                    style="color: white; font-size: 1.1rem; font-weight: 700;"></span>
+                            </template>
+                        </div>
+                        <div class="player-list-info" style="flex: 1; display: flex; flex-direction: column;">
+                            <span class="player-list-name" x-text="player.name"
+                                style="color: #fff; font-size: 1rem; font-weight: 600;"></span>
+                        </div>
+                        <span class="player-list-status"
+                            style="color: #6fffa7; font-size: 1.1rem; font-weight: 700;">●</span>
+                    </div>
                 </template>
-                <template x-if="!currentCard">
-                    <div style="color: #666; font-size: 12px;">Esperando carta...</div>
-                </template>
-            </div>
-
-            <!-- Barra de tiempo -->
-            <div class="time-bar-container">
-                <div class="time-bar" :style="'width: ' + timePercentage + '%'"></div>
-            </div>
-            <div class="time-remaining" x-text="'Tiempo: ' + Math.max(0, Math.ceil(timeRemaining)) + 's'"></div>
-        </div>
-
-        <!-- Tablero del jugador -->
-        <div class="player-board-container">
-            <div class="player-board-title">
-                Mi Tablero (<span x-text="selectedCards"></span>/16)
-            </div>
-
-            <div class="player-board">
-                <template x-for="(card, index) in playerCards" :key="index">
-                    <div class="card-slot" :class="card.selected ? 'selected' : ''" @click="selectCard(card)">
-                        <img :src="'/img/carrusel/' + card.filename" :alt="card.name">
+                <!-- Espacios vacíos -->
+                <template x-for="i in 5 - Object.keys(players).length" :key="'empty-' + i">
+                    <div class="player-list-item empty"
+                        style="display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 0.7rem; border-radius: 8px; margin-bottom: 0.3rem; background: rgba(255,255,255,0.03); opacity: 0.5;">
+                        <div class="player-avatar-circle"
+                            style="width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center;">
+                            <span class="question-mark"
+                                style="color: rgba(255,255,255,0.6); font-size: 1.3rem; font-weight: 300;">?</span>
+                        </div>
+                        <div class="player-list-info" style="flex: 1; display: flex; flex-direction: column;">
+                            <span class="player-list-name"
+                                style="color: #fff; font-size: 1rem; font-weight: 600;">Esperando...</span>
+                        </div>
                     </div>
                 </template>
             </div>
+            <!-- Botón Iniciar Partida (solo host) -->
+            <button class="start-game-button" @click="startGame()" x-show="isHost && Object.keys(players).length >= 1"
+                :disabled="Object.keys(players).length < 1"
+                style="background: #22c55e; color: white; border: none; border-radius: 8px; padding: 0.7rem 1.5rem; font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease;"
+                onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+                <i class="fas fa-play"></i> Iniciar Partida (<span x-text="Object.keys(players).length"></span>/5)
+            </button>
+            <!-- Contador de jugadores -->
+            <div class="player-counter" style="color: #fff; font-size: 0.95rem; margin-bottom: 0.5rem;">
+                <div class="counter-main"><span x-text="Object.keys(players).length"></span> / 5 jugadores conectados
+                </div>
+                <div class="counter-waiting" x-show="Object.keys(players).length < 5">Esperando <span
+                        x-text="5 - Object.keys(players).length"></span> jugadores más</div>
+                <div class="counter-ready" x-show="Object.keys(players).length === 5">¡Sala completa! Lista para empezar
+                </div>
+            </div>
+            <!-- Modal: ¿Seguro que quieres salir? -->
+            <!-- Modal de salir eliminado para mobile, salida directa -->
+            <!-- Modal: El host ha abandonado la sala -->
+            <div x-show="showHostLeftModal || showHostDisconnectedModal"
+                x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                class="host-disconnection-modal">
+                <div class="modal-content">
+                    <div class="modal-icon">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="modal-title">El creador de la partida se ha desconectado</div>
+                    <div class="modal-subtitle">Serás redirigido al inicio</div>
+                    <div class="countdown-display-modal" x-text="hostDisconnectedCountdown"></div>
+                    <button class="modal-button" @click="goToDashboardFromModal()">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al dashboard
+                    </button>
+                </div>
+            </div>
+            <!-- Modal: Partida ya iniciada -->
+            <div x-show="showGameAlreadyStartedModal" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0" class="host-disconnection-modal">
+                <div class="modal-content">
+                    <div class="modal-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div class="modal-title">Esta partida ya ha iniciado</div>
+                    <div class="modal-subtitle">No es posible unirse a una partida en curso</div>
+                    <div class="countdown-display-modal" x-text="gameAlreadyStartedCountdown"></div>
+                    <button class="modal-button" @click="goToDashboardFromGameStarted()">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al dashboard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal de Victoria -->
+            <div x-show="showVictoryModal === true" x-transition:enter="transition ease-out duration-500"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0" class="game-result-modal victory">
+                <div class="game-result-content victory">
+                    <div class="result-title victory">YOU WON!</div>
+                    <button class="result-button" @click="goToDashboardFromResult()">
+                        <i class="fas fa-home"></i>
+                        INICIO
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal de Derrota -->
+            <div x-show="showDefeatModal === true" x-transition:enter="transition ease-out duration-500"
+                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0" class="game-result-modal defeat">
+                <div class="game-result-content defeat">
+                    <div class="result-title defeat">GAME OVER</div>
+                    <button class="result-button" @click="goToDashboardFromResult()">
+                        <i class="fas fa-home"></i>
+                        INICIO
+                    </button>
+                </div>
+            </div>
         </div>
-    </div>
+    </template>
+
+    <!-- PANTALLA DE CUENTA REGRESIVA -->
+    <template x-if="gameState === 'starting'">
+        <div class="countdown-screen">
+            <div class="countdown-container">
+                <div class="waiting-logo" style="width: 140px; height: 80px; margin-bottom: 1rem;">
+                    <img src="/img/logo_formularios.svg" alt="Logo Formularios"
+                        style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div class="countdown-display">
+                    <span x-text="countdown > 0 ? countdown : '¡Comenzamos!'"></span>
+                </div>
+                <div class="countdown-message">
+                    <span x-show="countdown > 0">La partida comenzará en...</span>
+                    <span x-show="countdown <= 0">¡Preparate!</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- CONTENEDOR PRINCIPAL DEL JUEGO (PC) COPIADO PARA ADAPTAR EN MOBILE -->
+    <template x-if="gameState === 'playing'">
+        <div class="game-mobile-vertical d-flex flex-column align-items-center w-100 px-0"
+            style="min-height: 100vh; background: #000; font-family: 'Inter', sans-serif; margin-top: 44px;">
+            <div class="d-flex flex-row align-items-start justify-content-start w-100 px-2 pt-3 pb-2"
+                style="max-width: 100vw; align-items: flex-start;">
+                <!-- Solo la carta actual, barra de tiempo y cantidad de cartas salidas -->
+                <div class="d-flex flex-column align-items-center justify-content-start flex-fill"
+                    style="width: 60%; min-width: 0; padding: 0; border-radius: 0; box-shadow: none; background: transparent;">
+                    <!-- Espaciador para alinear la carta con el título 'Jugadores' -->
+                    <div style="height: 1.2em;"></div>
+                    <!-- Carta actual sin ningún fondo ni contenedor -->
+                    <template x-if="currentCard">
+                        <img :src="currentCard.img || ('/img/carrusel/' + currentCard.filename)" :alt="currentCard.name"
+                            style="width: min(30vw, 110px); height: auto; aspect-ratio: 140/190; display: block; border-radius: 10px; box-shadow: 0 1vw 3vw rgba(0,0,0,0.13); max-width: 90vw; background: transparent; margin-bottom: 8px;" />
+                    </template>
+                    <template x-if="!currentCard">
+                        <img :src="randomCarruselCard" alt="Carta de espera"
+                            style="width: min(30vw, 110px); height: auto; aspect-ratio: 140/190; display: block; border-radius: 10px; box-shadow: 0 1vw 3vw rgba(0,0,0,0.13); max-width: 90vw; background: transparent; margin-bottom: 8px;" />
+                    </template>
+                    <!-- Barra de tiempo más corta -->
+                    <div
+                        style="width: 70%; max-width: 120px; height: 9px; background: #222; border-radius: 5px; overflow: hidden; margin-bottom: 7px;">
+                        <div
+                            :style="'width: ' + Math.max(0, Math.min(100, (timeLeft/5)*100)) + '%; height: 100%; background: linear-gradient(90deg, #22c55e, #073af3); transition: width 0.3s;'">
+                        </div>
+                    </div>
+                    <!-- Cantidad de cartas salidas -->
+                    <div class="text-white"
+                        style="font-size: clamp(12px, 3vw, 15px); font-weight: 600; margin-bottom: 2px;">
+                        Cartas salidas: <span x-text="shownCards.length"></span>/54
+                    </div>
+                </div>
+                <!-- Columna jugadores (derecha) -->
+                <div class="players-list-mini d-flex flex-column align-items-start justify-content-start flex-fill"
+                    style="width: 40%; min-width: 0; gap: 1.5vw;">
+                    <span class="text-white fw-bold mb-1"
+                        style="font-size: clamp(11px, 2.5vw, 15px); letter-spacing: 0.08em;">Jugadores</span>
+                    <template x-for="(player, idx) in Object.values(players)" :key="player.id || idx">
+                        <div class="d-flex align-items-center mb-1" style="gap: 2vw;">
+                            <div class="bg-white border border-2 border-white shadow d-flex align-items-center justify-content-center"
+                                style="width: clamp(28px, 7vw, 40px); height: clamp(28px, 7vw, 40px); border-radius: 50%; overflow: hidden;">
+                                <template x-if="player.avatar">
+                                    <img :src="player.avatar" :alt="player.name"
+                                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                </template>
+                                <template x-if="!player.avatar">
+                                    <span style="color: #073af3; font-size: clamp(13px, 3vw, 18px); font-weight: 700;"
+                                        x-text="getInitials(player.name)"></span>
+                                </template>
+                            </div>
+                            <div class="d-flex flex-column align-items-start" style="min-width: 0;">
+                                <span class="text-white fw-bold"
+                                    style="font-size: clamp(11px, 2.5vw, 15px); max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                                    x-text="player.name"></span>
+                                <span class="text-white"
+                                    style="font-size: clamp(10px, 2vw, 13px); font-weight: 400; opacity: 0.7;"
+                                    x-text="(player.selectedCards !== undefined ? player.selectedCards : 0) + '/16'"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <!-- Cartilla centrada debajo de carta y jugadores -->
+            <div class="w-100 d-flex justify-content-center mt-2 mb-2">
+                <div class="cartilla-container"
+                    style="background: #fff; border-radius: 2.8vw; box-shadow: 0 2vw 6vw rgba(0,0,0,0.08); padding: clamp(10px, 3vw, 22px); width: min(88vw, 350px); margin: 0 auto;">
+                    <div class="cartilla-grid"
+                        style="display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(7px, 2vw, 16px);">
+                        <template x-for="(card, index) in playerCards" :key="index">
+                            <div class="cartilla-card" :class="{
+                                            'selected': card.selected,
+                                            'selectable': currentCard && card.number === currentCard.number && !card.selected
+                                        }" @click="selectCard(index)"
+                                style="background: #f8fafc; border-radius: 1.8vw; box-shadow: 0 1vw 3vw rgba(0,0,0,0.07); border: 1.6px solid #e5e7eb; aspect-ratio: 140/190; width: 100%; max-width: 100%; cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; display: flex; align-items: center; justify-content: center;">
+                                <img :src="'/img/carrusel/' + card.filename" :alt="card.name"
+                                    style="width: 80%; height: 80%; object-fit: contain; border-radius: 0.9vw;" />
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Cartilla ya está incluida dentro del contenedor principal del juego en mobile -->
 
     <!-- Estados del juego -->
-    <div class="game-status" :class="gameStatus.show ? 'show' : ''">
-        <div class="status-title" x-text="gameStatus.title"></div>
-        <div class="status-message" x-text="gameStatus.message"></div>
+    <div class="game-status" :class="gameStatus.show ? 'show' : ''"
+        style="padding: clamp(9.6px, 3.2vw, 25.6px); border-radius: 2.4vw; max-width: 76vw;">
+        <div class="status-title" x-text="gameStatus.title" style="font-size: clamp(14.4px, 4vw, 22.4px);"></div>
+        <div class="status-message" x-text="gameStatus.message" style="font-size: clamp(11.2px, 3.2vw, 16px);"></div>
         <template x-if="gameStatus.showButton">
-            <button class="btn-status" @click="handleStatusAction()" x-text="gameStatus.buttonText"></button>
+            <button class="btn-status" @click="handleStatusAction()" x-text="gameStatus.buttonText"
+                style="font-size: clamp(11.2px, 3.2vw, 16px); padding: clamp(6.4px, 1.6vw, 12.8px) clamp(14.4px, 4vw, 28.8px);"></button>
         </template>
     </div>
 
     <script>
+
+
         function gameApp() {
+            // Array de nombres de cartas para demo (puedes agregar más si lo deseas)
+            const carruselCards = [
+                'CARTA 1.svg', 'CARTA 2.svg', 'CARTA 3.svg', 'CARTA 4.svg', 'CARTA 5.svg', 'CARTA 6.svg', 'CARTA 7.svg', 'CARTA 8.svg', 'CARTA 9.svg', 'CARTA 10.svg',
+                'CARTA 11.svg', 'CARTA 12.svg', 'CARTA 13.svg', 'CARTA 14.svg', 'CARTA 15.svg', 'CARTA 16.svg', 'CARTA 17.svg', 'CARTA 18.svg', 'CARTA 19.svg', 'CARTA 20.svg',
+                'CARTA 21.svg', 'CARTA 22.svg', 'CARTA 23.svg', 'CARTA 24.svg', 'CARTA 25.svg', 'CARTA 26.svg', 'CARTA 27.svg', 'CARTA 28.svg', 'CARTA 29.svg', 'CARTA 30.svg',
+                'CARTA 31.svg', 'CARTA 32.svg', 'CARTA 33.svg', 'CARTA 34.svg', 'CARTA 35.svg', 'CARTA 36.svg', 'CARTA 37.svg', 'CARTA 38.svg', 'CARTA 39.svg', 'CARTA 40.svg',
+                'CARTA 41.svg', 'CARTA 42.svg', 'CARTA 43.svg', 'CARTA 44.svg', 'CARTA 45.svg', 'CARTA 46.svg', 'CARTA 47.svg', 'CARTA 48.svg', 'CARTA 49.svg', 'CARTA 50.svg',
+                'CARTA 51.svg', 'CARTA 52.svg', 'CARTA 53.svg', 'CARTA 54.svg'
+            ];
+            // Selecciona una carta aleatoria para mostrar cuando no hay carta actual
+            const randomCard = '/img/carrusel/' + carruselCards[Math.floor(Math.random() * carruselCards.length)];
+            // Leer datos del usuario desde el div data-*
+            const userData = document.getElementById('user-data').dataset;
+            function getInitials(name) {
+                if (!name) return '??';
+                const words = name.trim().split(' ');
+                if (words.length === 1) return words[0][0].toUpperCase();
+                return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+            }
             return {
+                randomCarruselCard: randomCard,
+                copyRoomCode() {
+                    if (!this.roomCode) return;
+                    if (navigator && navigator.clipboard) {
+                        navigator.clipboard.writeText(this.roomCode)
+                            .then(() => {
+                                this.copySuccess = true;
+                                setTimeout(() => { this.copySuccess = false; }, 1200);
+                            })
+                            .catch(() => {
+                                this.copySuccess = false;
+                            });
+                    } else {
+                        // Fallback para navegadores antiguos
+                        const tempInput = document.createElement('input');
+                        tempInput.value = this.roomCode;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        try {
+                            document.execCommand('copy');
+                            this.copySuccess = true;
+                            setTimeout(() => { this.copySuccess = false; }, 1200);
+                        } catch (e) {
+                            this.copySuccess = false;
+                        }
+                        document.body.removeChild(tempInput);
+                    }
+                },
+                userFullname: userData.fullname,
+                userProfilePicture: userData.profilePicture,
+                userEmail: userData.email,
+                userInitials: getInitials(userData.fullname),
                 // Estado del juego
                 loading: true,
-                gameStarted: false,
-                gameFinished: false,
-
-                // Datos de la sala
+                gameState: 'waiting', // 'waiting' | 'starting' | 'playing'
+                isHost: true, // El usuario es el host en modo demo
+                players: {
+                    'me': {
+                        id: 'me',
+                        name: userData.fullname || 'Tú',
+                        avatar: userData.profilePicture || '',
+                        selectedCards: 0
+                    },
+                    '1': { id: '1', name: 'Ana Torres', avatar: 'https://randomuser.me/api/portraits/women/65.jpg', selectedCards: 3 },
+                    '2': { id: '2', name: 'Luis Pérez', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selectedCards: 7 },
+                    '3': { id: '3', name: 'María López', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', selectedCards: 0 },
+                    '4': { id: '4', name: 'Carlos Ruiz', avatar: 'https://randomuser.me/api/portraits/men/76.jpg', selectedCards: 12 }
+                },
+                copySuccess: false,
                 roomCode: '<%= roomCode || "" %>',
-                playersCount: 0,
-
-                // Cartas
                 currentCard: null,
                 currentCardIndex: 0,
                 playerCards: [],
                 selectedCards: 0,
                 cardFlipping: false,
-
-                // Tiempo
                 timeRemaining: 0,
                 timePercentage: 100,
                 timeInterval: null,
-
-                // UI
                 showUserMenu: false,
+                muted: false,
+                isFullscreen: false,
                 gameStatus: {
                     show: false,
                     title: '',
@@ -580,111 +1778,138 @@
                     buttonText: '',
                     action: null
                 },
-
-                // Socket
                 socket: null,
+                // Nuevos estados para modals y countdown
+                showLeaveModal: false,
+                showHostLeftModal: false,
+                showHostDisconnectedModal: false,
+                showGameAlreadyStartedModal: false,
+                showVictoryModal: false,
+                showDefeatModal: false,
+                gameEnded: false,
+                winner: null,
+                gameResultsReady: false,
+                gameFullyInitialized: true,
+                countdown: 3,
+                hostDisconnectedCountdown: 5,
+                gameAlreadyStartedCountdown: 5,
+                hostDisconnectedTimer: null,
+                gameAlreadyStartedTimer: null,
+                // Variables añadidas de PC
+                timeLeft: 5,
+                timer: null,
+                isChangingCard: false,
+                isAppearingCard: false,
+                countdownTimer: null,
+                cardTimer: null,
 
                 init() {
-                    this.initSocket();
-                    this.generatePlayerCards();
-                    setTimeout(() => this.loading = false, 1000);
+                    // No conectar socket en modo demo para que no se sobrescriba players
+                    // this.initSocket();
+                    // Demo: inicializar cartilla con 16 cartas aleatorias
+                    if (!this.playerCards || this.playerCards.length === 0) {
+                        const used = new Set();
+                        this.playerCards = Array.from({ length: 16 }, (_, i) => {
+                            let idx;
+                            do {
+                                idx = Math.floor(Math.random() * carruselCards.length);
+                            } while (used.has(idx));
+                            used.add(idx);
+                            return {
+                                number: idx + 1,
+                                name: carruselCards[idx].replace('.svg', ''),
+                                filename: carruselCards[idx],
+                                selected: false
+                            };
+                        });
+                    }
+                    setTimeout(() => this.loading = false, 500);
                 },
 
                 initSocket() {
                     this.socket = io();
-
-                    // Eventos del socket
+                    // Countdown de inicio de partida
+                    this.socket.on('countdown-start', (data) => {
+                        this.gameState = 'starting';
+                        this.countdown = data.count || 5;
+                    });
+                    this.socket.on('countdown-update', (count) => {
+                        this.countdown = count;
+                        if (count <= 0) {
+                            setTimeout(() => {
+                                this.gameState = 'playing';
+                            }, 500);
+                        }
+                    });
+                    // Al conectar, unirse a la sala
                     this.socket.on('connect', () => {
-                        console.log('Conectado al servidor');
                         if (this.roomCode) {
                             this.socket.emit('join-room', this.roomCode);
                         }
                     });
-
-                    this.socket.on('room-joined', (data) => {
-                        console.log('Unido a la sala:', data);
-                        this.playersCount = data.playersCount || 1;
-                    });
-
-                    this.socket.on('game-started', () => {
-                        this.gameStarted = true;
-                        this.showStatus('¡Juego Iniciado!', 'El juego ha comenzado. ¡Buena suerte!');
-                    });
-
-                    this.socket.on('new-card', (data) => {
-                        this.showNewCard(data);
-                    });
-
-                    this.socket.on('game-finished', (data) => {
-                        this.gameFinished = true;
-                        this.showStatus(
-                            data.winner ? '¡Victoria!' : 'Juego Terminado',
-                            data.winner ? `¡${data.winner} ha ganado!` : 'El juego ha terminado',
-                            true,
-                            'Volver al Dashboard',
-                            () => window.location.href = '/dashboard'
-                        );
-                    });
-
-                    this.socket.on('player-won', (data) => {
-                        if (data.winner === '<%= user ? user.fullname : "" %>') {
-                            this.showStatus('¡Felicidades!', '¡Has ganado la partida!', true, 'Volver al Dashboard', () => window.location.href = '/dashboard');
+                    // Estado inicial de la sala
+                    this.socket.on('room-state', (data) => {
+                        this.players = data.players || {};
+                        this.isHost = data.isHost;
+                        if (data.gameState === 'playing') {
+                            this.gameState = 'playing';
                         } else {
-                            this.showStatus('Juego Terminado', `${data.winner} ha ganado la partida`, true, 'Volver al Dashboard', () => window.location.href = '/dashboard');
+                            this.gameState = 'waiting';
                         }
                     });
 
-                    this.socket.on('disconnect', () => {
-                        this.showStatus('Desconectado', 'Se ha perdido la conexión con el servidor', true, 'Reconectar', () => location.reload());
+                    // Actualización de jugadores en tiempo real
+                    this.socket.on('players-updated', (data) => {
+                        this.players = data.players;
+                    });
+
+                    // Un jugador se desconectó
+                    this.socket.on('player-disconnected', (data) => {
+                        this.players = data.players;
+                    });
+
+                    // El host abandonó la sala
+                    this.socket.on('host-left', () => {
+                        this.showHostLeftModal = true;
+                        this.startHostDisconnectedCountdown();
+                    });
+
+                    // El host se desconectó
+                    this.socket.on('host-disconnected', () => {
+                        this.showHostDisconnectedModal = true;
+                        this.startHostDisconnectedCountdown();
+                    });
+
+                    // La partida ha iniciado
+                    this.socket.on('game-started', () => {
+                        this.gameState = 'starting';
+                        this.startCountdown && this.startCountdown();
                     });
                 },
-
-                generatePlayerCards() {
-                    // Generar 16 cartas aleatorias para el jugador
-                    const totalCards = 54;
-                    const selectedNumbers = new Set();
-
-                    while (selectedNumbers.size < 16) {
-                        selectedNumbers.add(Math.floor(Math.random() * totalCards) + 1);
-                    }
-
-                    this.playerCards = Array.from(selectedNumbers).map(num => ({
-                        number: num,
-                        name: `CARTA ${num}`,
-                        filename: `CARTA ${num}.svg`,
-                        selected: false
-                    }));
-                },
-
-                showNewCard(cardData) {
-                    this.cardFlipping = true;
-
-                    setTimeout(() => {
-                        this.currentCard = {
-                            number: cardData.number,
-                            name: cardData.name,
-                            filename: `CARTA ${cardData.number}.svg`
-                        };
-                        this.currentCardIndex = cardData.index || this.currentCardIndex + 1;
-                        this.cardFlipping = false;
-
-                        // Iniciar temporizador
-                        this.startTimer(cardData.duration || 15);
-                    }, 150);
+                startGame() {
+                    // Demo: cambiar a estado 'starting' y simular cuenta regresiva
+                    this.gameState = 'starting';
+                    this.countdown = 3;
+                    const countdownInterval = setInterval(() => {
+                        this.countdown--;
+                        if (this.countdown <= 0) {
+                            clearInterval(countdownInterval);
+                            setTimeout(() => {
+                                this.gameState = 'playing';
+                            }, 500);
+                        }
+                    }, 1000);
                 },
 
                 startTimer(duration) {
                     this.timeRemaining = duration;
                     this.timePercentage = 100;
-
                     if (this.timeInterval) {
                         clearInterval(this.timeInterval);
                     }
-
                     this.timeInterval = setInterval(() => {
                         this.timeRemaining -= 0.1;
                         this.timePercentage = (this.timeRemaining / duration) * 100;
-
                         if (this.timeRemaining <= 0) {
                             clearInterval(this.timeInterval);
                             this.timeRemaining = 0;
@@ -693,33 +1918,103 @@
                     }, 100);
                 },
 
-                selectCard(card) {
-                    if (!this.currentCard || !this.gameStarted || card.selected) {
+                selectCard(index) {
+                    if (!this.currentCard || this.gameEnded) {
                         return;
                     }
-
-                    // Verificar si la carta coincide con la actual
-                    if (card.number === this.currentCard.number) {
+                    const card = this.playerCards[index];
+                    if (card.number === this.currentCard.number && !card.selected) {
                         card.selected = true;
-                        this.selectedCards++;
-
-                        // Agregar efecto visual
-                        this.$nextTick(() => {
-                            const cardElement = event.target.closest('.card-slot');
-                            if (cardElement) {
-                                cardElement.classList.add('pulse');
-                                setTimeout(() => cardElement.classList.remove('pulse'), 1000);
-                            }
+                        this.updateSelectedCards();
+                        this.socket.emit('card-selected', {
+                            cardIndex: index,
+                            selectedCards: this.selectedCards
                         });
-
-                        // Verificar victoria
-                        if (this.selectedCards >= 16) {
-                            this.socket.emit('player-won', {
-                                roomCode: this.roomCode,
-                                winner: '<%= user ? user.fullname : "" %>',
-                                selectedCards: this.selectedCards
-                            });
+                        if (!this.muted) {
+                            this.playSelectSound();
                         }
+                        if (this.selectedCards === 16) {
+                            this.socket.emit('player-won');
+                        }
+                    }
+                },
+
+                updateSelectedCards() {
+                    this.selectedCards = this.playerCards.filter(card => card.selected).length;
+                },
+
+                onCardLoaded() {
+                    // Función para manejar cuando la imagen se carga completamente
+                },
+
+                toggleMute() {
+                    this.muted = !this.muted;
+                },
+
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        this.enterFullscreen();
+                    } else {
+                        this.exitFullscreen();
+                    }
+                },
+
+                enterFullscreen() {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.log('Error al entrar en pantalla completa:', err);
+                        });
+                    }
+                },
+
+                exitFullscreen() {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(err => {
+                            console.log('Error al salir de pantalla completa:', err);
+                        });
+                    }
+                },
+
+                playSelectSound() {
+                    try {
+                        const audio = new Audio('/sounds/select.mp3');
+                        audio.volume = 0.3;
+                        audio.play().catch(err => console.log('Error reproduciendo sonido:', err));
+                    } catch (err) {
+                        console.log('Error creando audio:', err);
+                    }
+                },
+
+                showNewCard(card, index) {
+                    this.isChangingCard = true;
+                    this.stopTimer();
+                    setTimeout(() => {
+                        this.currentCard = card;
+                        this.currentCardIndex = index;
+                        this.isChangingCard = false;
+                        this.isAppearingCard = true;
+                        this.timeLeft = 5;
+                        this.startTimer();
+                        setTimeout(() => {
+                            this.isAppearingCard = false;
+                        }, 500);
+                    }, 250);
+                },
+
+                startTimer() {
+                    this.stopTimer();
+                    this.timer = setInterval(() => {
+                        this.timeLeft--;
+                        if (this.timeLeft <= 0) {
+                            this.stopTimer();
+                        }
+                    }, 1000);
+                },
+
+                stopTimer() {
+                    if (this.timer) {
+                        clearInterval(this.timer);
+                        this.timer = null;
                     }
                 },
 
@@ -728,9 +2023,38 @@
                 },
 
                 leaveGame() {
-                    if (confirm('¿Estás seguro de que quieres salir del juego?')) {
+                    const gameCode = this.roomCode;
+                    if (gameCode) {
+                        fetch('/api/game-rooms/leave-room', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ code: gameCode })
+                        })
+                            .then(() => {
+                                this.cleanupGameData();
+                            })
+                            .catch(error => {
+                                this.cleanupGameData();
+                            })
+                            .finally(() => {
+                                window.location.href = '/dashboard';
+                            });
+                    } else {
+                        this.cleanupGameData();
                         window.location.href = '/dashboard';
                     }
+                },
+
+                cleanupGameData() {
+                    localStorage.removeItem('gameCode');
+                    localStorage.removeItem('gameConfig');
+                    localStorage.removeItem('isHost');
+                    if (this.socket) {
+                        this.socket.disconnect();
+                    }
+                    window.dispatchEvent(new CustomEvent('game-finished'));
                 },
 
                 showStatus(title, message, showButton = false, buttonText = '', action = null) {
@@ -742,7 +2066,6 @@
                         buttonText,
                         action
                     };
-
                     if (!showButton) {
                         setTimeout(() => {
                             this.gameStatus.show = false;
@@ -755,6 +2078,101 @@
                         this.gameStatus.action();
                     }
                     this.gameStatus.show = false;
+                },
+
+                redirectToDashboard() {
+                    window.location.href = '/dashboard';
+                },
+
+                startHostDisconnectedCountdown() {
+                    this.hostDisconnectedTimer = setInterval(() => {
+                        this.hostDisconnectedCountdown--;
+                        if (this.hostDisconnectedCountdown <= 0) {
+                            clearInterval(this.hostDisconnectedTimer);
+                            this.goToDashboardFromModal();
+                        }
+                    }, 1000);
+                },
+
+                goToDashboardFromModal() {
+                    if (this.hostDisconnectedTimer) {
+                        clearInterval(this.hostDisconnectedTimer);
+                    }
+                    this.cleanupGameData();
+                    window.location.href = '/dashboard';
+                },
+
+                startGameAlreadyStartedCountdown() {
+                    this.gameAlreadyStartedTimer = setInterval(() => {
+                        this.gameAlreadyStartedCountdown--;
+                        if (this.gameAlreadyStartedCountdown <= 0) {
+                            clearInterval(this.gameAlreadyStartedTimer);
+                            this.goToDashboardFromGameStarted();
+                        }
+                    }, 1000);
+                },
+
+                goToDashboardFromGameStarted() {
+                    if (this.gameAlreadyStartedTimer) {
+                        clearInterval(this.gameAlreadyStartedTimer);
+                    }
+                    this.cleanupGameData();
+                    window.location.href = '/dashboard';
+                },
+
+                handleGameEnd(data) {
+                    this.gameEnded = true;
+                    this.winner = data.winner;
+                    this.gameResultsReady = true;
+                    const currentPlayerId = this.socket.id;
+                    setTimeout(() => {
+                        if (data.winner === currentPlayerId) {
+                            this.showVictoryModal = true;
+                        } else {
+                            this.showDefeatModal = true;
+                        }
+                    }, 100);
+                    const gameCode = localStorage.getItem('gameCode');
+                    const isHost = localStorage.getItem('isHost') === 'true';
+                    if (gameCode && isHost) {
+                        localStorage.removeItem('gameCode');
+                        localStorage.removeItem('isHost');
+                    }
+                },
+
+                goToDashboardFromResult() {
+                    this.showVictoryModal = false;
+                    this.showDefeatModal = false;
+                    this.gameResultsReady = false;
+                    this.gameEnded = false;
+                    this.gameFullyInitialized = false;
+                    localStorage.removeItem('gameCode');
+                    localStorage.removeItem('isHost');
+                    if (this.socket) {
+                        this.socket.disconnect();
+                    }
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 300);
+                },
+
+                callLoteria() {
+                    if (this.selectedCards >= 4 && this.gameState === 'playing') {
+                        this.socket.emit('player-won', {
+                            roomCode: this.roomCode,
+                            winner: '<%= user ? user.fullname : "" %>',
+                            selectedCards: this.selectedCards
+                        });
+                    }
+                },
+
+                getInitials(name) {
+                    if (!name) return '??';
+                    const words = name.trim().split(' ');
+                    if (words.length === 1) {
+                        return words[0].substring(0, 2).toUpperCase();
+                    }
+                    return (words[0][0] + words[words.length - 1][0]).toUpperCase();
                 }
             }
         }
@@ -777,6 +2195,22 @@
 
         document.addEventListener('gestureend', function (e) {
             e.preventDefault();
+        });
+
+        // Manejar cierre de página/pestaña
+        window.addEventListener('beforeunload', function () {
+            // Obtener la instancia de Alpine y limpiar datos
+            try {
+                const gameApp = document.querySelector('[x-data]')?.__x?.$data;
+                if (gameApp) {
+                    gameApp.cleanupGameData();
+                }
+            } catch (e) {
+                // Fallback: limpiar localStorage directamente
+                localStorage.removeItem('gameCode');
+                localStorage.removeItem('gameConfig');
+                localStorage.removeItem('isHost');
+            }
         });
     </script>
 </body>
