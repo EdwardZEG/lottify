@@ -117,7 +117,8 @@ router.post('/join-room', requireAuth, async (req, res) => {
         // Intentar agregar al jugador
         const added = gameRoom.addPlayer(
             req.session.user._id, 
-            req.session.user.fullname || 'Jugador'
+            req.session.user.fullname || 'Jugador',
+            false // false indica que es usuario registrado
         );
         
         if (!added) {
@@ -298,6 +299,74 @@ router.post('/cleanup', requireAuth, async (req, res) => {
         console.error('Error en limpieza:', error);
         res.status(500).json({ 
             error: 'Error interno del servidor durante la limpieza' 
+        });
+    }
+});
+
+// Ruta especial para que invitados se unan a salas (sin autenticación)
+router.post('/join-room-guest', async (req, res) => {
+    try {
+        const { code } = req.body;
+        
+        if (!code || code.length < 6) {
+            return res.status(400).json({ 
+                error: 'Código de sala inválido' 
+            });
+        }
+        
+        // Buscar la sala
+        const gameRoom = await GameRoom.findOne({ 
+            code: code.toString(),
+            status: 'waiting' // Solo se puede unir a salas en espera
+        });
+        
+        if (!gameRoom) {
+            return res.status(404).json({ 
+                error: 'Sala no encontrada o ya iniciada' 
+            });
+        }
+        
+        // Verificar si la sala está llena
+        if (gameRoom.players.length >= gameRoom.maxPlayers) {
+            return res.status(400).json({ 
+                error: 'La sala está llena' 
+            });
+        }
+        
+        // Generar un ID temporal para el invitado
+        const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const guestName = 'Invitado';
+        
+        // Intentar agregar al jugador invitado
+        const added = gameRoom.addPlayer(guestId, guestName, true); // true indica que es invitado
+        
+        if (!added) {
+            return res.status(400).json({ 
+                error: 'Error al unirse a la sala' 
+            });
+        }
+        
+        await gameRoom.save();
+        
+        console.log(`Invitado se unió a la sala ${code}`);
+        
+        res.json({
+            success: true,
+            room: {
+                code: gameRoom.code,
+                configuration: gameRoom.configuration,
+                status: gameRoom.status,
+                playersCount: gameRoom.players.length,
+                maxPlayers: gameRoom.maxPlayers,
+                isHost: false, // Los invitados nunca son hosts
+                guestId: guestId // ID temporal para el invitado
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error de invitado uniéndose a sala:', error);
+        res.status(500).json({ 
+            error: 'Error interno del servidor al unirse a la sala' 
         });
     }
 });
