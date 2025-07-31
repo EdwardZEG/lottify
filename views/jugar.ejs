@@ -923,6 +923,90 @@
             font-weight: 600;
         }
 
+        .disconnected-players {
+            font-size: 0.9rem;
+            color: #ef4444;
+            font-weight: 500;
+            margin-top: 0.3rem;
+            font-style: italic;
+        }
+
+        /* Sistema de notificaciones en tiempo real */
+        .live-notifications {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 300px;
+        }
+
+        .notification {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.success {
+            border-left-color: #22c55e;
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .notification.warning {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .notification.error {
+            border-left-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .notification.info {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .notification-enter {
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .notification-leave {
+            animation: slideOutRight 0.3s ease-in;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         /* Pantalla de cuenta regresiva */
         .countdown-screen {
             display: flex;
@@ -1262,6 +1346,61 @@
             /* Aumentar padding */
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .player-item.player-disconnected {
+            opacity: 0.6;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        /* Indicador de conexión */
+        .connection-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .connection-indicator.connected {
+            background: #22c55e;
+            border-color: #16a34a;
+            animation: connectedPulse 2s infinite;
+        }
+
+        .connection-indicator.disconnected {
+            background: #ef4444;
+            border-color: #dc2626;
+            animation: disconnectedPulse 1s infinite;
+        }
+
+        @keyframes connectedPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes disconnectedPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
         }
 
         .player-avatar-img {
@@ -1304,6 +1443,13 @@
             /* Aumentar tamaño */
             color: #fbbf24;
             font-weight: 600;
+        }
+
+        .connection-status {
+            font-size: 10px;
+            color: #ef4444;
+            font-weight: 500;
+            font-style: italic;
         }
 
         .game-controls {
@@ -1488,6 +1634,16 @@
 
 <body>
     <div x-data="lotteriaGame('<%- roomCode %>')" x-cloak>
+        <!-- Zona de notificaciones en tiempo real -->
+        <div class="live-notifications" x-show="notifications.length > 0">
+            <template x-for="notification in notifications" :key="notification.id">
+                <div class="notification" :class="notification.type" x-show="notification.visible"
+                    x-transition:enter="notification-enter" x-transition:leave="notification-leave">
+                    <span x-text="notification.message"></span>
+                </div>
+            </template>
+        </div>
+
         <!-- Pantalla de espera - DISEÑO EXACTO DE LA IMAGEN SIN HEADER -->
         <div x-show="gameState === 'waiting'" class="waiting-screen">
             <!-- Botón de salir flotante -->
@@ -1555,13 +1711,23 @@
                 <!-- Contador de jugadores -->
                 <div class="player-counter">
                     <div class="counter-main">
-                        <span x-text="Object.keys(players).length"></span> / 5 jugadores conectados
+                        <span x-text="Object.values(players).filter(p => p.connected !== false).length"></span> / 5
+                        jugadores conectados
                     </div>
-                    <div class="counter-waiting" x-show="Object.keys(players).length < 5">
-                        Esperando <span x-text="5 - Object.keys(players).length"></span> jugadores más
+                    <div class="counter-waiting"
+                        x-show="Object.values(players).filter(p => p.connected !== false).length < 5">
+                        Esperando <span
+                            x-text="5 - Object.values(players).filter(p => p.connected !== false).length"></span>
+                        jugadores más
                     </div>
-                    <div class="counter-ready" x-show="Object.keys(players).length === 5">
+                    <div class="counter-ready"
+                        x-show="Object.values(players).filter(p => p.connected !== false).length === 5">
                         ¡Sala completa! Lista para empezar
+                    </div>
+                    <div class="disconnected-players"
+                        x-show="Object.values(players).filter(p => p.connected === false).length > 0">
+                        <span x-text="Object.values(players).filter(p => p.connected === false).length"></span>
+                        jugador(es) desconectado(s)
                     </div>
                 </div>
             </div>
@@ -1682,7 +1848,13 @@
                 <!-- Lista de jugadores con avatares -->
                 <div class="players-list">
                     <template x-for="(player, playerId) in players" :key="playerId">
-                        <div class="player-item">
+                        <div class="player-item" :class="{ 'player-disconnected': player.connected === false }">
+                            <!-- Indicador de conexión -->
+                            <div class="connection-indicator"
+                                :class="{ 'connected': player.connected !== false, 'disconnected': player.connected === false }"
+                                :title="player.connected === false ? 'Jugador desconectado' : 'Jugador conectado'">
+                            </div>
+
                             <!-- Avatar del jugador -->
                             <img x-show="player.avatar" :src="player.avatar" :alt="player.name"
                                 class="player-avatar-img">
@@ -1693,6 +1865,7 @@
                             <div class="player-details">
                                 <div class="player-name" x-text="player.name"></div>
                                 <div class="player-score" x-text="(player.selectedCards || 0) + '/16'"></div>
+                                <div x-show="player.connected === false" class="connection-status">Desconectado</div>
                             </div>
                         </div>
                     </template>
@@ -1849,6 +2022,10 @@
                 showGuestNameModal: false,
                 guestFirstName: '',
                 guestLastName: '',
+
+                // Sistema de notificaciones en tiempo real
+                notifications: [],
+                notificationId: 0,
                 isGuest: false,
 
                 // Modal de partida ya iniciada
@@ -1919,7 +2096,7 @@
                         .then(userData => {
                             console.log('Datos del usuario recibidos:', userData);
 
-                            // Verificar si es un usuario registrado o invitado
+                            // Verificar si es un usuario registrado
                             if (!userData.isGuest && userData.fullname && userData.fullname !== 'Usuario Anónimo' && userData.fullname !== 'Invitado') {
                                 // Usuario registrado - conectar directamente
                                 this.currentUser = {
@@ -1931,18 +2108,73 @@
                                 console.log('Usuario registrado conectado:', this.currentUser);
                                 this.connectToRoom();
                             } else {
-                                // Usuario invitado - mostrar modal de nombre
+                                // Usuario invitado - verificar si tiene datos guardados para esta partida
                                 this.isGuest = true;
+                                const roomCode = '<%= roomCode %>';
+                                const guestKey = `lottify_guest_${roomCode}`;
+                                const savedGuestData = localStorage.getItem(guestKey);
+
+                                if (savedGuestData) {
+                                    try {
+                                        const guestInfo = JSON.parse(savedGuestData);
+                                        console.log('Datos de invitado encontrados:', guestInfo);
+
+                                        // Verificar que los datos son válidos y no muy antiguos (1 hora)
+                                        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+                                        if (guestInfo.timestamp && guestInfo.timestamp > oneHourAgo && guestInfo.name) {
+                                            // Reconectar con datos guardados
+                                            this.currentUser = {
+                                                name: guestInfo.name,
+                                                email: '',
+                                                avatar: null
+                                            };
+                                            console.log('Reconectando invitado automáticamente:', this.currentUser);
+                                            this.connectToRoom();
+                                            return;
+                                        } else {
+                                            // Datos muy antiguos o inválidos, limpiar
+                                            localStorage.removeItem(guestKey);
+                                        }
+                                    } catch (error) {
+                                        console.error('Error parsing guest data:', error);
+                                        localStorage.removeItem(guestKey);
+                                    }
+                                }
+
+                                // No hay datos válidos de invitado, mostrar modal
                                 this.showGuestNameModal = true;
-                                console.log('Invitado detectado - mostrando modal de nombre');
+                                console.log('Invitado nuevo - mostrando modal de nombre');
                             }
                         })
                         .catch(err => {
                             console.error('Error loading user data:', err);
-                            // Si hay error, tratar como invitado
+                            // Si hay error, verificar datos de invitado guardados
                             this.isGuest = true;
+                            const roomCode = '<%= roomCode %>';
+                            const guestKey = `lottify_guest_${roomCode}`;
+                            const savedGuestData = localStorage.getItem(guestKey);
+
+                            if (savedGuestData) {
+                                try {
+                                    const guestInfo = JSON.parse(savedGuestData);
+                                    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+                                    if (guestInfo.timestamp && guestInfo.timestamp > oneHourAgo && guestInfo.name) {
+                                        this.currentUser = {
+                                            name: guestInfo.name,
+                                            email: '',
+                                            avatar: null
+                                        };
+                                        console.log('Reconectando invitado (modo error):', this.currentUser);
+                                        this.connectToRoom();
+                                        return;
+                                    }
+                                } catch (error) {
+                                    console.error('Error parsing guest data in error mode:', error);
+                                }
+                            }
+
                             this.showGuestNameModal = true;
-                            console.log('Error al cargar usuario - tratando como invitado');
+                            console.log('Error al cargar usuario - tratando como invitado nuevo');
                         });
                 },
 
@@ -1976,6 +2208,21 @@
                         avatar: null
                     };
 
+                    // Guardar datos del invitado para reconexión automática
+                    const roomCode = '<%= roomCode %>';
+                    const guestKey = `lottify_guest_${roomCode}`;
+                    const guestData = {
+                        name: fullName,
+                        timestamp: Date.now()
+                    };
+
+                    try {
+                        localStorage.setItem(guestKey, JSON.stringify(guestData));
+                        console.log('Datos de invitado guardados para reconexión automática');
+                    } catch (error) {
+                        console.error('Error guardando datos de invitado:', error);
+                    }
+
                     // Cerrar el modal
                     this.showGuestNameModal = false;
 
@@ -1988,6 +2235,30 @@
                 closeGuestModal() {
                     // Cerrar modal sin conectar (volver a dashboard)
                     window.location.href = '/dashboard';
+                },
+
+                // Sistema de notificaciones en tiempo real
+                showNotification(message, type = 'info', duration = 3000) {
+                    const notification = {
+                        id: this.notificationId++,
+                        message: message,
+                        type: type,
+                        visible: true
+                    };
+
+                    this.notifications.push(notification);
+
+                    // Auto-ocultar después del tiempo especificado
+                    setTimeout(() => {
+                        notification.visible = false;
+                        // Remover de la lista después de la animación
+                        setTimeout(() => {
+                            const index = this.notifications.findIndex(n => n.id === notification.id);
+                            if (index > -1) {
+                                this.notifications.splice(index, 1);
+                            }
+                        }, 300);
+                    }, duration);
                 },
 
                 setupSocketEvents() {
@@ -2057,19 +2328,101 @@
                     });
 
                     // Manejo mejorado de desconexiones de jugadores individuales
-                    this.socket.on('player-disconnected', (playerId) => {
-                        console.log('Jugador desconectado:', playerId);
-                        if (this.players[playerId]) {
-                            this.players[playerId].connected = false;
+                    this.socket.on('player-disconnected', (data) => {
+                        if (typeof data === 'string') {
+                            // Formato antiguo - solo playerId
+                            const playerId = data;
+                            console.log('Jugador desconectado:', playerId);
+                            if (this.players[playerId]) {
+                                this.players[playerId].connected = false;
 
-                            // Si estamos en la sala de espera, remover el jugador
-                            if (this.gameState === 'waiting') {
-                                delete this.players[playerId];
+                                // Si estamos en la sala de espera, remover el jugador
+                                if (this.gameState === 'waiting') {
+                                    delete this.players[playerId];
+                                }
+
+                                // Forzar actualización de la vista
+                                this.$nextTick();
                             }
+                        } else {
+                            // Formato nuevo - con información adicional
+                            console.log('Jugador desconectado:', data);
+                            if (this.players[data.playerId]) {
+                                this.players[data.playerId].connected = false;
 
-                            // Forzar actualización de la vista
+                                // Mostrar mensaje de desconexión temporal si hay período de gracia
+                                if (data.gracePeriod) {
+                                    console.log(`${data.playerName} se desconectó temporalmente. Esperando reconexión...`);
+                                    this.showNotification(`${data.playerName} se desconectó`, 'warning', 2000);
+                                }
+
+                                // Si estamos en la sala de espera, remover el jugador
+                                if (this.gameState === 'waiting') {
+                                    delete this.players[data.playerId];
+                                }
+
+                                // Forzar actualización de la vista
+                                this.$nextTick();
+                            }
+                        }
+                    });
+
+                    // Manejar reconexiones de jugadores
+                    this.socket.on('player-reconnected', (data) => {
+                        console.log(`Jugador ${data.playerName} se ha reconectado`);
+                        if (this.players[data.playerId]) {
+                            this.players[data.playerId].connected = true;
                             this.$nextTick();
                         }
+
+                        // Mostrar notificación de reconexión
+                        this.showNotification(`${data.playerName} se reconectó`, 'success', 2000);
+                    });
+
+                    // Manejar desconexión temporal del host
+                    this.socket.on('host-disconnected-temp', (data) => {
+                        console.log('Host desconectado temporalmente:', data);
+                        // Aquí puedes mostrar un mensaje temporal al usuario
+                        // Por ejemplo: "El host se desconectó, esperando reconexión..."
+                    });
+
+                    // Manejar reconexión del host
+                    this.socket.on('host-reconnected', (data) => {
+                        console.log('Host reconectado:', data);
+                        // Aquí puedes mostrar un mensaje de que el host regresó
+                    });
+
+                    // Manejar cuando un jugador es removido definitivamente
+                    this.socket.on('player-removed', (data) => {
+                        console.log(`Jugador ${data.playerName} fue removido de la partida`);
+                        if (this.players[data.playerId]) {
+                            delete this.players[data.playerId];
+                            this.$nextTick();
+                        }
+
+                        // Mostrar notificación de remoción
+                        this.showNotification(`${data.playerName} fue removido`, 'error', 3000);
+                    });
+
+                    // Manejar cambio de host
+                    this.socket.on('new-host', (data) => {
+                        console.log('Nuevo host asignado:', data);
+
+                        // Actualizar el estado de host para todos los jugadores
+                        for (const playerId in this.players) {
+                            this.players[playerId].isHost = (playerId === data.hostId);
+                        }
+
+                        // Actualizar si el usuario actual es el nuevo host
+                        this.isHost = (this.socket.id === data.hostId);
+
+                        // Mostrar mensaje
+                        if (data.message) {
+                            console.log(data.message);
+                            this.showNotification(data.message, 'info', 4000);
+                        }
+
+                        this.$nextTick();
                     });
 
                     this.socket.on('game-started', (data) => {

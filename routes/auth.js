@@ -458,14 +458,33 @@ router.put("/api/user/profile", async (req, res) => {
 
 // API: Subir foto de perfil
 router.post("/api/user/profile-picture", upload.single('profilePicture'), async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ success: false, message: "No autorizado" });
+  console.log('=== UPLOAD ENDPOINT CALLED ===');
+  console.log('Session ID:', req.sessionID);
+  console.log('User ID:', req.session.userId);
+  console.log('File received:', req.file ? 'YES' : 'NO');
+  console.log('Headers:', req.headers);
+  
+  if (!req.session.userId) {
+    console.log('ERROR: No session userId');
+    return res.status(401).json({ success: false, message: "No autorizado" });
+  }
   
   if (!req.file) {
+    console.log('ERROR: No file received');
     return res.status(400).json({ success: false, message: "No se subió ningún archivo" });
   }
 
+  console.log('File details:', {
+    originalname: req.file.originalname,
+    filename: req.file.filename,
+    mimetype: req.file.mimetype,
+    size: req.file.size,
+    path: req.file.path
+  });
+
   try {
     const profilePictureUrl = `/uploads/profiles/${req.file.filename}`;
+    console.log('Profile picture URL:', profilePictureUrl);
     
     const user = await User.findByIdAndUpdate(
       req.session.userId, 
@@ -474,9 +493,11 @@ router.post("/api/user/profile-picture", upload.single('profilePicture'), async 
     );
     
     if (!user) {
+      console.log('ERROR: User not found');
       return res.status(404).json({ success: false, message: "Usuario no encontrado" });
     }
 
+    console.log('SUCCESS: Profile picture updated for user:', user.fullname);
     res.json({ 
       success: true, 
       message: "Foto de perfil actualizada correctamente", 
