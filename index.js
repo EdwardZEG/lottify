@@ -6,6 +6,22 @@ const MongoStore = require("connect-mongo");
 const path = require("path");
 const http = require("http");
 const socketIo = require("socket.io");
+const fs = require("fs");
+
+// Crear directorios necesarios al inicio
+const uploadDir = 'public/uploads/profiles/';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('✓ Directorio de uploads creado');
+}
+
+// Logging para Railway
+if (process.env.RAILWAY_ENVIRONMENT) {
+  console.log('🚂 Ejecutándose en Railway');
+  console.log('📁 Verificando directorios...');
+  console.log('Upload dir exists:', fs.existsSync(uploadDir));
+  console.log('Upload dir path:', path.resolve(uploadDir));
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -48,6 +64,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Permite recibir JSON en el body
 app.use(express.static(path.join(__dirname, "public")));
 
+// Configuración específica para Railway - servir archivos upload
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), {
+  maxAge: '1d',
+  etag: false
+}));
+
 // Usar el middleware de sesión en Express
 app.use(sessionMiddleware);
 
@@ -76,6 +98,45 @@ app.use("/", registerPaymentSuccess);
 // Rutas de salas de juego
 const gameRoomRoutes = require("./routes/game-rooms");
 app.use("/api/game-rooms", gameRoomRoutes);
+
+// API de debug para verificar estado de uploads
+app.get("/api/debug/uploads", (req, res) => {
+  const uploadDir = 'public/uploads/profiles/';
+  const absolutePath = path.resolve(uploadDir);
+  
+  try {
+    const exists = fs.existsSync(uploadDir);
+    let files = [];
+    let writable = false;
+    
+    if (exists) {
+      files = fs.readdirSync(uploadDir);
+      try {
+        fs.accessSync(uploadDir, fs.constants.W_OK);
+        writable = true;
+      } catch (e) {
+        writable = false;
+      }
+    }
+    
+    res.json({
+      environment: process.env.NODE_ENV || 'development',
+      railway: !!process.env.RAILWAY_ENVIRONMENT,
+      uploadDir: uploadDir,
+      absolutePath: absolutePath,
+      exists: exists,
+      writable: writable,
+      files: files,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+      uploadDir: uploadDir,
+      absolutePath: absolutePath
+    });
+  }
+});
 
 // API para obtener información del usuario actual
 app.get("/api/current-user", (req, res) => {

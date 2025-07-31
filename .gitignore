@@ -81,3 +81,11 @@ logs
 # Temporary files
 tmp/
 temp/
+
+# Uploaded files (but keep directory structure)
+public/uploads/profiles/*.jpg
+public/uploads/profiles/*.jpeg
+public/uploads/profiles/*.png
+public/uploads/profiles/*.gif
+public/uploads/profiles/*.webp
+!public/uploads/profiles/.gitkeep
