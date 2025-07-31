@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  profilePicture: { type: String }, // Nuevo campo para la foto de perfil
+  profilePicture: { type: String }, // Campo para la foto de perfil
   resetToken: String,
   resetTokenExpiration: Date,
   resetCode: String,
@@ -13,6 +13,15 @@ const userSchema = new mongoose.Schema({
   verified: { type: Boolean, default: false }, // Campo de verificación
   status: { type: String, enum: ["activo", "inactivo"], default: "activo" },
   profile: { type: String, enum: ["administrador", "usuario", "docente"], default: "usuario" },
+  // Nuevos campos para suscripción
+  subscriptionStatus: { 
+    type: String, 
+    enum: ["free", "premium", "expired"], 
+    default: "free" 
+  },
+  subscriptionDate: { type: Date },
+  subscriptionExpiry: { type: Date },
+  mercadoPagoPreferenceId: { type: String }
 });
 
 userSchema.pre("save", async function (next) {
