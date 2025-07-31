@@ -610,7 +610,7 @@
             const name = nameInput.value.trim();
             const email = emailInput.value.trim();
             const password = passwordInput.value;
-            
+
             // Registro directo sin pago
             try {
                 const res = await fetch('/register', {
@@ -623,7 +623,7 @@
                         confirmPassword: password
                     })
                 });
-                
+
                 if (res.redirected) {
                     // Si hay redirección, seguirla
                     window.location.href = res.url;

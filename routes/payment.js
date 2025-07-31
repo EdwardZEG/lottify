@@ -60,12 +60,18 @@ router.post('/create-preference', async (req, res) => {
 // Nueva ruta para suscripción desde dashboard
 router.post('/create-subscription-preference', async (req, res) => {
   // Verificar que el usuario esté logueado
-  if (!req.session.userId) {
+  if (!req.session.userId && !req.session.user) {
     return res.status(401).json({ error: 'Usuario no autenticado' });
   }
 
   try {
-    const user = await User.findById(req.session.userId);
+    let user;
+    if (req.session.user) {
+      user = req.session.user;
+    } else {
+      user = await User.findById(req.session.userId);
+    }
+    
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
@@ -102,10 +108,11 @@ router.post('/create-subscription-preference', async (req, res) => {
     
     res.json({ 
       id: response.id,
-      init_point: response.init_point 
+      init_point: response.init_point,
+      public_key: process.env.MP_PUBLIC_KEY || 'APP_USR-e143b4eb-a8c6-4a61-bfa1-ede0ed1e3c3e' // Fallback temporal
     });
   } catch (err) {
-    console.error('Error creando preferencia de suscripción:', err);
+    console.error('❌ Error creando preferencia de suscripción:', err);
     if (err.cause && err.cause.response) {
       const mpError = await err.cause.response.text();
       console.error('Detalle Mercado Pago:', mpError);

@@ -3354,11 +3354,16 @@
                     }
                 });
 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error ${response.status}: ${errorText}`);
+                }
+
                 const data = await response.json();
 
                 if (data.id) {
                     // Crear checkout de Mercado Pago
-                    const mp = new MercadoPago('APP_USR-e143b4eb-a8c6-4a61-bfa1-ede0ed1e3c3e', {
+                    const mp = new MercadoPago(data.public_key, {
                         locale: 'es-MX'
                     });
 
@@ -3369,7 +3374,7 @@
                         autoOpen: true
                     });
                 } else {
-                    throw new Error(data.error || 'Error creando preferencia de pago');
+                    throw new Error('No se recibió ID de preferencia');
                 }
             } catch (error) {
                 console.error('Error en suscripción:', error);
