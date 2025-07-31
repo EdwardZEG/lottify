@@ -2458,6 +2458,8 @@
                 if (sectionName === 'vocabulario' && !vocabularyCarousel) {
                     setTimeout(() => {
                         vocabularyCarousel = new VocabularyCarousel();
+                        // Inicializar Text-to-Speech para repaso
+                        initializeRepasoTTS();
                     }, 100);
                 }
 
@@ -2521,6 +2523,124 @@
             showSection('inicio');
         });
 
+        // Mapeo de nombres en inglés para repaso
+        const repasoCardNames = {
+            1: "Tree",
+            2: "Flower",
+            3: "Grass",
+            4: "Mountain",
+            5: "Fish",
+            6: "Bird",
+            7: "Cat",
+            8: "Dog",
+            9: "Car",
+            10: "Bus",
+            11: "Bike",
+            12: "Apple",
+            13: "Banana",
+            14: "Watermelon",
+            15: "Carrot",
+            16: "Tomato",
+            17: "Grapes",
+            18: "Strawberry",
+            19: "Pineapple",
+            20: "Spring",
+            21: "Summer",
+            22: "Autumn",
+            23: "Winter",
+            24: "Sunny",
+            25: "Rainy",
+            26: "Cloudy",
+            27: "Snowy",
+            28: "Windy",
+            29: "Hot",
+            30: "Cold",
+            31: "Warm",
+            32: "Stormy",
+            33: "Foggy",
+            34: "Sun",
+            35: "Moon",
+            36: "Star",
+            37: "Sky",
+            38: "Rainbow",
+            39: "Thunder",
+            40: "Lightning",
+            41: "Mercury",
+            42: "Venus",
+            43: "Earth",
+            44: "Mars",
+            45: "Jupiter",
+            46: "Saturn",
+            47: "Uranus",
+            48: "Neptune",
+            49: "Comet",
+            50: "Rocket",
+            51: "Eclipse",
+            52: "Sunrise",
+            53: "Sunset",
+            54: "Nightfall"
+        };
+
+        // Funciones para Text-to-Speech del repaso
+        function initializeRepasoTTS() {
+            if ('speechSynthesis' in window) {
+                const loadVoices = () => {
+                    const voices = speechSynthesis.getVoices();
+                    console.log('🎵 Voces TTS para repaso disponibles:', voices.length);
+                    voices.forEach(voice => {
+                        if (voice.lang.startsWith('en')) {
+                            console.log(`  - ${voice.name} (${voice.lang})`);
+                        }
+                    });
+                };
+
+                if (speechSynthesis.getVoices().length > 0) {
+                    loadVoices();
+                } else {
+                    speechSynthesis.addEventListener('voiceschanged', loadVoices);
+                }
+            } else {
+                console.warn('⚠️ Text-to-Speech no soportado en este navegador');
+            }
+        }
+
+        function speakRepasoCard(cardNumber) {
+            if ('speechSynthesis' in window) {
+                try {
+                    speechSynthesis.cancel();
+
+                    const utterance = new SpeechSynthesisUtterance();
+                    const textToSpeak = repasoCardNames[cardNumber] || `Card ${cardNumber}`;
+                    utterance.text = textToSpeak;
+
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.0;
+                    utterance.volume = 0.8;
+
+                    const voices = speechSynthesis.getVoices();
+                    const googleVoice = voices.find(voice =>
+                        voice.name.includes('Google') && voice.lang.startsWith('en')
+                    );
+                    const femaleVoice = voices.find(voice =>
+                        voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+                    );
+                    const maleVoice = voices.find(voice =>
+                        voice.lang.startsWith('en') && voice.name.toLowerCase().includes('male')
+                    );
+
+                    utterance.voice = googleVoice || femaleVoice || maleVoice || voices.find(voice => voice.lang.startsWith('en'));
+
+                    console.log(`🎵 Pronunciando repaso: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
+
+                    speechSynthesis.speak(utterance);
+
+                } catch (error) {
+                    console.error('Error con Text-to-Speech en repaso:', error);
+                }
+            }
+        }
+
         // Carrusel de vocabulario
         let vocabularyCarousel = null;
 
@@ -2554,7 +2674,7 @@
                     card.dataset.index = i - 1;
 
                     const img = document.createElement('img');
-                    img.src = `/img/carrusel/CARTA ${i}.svg`;
+                    img.src = `/img/repaso/REPASO A1 - ${i}.svg`;
                     img.alt = `Carta ${i}`;
                     img.loading = 'lazy';
 
@@ -2633,6 +2753,8 @@
                     this.updateCarousel();
                     this.updateCounter();
                     this.updateButtons();
+                    // Reproducir voz de la nueva carta
+                    speakRepasoCard(this.currentIndex + 1);
                 }
             }
 
@@ -2642,6 +2764,8 @@
                     this.updateCarousel();
                     this.updateCounter();
                     this.updateButtons();
+                    // Reproducir voz de la nueva carta
+                    speakRepasoCard(this.currentIndex + 1);
                 }
             }
 
@@ -2651,6 +2775,8 @@
                     this.updateCarousel();
                     this.updateCounter();
                     this.updateButtons();
+                    // Reproducir voz de la carta seleccionada
+                    speakRepasoCard(this.currentIndex + 1);
                 }
             }
 
@@ -2670,8 +2796,8 @@
                     this.soundBtn.style.transform = 'scale(1)';
                 }, 150);
 
-                // Aquí se puede agregar la funcionalidad de audio real
-                console.log(`Reproduciendo sonido para carta ${this.currentIndex + 1}`);
+                // Reproducir voz de la carta actual usando TTS
+                speakRepasoCard(this.currentIndex + 1);
             }
 
             toggleAutoplay() {

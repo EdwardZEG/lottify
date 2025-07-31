@@ -745,7 +745,7 @@
                         const formData = new FormData();
                         formData.append('profilePicture', file);
 
-                        const response = await fetch('/config/update-profile-picture', {
+                        const response = await fetch('/api/user/profile-picture', {
                             method: 'POST',
                             body: formData
                         });
@@ -766,11 +766,16 @@
                 },
 
                 async updateProfile() {
+                    if (!this.formData.fullname.trim()) {
+                        this.showMessage('El nombre es obligatorio', 'error');
+                        return;
+                    }
+
                     this.loading = true;
 
                     try {
-                        const response = await fetch('/config/update-profile', {
-                            method: 'POST',
+                        const response = await fetch('/api/user/profile', {
+                            method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
