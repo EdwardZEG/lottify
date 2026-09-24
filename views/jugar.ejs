@@ -1,0 +1,2537 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotería Multiplayer</title>
+
+    <!-- CDN de Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- CDN de Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CDN de Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Header superior exacto de la imagen */
+        .game-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #000000;
+            padding: 8px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            font-size: 13px;
+            color: #fff;
+            overflow: visible;
+        }
+
+        .game-header-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .game-header-right {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .user-menu-container {
+            position: relative;
+            overflow: visible;
+        }
+
+        .sidebar-footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: white;
+        }
+
+        .sidebar-footer-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-footer-btn .arrow-game {
+            margin-left: auto;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .sidebar-footer-btn[aria-expanded="true"] .arrow-game {
+            transform: rotate(180deg);
+        }
+
+        .user-avatar-game {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-name-game {
+            color: white;
+            font-weight: 600;
+        }
+
+        .game-user-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 240px;
+            background: rgba(0, 0, 0, 0.95);
+            border-radius: 12px;
+            padding: 15px;
+            z-index: 99999;
+            animation: fadeIn 0.18s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+        }
+
+        .game-user-dropdown.show {
+            display: block;
+        }
+
+        .user-avatar-dropdown {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .user-name-dropdown {
+            font-size: 0.93rem;
+            font-weight: 500;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .user-email-dropdown {
+            font-size: 0.8rem;
+            color: #bdbdbd;
+            margin-bottom: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dropdown-divider-game {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 0.8rem 0;
+        }
+
+        .dropdown-item-game {
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            transition: background 0.18s, color 0.18s;
+            margin-bottom: 4px;
+        }
+
+        .dropdown-item-game:hover {
+            background: rgb(7, 10, 243);
+            color: #fff;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .home-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .home-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .home-button img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        /* Pantalla de espera - DISEÑO CON FONDO NEGRO Y LOGO SIN HEADER */
+        .waiting-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #000000;
+            padding: 2rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            position: relative;
+            /* Aplicar zoom 80% para que se vea todo el contenido con más espacio */
+            transform: scale(0.8);
+            transform-origin: center center;
+        }
+
+        /* Botón de salir flotante - Mejorado para mejor usabilidad */
+        .exit-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 50px;
+            /* Aumentado de 40px a 50px */
+            height: 50px;
+            /* Aumentado de 40px a 50px */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 18px;
+            /* Aumentado de 14px a 18px */
+            /* Mantener el botón sin afectar por el scaling */
+            transform: none !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .exit-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1) !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .exit-button:active {
+            transform: scale(1.05) !important;
+        }
+
+        /* Modal de desconexión del host - Diseño compacto y elegante */
+        .host-disconnection-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 2rem 1.8rem;
+            max-width: 320px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            animation: modalSlideIn 0.3s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ef4444, #dc2626, #ef4444);
+            animation: redGlow 2s infinite;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes redGlow {
+
+            0%,
+            100% {
+                opacity: 0.8;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+            animation: iconBounce 2s infinite;
+        }
+
+        @keyframes iconBounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .countdown-display-modal {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: rgb(7, 10, 243);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(7, 10, 243, 0.8);
+            animation: countdownBeat 1s infinite;
+            font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes countdownBeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .modal-button {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 10px;
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-button:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15));
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .modal-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-button i {
+            font-size: 0.9rem;
+        }
+
+        /* Modales de victoria y derrota - Pantalla completa limpia y transparente */
+        .game-result-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Solo ocultar cuando x-cloak está presente (durante carga inicial) */
+        [x-cloak] .game-result-modal {
+            display: none !important;
+        }
+
+        .game-result-modal.victory {
+            background: rgba(34, 197, 94, 0.75);
+            /* Verde transparente más sutil */
+        }
+
+        .game-result-modal.defeat {
+            background: rgba(239, 68, 68, 0.75);
+            /* Rojo transparente más sutil */
+        }
+
+        .game-result-content {
+            padding: 3rem 2rem;
+            width: 100%;
+            height: 100vh;
+            text-align: center;
+            animation: resultSlideIn 0.5s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            gap: 3rem;
+            /* Espacio entre título y botón */
+        }
+
+        .game-result-content.victory,
+        .game-result-content.defeat {
+            background: transparent;
+            color: #ffffff;
+        }
+
+        @keyframes resultSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-title {
+            font-size: 5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-family: 'Inter', sans-serif;
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .result-title.victory {
+            color: #ffffff;
+            animation: victoryPulse 2s infinite alternate;
+        }
+
+        .result-title.defeat {
+            color: #ffffff;
+            animation: defeatPulse 2s infinite alternate;
+        }
+
+        @keyframes victoryPulse {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            }
+
+            100% {
+                transform: scale(1.02);
+                text-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        @keyframes defeatPulse {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            }
+
+            100% {
+                transform: scale(1.02);
+                text-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        .result-button {
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            color: white;
+            border-radius: 50px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .result-button:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-button i {
+            font-size: 1rem;
+        }
+
+        .waiting-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .waiting-logo {
+            width: 200px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .waiting-logo::before,
+        .waiting-logo::after {
+            display: none !important;
+        }
+
+        .waiting-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .room-code-display {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 1.5rem 3rem;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .room-code-display span {
+            color: rgb(7, 10, 243);
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-code-button {
+            background: rgba(7, 10, 243, 0.1);
+            border: 2px solid rgb(7, 10, 243);
+            border-radius: 10px;
+            color: rgb(7, 10, 243);
+            cursor: pointer;
+            padding: 0.8rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            min-width: 50px;
+            height: 50px;
+        }
+
+        .copy-code-button:hover {
+            background: rgb(7, 10, 243);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(7, 10, 243, 0.3);
+        }
+
+        .copy-success {
+            color: #22C55E !important;
+            border-color: #22C55E !important;
+        }
+
+        .players-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .player-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 120px;
+            /* Ancho fijo para mejor alineación */
+        }
+
+        .player-circle {
+            position: relative;
+            margin-bottom: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .player-circle.connected.host-player .player-avatar-circle {
+            border: 4px solid #22C55E;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+            animation: hostGlow 2s infinite alternate;
+        }
+
+        .player-circle.empty .player-avatar-circle {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .player-circle.connected .player-avatar-circle {
+            border: 4px solid #22C55E;
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+            animation: playerGlow 3s infinite alternate;
+        }
+
+        @keyframes hostGlow {
+            0% {
+                box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 30px rgba(34, 197, 94, 1);
+            }
+        }
+
+        @keyframes playerGlow {
+            0% {
+                box-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+            }
+
+            100% {
+                box-shadow: 0 0 30px rgba(34, 197, 94, 1);
+            }
+        }
+
+        .player-avatar-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            overflow: hidden;
+            /* Solución para el efecto de enfoque/desenfoque en las imágenes */
+            will-change: box-shadow;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            /* Solución para el efecto de enfoque/desenfoque */
+            will-change: auto;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+
+        .avatar-initials {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .question-mark {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 3rem;
+            font-weight: 300;
+        }
+
+        .player-name-below {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            width: 120px;
+            min-height: 2.5rem;
+            max-height: 2.5rem;
+            line-height: 1.25;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            /* Forzar división en dos líneas para nombres largos */
+            white-space: normal;
+        }
+
+        /* Responsive adjustments para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .waiting-screen {
+                transform: scale(0.9);
+                padding: 1rem;
+            }
+
+            .players-row {
+                gap: 1rem;
+            }
+
+            .player-slot {
+                width: 100px;
+            }
+
+            .player-name-below {
+                width: 100px;
+                font-size: 0.8rem;
+            }
+        }
+
+        .start-game-button {
+            background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            margin-bottom: 1rem;
+            min-width: 200px;
+        }
+
+        .start-game-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6);
+        }
+
+        .start-game-button:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .dev-note {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin: 0;
+            text-align: center;
+        }
+
+        .player-counter {
+            text-align: center;
+            color: white;
+        }
+
+        .counter-main {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .counter-waiting {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .counter-ready {
+            font-size: 1rem;
+            color: #22C55E;
+            font-weight: 600;
+        }
+
+        /* Pantalla de cuenta regresiva */
+        .countdown-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #000000;
+            padding: 2rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .countdown-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .countdown-display {
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgb(7, 10, 243);
+            text-shadow: 0 0 30px rgba(7, 10, 243, 0.5);
+            animation: pulse 1s infinite;
+        }
+
+        .countdown-message {
+            font-size: 2rem;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Pantalla principal del juego - DISEÑO EXACTO 3 COLUMNAS CON ESCALADO */
+        .game-screen {
+            display: none;
+            height: 100vh;
+            background: #000000;
+            grid-template-columns: 1fr 2.2fr 0.9fr;
+            /* Ajustar proporciones para simular zoom 110% */
+            grid-template-areas: "left-column center-column right-column";
+            gap: clamp(15px, 2.2vw, 30px);
+            /* Gap ligeramente más grande */
+            padding: clamp(12px, 1.8vh, 25px) clamp(18px, 2.5vw, 30px);
+            /* Padding más generoso */
+            padding-top: 50px;
+            /* Más espacio superior para títulos */
+            transform: scale(1.1);
+            /* Aplicar escala 110% directamente */
+            transform-origin: center top;
+            /* Escalar desde arriba-centro */
+            width: 90.91%;
+            /* Compensar el scale (100% / 1.1) */
+            margin-left: 4.55%;
+            /* Centrar el contenido escalado */
+        }
+
+        .game-screen.active {
+            display: grid;
+        }
+
+        /* COLUMNA 1 - IZQUIERDA: Logo + Carta actual + Barra tiempo + Contador */
+        .left-column {
+            grid-area: left-column;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 25px;
+            /* Reducir espacio superior ya que tenemos más padding general */
+        }
+
+        .game-logo {
+            width: clamp(140px, 16vw, 200px);
+            /* Logo más grande */
+            height: clamp(85px, 9vh, 120px);
+            margin-bottom: clamp(25px, 3vh, 40px);
+            /* Más separación */
+        }
+
+        .game-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .current-card-pure {
+            width: clamp(220px, 25vw, 300px);
+            /* Carta más grande */
+            height: clamp(280px, 32vh, 380px);
+            margin-bottom: clamp(18px, 2vh, 30px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-card-pure img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: all 0.5s ease;
+            /* Transición suave para animaciones */
+        }
+
+        .current-card-pure.changing {
+            opacity: 0;
+        }
+
+        .current-card-pure.appearing {
+            animation: cardAppear 0.5s ease forwards;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .time-bar {
+            width: clamp(220px, 25vw, 300px);
+            /* Barra más grande para coincidir con la carta */
+            height: clamp(12px, 1.2vh, 18px);
+            background: #333;
+            border-radius: 8px;
+            margin-bottom: clamp(18px, 2vh, 30px);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .time-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ff4444);
+            transition: width 0.1s linear;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .time-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .cards-counter {
+            color: #ffffff;
+            font-size: clamp(18px, 2vw, 22px);
+            /* Texto más grande */
+            font-weight: 700;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* COLUMNA 2 - CENTRO: Tu cartilla */
+        .center-column {
+            grid-area: center-column;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            /* Aumentar padding superior para compensar la eliminación del título */
+        }
+
+        .cartilla-title {
+            color: #ffffff;
+            font-size: clamp(20px, 2.5vw, 26px);
+            /* Título ligeramente más grande */
+            font-weight: 700;
+            margin-bottom: 12px;
+            /* Aumentar margen */
+            text-align: center;
+        }
+
+        .cartilla-container {
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px;
+            /* Aumentar padding */
+            width: 100%;
+            max-width: clamp(320px, 32vw, 400px);
+            /* Contenedor ligeramente más pequeño para mejor distribución */
+            margin-bottom: 10px;
+            /* Aumentar margen inferior */
+        }
+
+        .cartilla-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: clamp(2px, 0.4vw, 5px);
+            /* Gap más pequeño */
+        }
+
+        .cartilla-card {
+            aspect-ratio: 3/4;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            /* Quitar el borde del contenedor - ahora irá en la imagen */
+            min-height: 100px;
+            /* Reducir altura mínima */
+        }
+
+        .cartilla-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            /* Sin bordes en las imágenes */
+        }
+
+        .cartilla-card.selected {
+            transform: scale(0.92);
+            opacity: 0.6;
+            /* Más oscuro para mejor visibilidad */
+            filter: brightness(0.4) saturate(0.7);
+            /* Oscurecer significativamente */
+        }
+
+        /* .cartilla-card.selected img { Mantener imagen oscurecida por el filtro del contenedor } */
+
+        .cartilla-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            /* Color blanco para mejor contraste */
+            font-size: 28px;
+            /* Ícono más grande */
+            font-weight: 900;
+            background: #22c55e;
+            /* Fondo verde sólido */
+            border: 3px solid #ffffff;
+            /* Borde blanco para destacar */
+            border-radius: 50%;
+            width: 40px;
+            /* Más grande */
+            height: 40px;
+            /* Más grande */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.8);
+            /* Sombra verde y borde exterior */
+            animation: selectedPulse 2s infinite;
+        }
+
+        @keyframes selectedPulse {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 4px 12px rgba(34, 197, 94, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.8);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                box-shadow: 0 6px 16px rgba(34, 197, 94, 0.8), 0 0 0 3px rgba(255, 255, 255, 0.9);
+            }
+        }
+
+        .cartilla-card.selectable img {
+            border: 3px solid rgb(7, 10, 243);
+            /* Borde azul cuando es seleccionable */
+            box-shadow: 0 0 12px rgba(7, 10, 243, 0.8);
+            animation: glowBlue 1.5s ease-in-out infinite alternate;
+        }
+
+        .selected-counter {
+            color: #ffffff;
+            font-size: clamp(16px, 1.8vw, 20px);
+            /* Texto más grande */
+            font-weight: 600;
+            text-align: center;
+            margin-top: 8px;
+            /* Aumentar margen */
+        }
+
+        /* COLUMNA 3 - DERECHA: Jugadores + Controles */
+        .right-column {
+            grid-area: right-column;
+            display: flex;
+            flex-direction: column;
+            padding-top: 5px;
+            /* Reducir padding superior para alinear */
+            height: calc(100vh - 50px);
+            /* Ajustar altura con más espacio */
+        }
+
+        .players-title {
+            color: #ffffff;
+            font-size: clamp(16px, 2vw, 20px);
+            /* Título ligeramente más grande */
+            font-weight: 700;
+            margin-bottom: 12px;
+            /* Aumentar margen */
+            text-align: center;
+        }
+
+        .players-list {
+            flex: 1;
+            margin-bottom: 10px;
+            /* Volver a margen original sin controles */
+            max-height: calc(100vh - 120px);
+            /* Altura original */
+            overflow-y: auto;
+        }
+
+        .player-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* Restaurar gap original */
+            margin-bottom: 10px;
+            /* Aumentar margen entre jugadores */
+            padding: 8px;
+            /* Aumentar padding */
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .player-avatar-img {
+            width: 40px;
+            /* Aumentar tamaño de avatar */
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .player-avatar-initials {
+            width: 40px;
+            /* Aumentar tamaño de avatar */
+            height: 40px;
+            border-radius: 50%;
+            background: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            /* Aumentar tamaño de texto */
+        }
+
+        .player-details {
+            flex: 1;
+            color: white;
+        }
+
+        .player-name {
+            font-size: 14px;
+            /* Aumentar tamaño */
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .player-score {
+            font-size: 12px;
+            /* Aumentar tamaño */
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .game-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            /* Esquina inferior derecha */
+            display: flex;
+            flex-direction: column;
+            /* Botones en columna vertical */
+            gap: 10px;
+            z-index: 1000;
+            /* Siempre visible */
+        }
+
+        .control-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.8);
+            /* Fondo más opaco */
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Animaciones */
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
+            }
+
+            to {
+                box-shadow: 0 0 30px rgba(251, 191, 36, 1);
+            }
+        }
+
+        @keyframes glowBlue {
+            from {
+                box-shadow: 0 0 20px rgba(7, 10, 243, 0.8);
+            }
+
+            to {
+                box-shadow: 0 0 30px rgba(7, 10, 243, 1);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .countdown {
+            animation: pulse 1s infinite;
+            font-size: 2rem;
+            font-weight: 700;
+            color: rgb(7, 10, 243);
+        }
+
+        /* Mejoras para pantalla completa */
+        :fullscreen .game-screen,
+        .game-screen:fullscreen {
+            transform: scale(1);
+            /* En pantalla completa, usar escala normal */
+            width: 100%;
+            margin-left: 0;
+            padding: clamp(20px, 3vh, 40px) clamp(30px, 4vw, 55px);
+            gap: clamp(25px, 4vw, 50px);
+            padding-top: 60px;
+            /* Más espacio superior en pantalla completa */
+        }
+
+        :fullscreen .cartilla-container,
+        .game-screen:fullscreen .cartilla-container {
+            max-width: clamp(380px, 38vw, 520px);
+            /* Ajustar para pantalla completa */
+            padding: clamp(10px, 1.4vw, 16px);
+        }
+
+        :fullscreen .players-title,
+        .game-screen:fullscreen .players-title {
+            font-size: clamp(20px, 2.5vw, 26px);
+        }
+
+        :fullscreen .control-button,
+        .game-screen:fullscreen .control-button {
+            width: clamp(55px, 6vw, 70px);
+            height: clamp(55px, 6vw, 70px);
+            font-size: clamp(22px, 2.8vw, 28px);
+        }
+
+        :fullscreen .game-logo,
+        .game-screen:fullscreen .game-logo {
+            width: clamp(130px, 16vw, 220px);
+            height: clamp(80px, 9vh, 125px);
+        }
+
+        :fullscreen .current-card-pure,
+        .game-screen:fullscreen .current-card-pure {
+            width: clamp(280px, 28vw, 380px);
+            height: clamp(360px, 36vh, 480px);
+        }
+
+        :fullscreen .time-bar,
+        .game-screen:fullscreen .time-bar {
+            width: clamp(280px, 28vw, 380px);
+            height: clamp(15px, 1.5vh, 22px);
+        }
+
+        @media (min-width: 1920px) {
+            .game-screen {
+                padding: 30px 40px;
+                gap: 40px;
+            }
+
+            .cartilla-title {
+                font-size: 28px;
+            }
+
+            .players-title {
+                font-size: 22px;
+            }
+
+            .control-button {
+                width: 55px;
+                height: 55px;
+                font-size: 22px;
+            }
+        }
+
+        /* Ajustes para pantallas más pequeñas */
+        @media (max-width: 1366px) {
+            .game-screen {
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .cartilla-title {
+                font-size: 20px;
+            }
+
+            .players-title {
+                font-size: 16px;
+            }
+
+            .control-button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div x-data="lotteriaGame('<%- roomCode %>')" x-cloak>
+        <!-- Pantalla de espera - DISEÑO EXACTO DE LA IMAGEN SIN HEADER -->
+        <div x-show="gameState === 'waiting'" class="waiting-screen">
+            <!-- Botón de salir flotante -->
+            <button class="exit-button" @click="goToDashboard()" title="Volver al dashboard">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="waiting-container">
+                <!-- Logo en lugar del titulo -->
+                <div class="waiting-logo">
+                    <img src="/img/logo_formularios.svg" alt="Logo Formularios">
+                </div>
+
+                <!-- Código de la sala -->
+                <div class="room-code-display">
+                    <span x-text="roomCode"></span>
+                    <button class="copy-code-button" @click="copyRoomCode()" :class="{ 'copy-success': copySuccess }"
+                        title="Copiar código">
+                        <i class="fas fa-copy" x-show="!copySuccess"></i>
+                        <i class="fas fa-check" x-show="copySuccess"></i>
+                    </button>
+                </div>
+
+                <!-- Lista de jugadores en fila horizontal -->
+                <div class="players-row">
+                    <template x-for="(slot, index) in Array(5)" :key="index">
+                        <div class="player-slot">
+                            <template x-if="players[Object.keys(players)[index]]">
+                                <div class="player-circle connected" :class="{ 'host-player': index === 0 }">
+                                    <div class="player-avatar-circle">
+                                        <template x-if="players[Object.keys(players)[index]].avatar">
+                                            <img :src="players[Object.keys(players)[index]].avatar"
+                                                :alt="players[Object.keys(players)[index]].name" class="avatar-img">
+                                        </template>
+                                        <template x-if="!players[Object.keys(players)[index]].avatar">
+                                            <span class="avatar-initials"
+                                                x-text="players[Object.keys(players)[index]].name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()">
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <div class="player-name-below"
+                                        x-html="formatPlayerName(players[Object.keys(players)[index]].name)">
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="!players[Object.keys(players)[index]]">
+                                <div class="player-circle empty">
+                                    <div class="player-avatar-circle">
+                                        <span class="question-mark">?</span>
+                                    </div>
+                                    <div class="player-name-below">Esperando...</div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Botón Iniciar Partida -->
+                <button class="start-game-button" @click="startGame()"
+                    x-show="isHost && Object.keys(players).length >= 1" :disabled="Object.keys(players).length < 1">
+                    <i class="fas fa-play"></i> Iniciar Partida
+                    (<span x-text="Object.keys(players).length"></span>/5)
+                </button>
+
+                <!-- Contador de jugadores -->
+                <div class="player-counter">
+                    <div class="counter-main">
+                        <span x-text="Object.keys(players).length"></span> / 5 jugadores conectados
+                    </div>
+                    <div class="counter-waiting" x-show="Object.keys(players).length < 5">
+                        Esperando <span x-text="5 - Object.keys(players).length"></span> jugadores más
+                    </div>
+                    <div class="counter-ready" x-show="Object.keys(players).length === 5">
+                        ¡Sala completa! Lista para empezar
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de cuenta regresiva -->
+        <div x-show="gameState === 'starting'" class="countdown-screen">
+            <div class="countdown-container">
+                <div class="waiting-logo">
+                    <img src="/img/logo_formularios.svg" alt="Logo Formularios">
+                </div>
+                <div class="countdown-display">
+                    <span x-text="countdown > 0 ? countdown : '¡Comenzamos!'"></span>
+                </div>
+                <div class="countdown-message">
+                    <span x-show="countdown > 0">La partida comenzará en...</span>
+                    <span x-show="countdown <= 0">¡Preparate!</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Header superior exacto de la imagen -->
+        <div x-show="gameState === 'playing'" class="game-header">
+            <div class="game-header-left">
+                <span>Código: <strong x-text="roomCode"></strong></span>
+                <span>Categoría: A1</span>
+                <span>Nivel: 1</span>
+            </div>
+            <div class="game-header-right">
+                <span x-show="countdown > 0" x-text="countdown"></span>
+                <div x-show="countdown === 0 && !gameEnded" class="user-menu-container">
+                    <button class="sidebar-footer-btn" id="game-user-btn" aria-expanded="false">
+                        <!-- Avatar del usuario actual -->
+                        <div class="user-avatar-game">
+                            <img x-show="currentUser.avatar" :src="currentUser.avatar" :alt="currentUser.name"
+                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            <span x-show="!currentUser.avatar"
+                                x-text="currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'"></span>
+                        </div>
+                        <span x-text="currentUser.name || 'Usuario'" class="user-name-game"></span>
+                        <i class="fas fa-chevron-down arrow-game"></i>
+                    </button>
+
+                    <div class="game-user-dropdown" id="game-user-dropdown">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="user-avatar-dropdown">
+                                <img x-show="currentUser.avatar" :src="currentUser.avatar" :alt="currentUser.name"
+                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                <span x-show="!currentUser.avatar"
+                                    x-text="currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'"></span>
+                            </div>
+                            <div style="min-width:0; margin-left: 0.5rem;">
+                                <div class="user-name-dropdown" x-text="currentUser.name || 'Usuario'"></div>
+                                <div class="user-email-dropdown" x-text="currentUser.email || ''"></div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider-game" id="dropdown-divider-game"></div>
+                        <div class="dropdown-item-game" @click="goHome()">
+                            <i class="fas fa-home"></i> Inicio
+                        </div>
+                        <div class="dropdown-item-game" @click="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla principal del juego - DISEÑO EXACTO 3 COLUMNAS -->
+        <div x-show="gameState === 'playing'" class="game-screen active">
+
+            <!-- COLUMNA 1 - IZQUIERDA: Logo + Carta actual + Barra tiempo + Contador -->
+            <div class="left-column">
+                <!-- Logo formularios -->
+                <div class="game-logo">
+                    <img src="/img/logo_formularios.svg" alt="Logo Formularios">
+                </div>
+
+                <!-- Carta actual CON ANIMACIÓN -->
+                <div class="current-card-pure" :class="{ 'changing': isChangingCard, 'appearing': isAppearingCard }">
+                    <img x-show="currentCard" :src="currentCard ? '/img/carrusel/' + currentCard.filename : ''"
+                        :alt="currentCard ? currentCard.name : ''" @load="onCardLoaded()">
+                </div>
+
+                <!-- Barra de tiempo roja -->
+                <div class="time-bar">
+                    <div class="time-bar-fill" :style="`width: ${(timeLeft/5)*100}%`"></div>
+                </div>
+
+                <!-- Contador de cartas mostradas -->
+                <div class="cards-counter">
+                    Cartas mostradas: <span x-text="(currentCardIndex + 1) + '/54'"></span>
+                </div>
+            </div>
+
+            <!-- COLUMNA 2 - CENTRO: Tu cartilla -->
+            <div class="center-column">
+                <!-- Contenedor blanco con las 16 cartas -->
+                <div class="cartilla-container">
+                    <div class="cartilla-grid">
+                        <template x-for="(card, index) in playerCards" :key="index">
+                            <div class="cartilla-card" :class="{
+                                    'selected': card.selected,
+                                    'selectable': currentCard && card.number === currentCard.number && !card.selected
+                                }" @click="selectCard(index)">
+                                <img :src="'/img/carrusel/' + card.filename" :alt="card.name">
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA 3 - DERECHA: Jugadores + Controles -->
+            <div class="right-column">
+                <!-- Título Jugadores -->
+                <h3 class="players-title">Jugadores</h3>
+
+                <!-- Lista de jugadores con avatares -->
+                <div class="players-list">
+                    <template x-for="(player, playerId) in players" :key="playerId">
+                        <div class="player-item">
+                            <!-- Avatar del jugador -->
+                            <img x-show="player.avatar" :src="player.avatar" :alt="player.name"
+                                class="player-avatar-img">
+                            <div x-show="!player.avatar" class="player-avatar-initials"
+                                x-text="player.name.charAt(0).toUpperCase()"></div>
+
+                            <!-- Información del jugador -->
+                            <div class="player-details">
+                                <div class="player-name" x-text="player.name"></div>
+                                <div class="player-score" x-text="(player.selectedCards || 0) + '/16'"></div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles flotantes en esquina inferior derecha -->
+        <div x-show="gameState === 'playing'" class="game-controls">
+            <button class="control-button" title="Emojis">
+                <i class="fas fa-smile"></i>
+            </button>
+            <button class="control-button" title="Chat">
+                <i class="fas fa-comment"></i>
+            </button>
+            <button class="control-button" title="Audio" @click="toggleMute()">
+                <i :class="muted ? 'fas fa-volume-mute' : 'fas fa-volume-up'"></i>
+            </button>
+            <button class="control-button" title="Pantalla completa" @click="toggleFullscreen()">
+                <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
+            </button>
+        </div>
+
+        <!-- Modal de partida ya iniciada -->
+        <div x-show="showGameAlreadyStartedModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="host-disconnection-modal">
+            <div class="modal-content">
+                <div class="modal-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="modal-title">Esta partida ya ha iniciado</div>
+                <div class="modal-subtitle">No es posible unirse a una partida en curso</div>
+                <div class="countdown-display-modal" x-text="gameAlreadyStartedCountdown"></div>
+                <button class="modal-button" @click="goToDashboardFromGameStarted()">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de desconexión del host -->
+        <div x-show="showHostDisconnectedModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="host-disconnection-modal">
+            <div class="modal-content">
+                <div class="modal-icon">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="modal-title">El creador de la partida se ha desconectado</div>
+                <div class="modal-subtitle">Serás redirigido al inicio</div>
+                <div class="countdown-display-modal" x-text="hostDisconnectedCountdown"></div>
+                <button class="modal-button" @click="goToDashboardFromModal()">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver al dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de Victoria -->
+        <div x-show="showVictoryModal === true" x-cloak x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="game-result-modal victory"
+            x-effect="console.log('🏆 Modal Victoria - showVictoryModal:', showVictoryModal)">
+            <div class="game-result-content victory">
+                <div class="result-title victory">YOU WON!</div>
+                <button class="result-button" @click="goToDashboardFromResult()">
+                    <i class="fas fa-home"></i>
+                    INICIO
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de Derrota -->
+        <div x-show="showDefeatModal === true" x-cloak x-transition:enter="transition ease-out duration-500"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="game-result-modal defeat"
+            x-effect="console.log('💔 Modal Derrota - showDefeatModal:', showDefeatModal)">
+            <div class="game-result-content defeat">
+                <div class="result-title defeat">GAME OVER</div>
+                <button class="result-button" @click="goToDashboardFromResult()">
+                    <i class="fas fa-home"></i>
+                    INICIO
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function lotteriaGame(roomCode) {
+            return {
+                // Estado del juego
+                gameState: 'waiting',
+                roomCode: roomCode,
+                socket: null,
+
+                // Estado del jugador
+                isHost: false,
+                players: {},
+                playerCards: [],
+                selectedCards: 0,
+                currentUser: {
+                    name: 'Usuario',
+                    avatar: null
+                },
+
+                // Estado de la partida
+                currentCard: null,
+                currentCardIndex: 0,
+                gameEnded: false,
+                winner: null,
+
+                // Temporizadores y animaciones
+                countdown: 0,
+                timeLeft: 5,
+                timer: null,
+                countdownTimer: null,
+                cardTimer: null,
+                isChangingCard: false,
+                isAppearingCard: false,
+
+                // UI
+                muted: false,
+                isFullscreen: false,
+                copySuccess: false,
+
+                // Modal de partida ya iniciada
+                showGameAlreadyStartedModal: false,
+                gameAlreadyStartedCountdown: 5,
+                gameAlreadyStartedTimer: null,
+                // Modal de desconexión del host
+                showHostDisconnectedModal: false,
+                hostDisconnectedCountdown: 5,
+                hostDisconnectedTimer: null,
+
+                // Modales de resultado del juego
+                showVictoryModal: false,
+                showDefeatModal: false,
+                gameResultsReady: false, // Nueva variable para controlar cuándo pueden mostrarse los modales
+                gameFullyInitialized: false, // Variable para asegurar que el componente esté completamente cargado
+
+                init() {
+                    this.socket = io();
+                    this.setupSocketEvents();
+                    this.socket.emit('join-room', this.roomCode);
+
+                    // Obtener información del usuario actual desde la sesión
+                    this.loadCurrentUser();
+
+                    // Escuchar cambios en el estado de pantalla completa
+                    document.addEventListener('fullscreenchange', () => {
+                        this.isFullscreen = !!document.fullscreenElement;
+                    });
+
+                    // Cerrar dropdown al hacer clic fuera
+                    document.addEventListener('click', (event) => {
+                        const userDropdown = document.getElementById('game-user-dropdown');
+                        const userBtn = document.getElementById('game-user-btn');
+
+                        if (userDropdown && userBtn) {
+                            if (!event.target.closest('.user-menu-container')) {
+                                userBtn.setAttribute('aria-expanded', 'false');
+                                userDropdown.classList.remove('show');
+                            }
+                        }
+                    });
+
+                    // Setup dropdown functionality
+                    this.setupDropdown();
+
+                    // Marcar que el componente está completamente inicializado
+                    // Esto debe ser lo ÚLTIMO en ejecutarse
+                    setTimeout(() => {
+                        this.gameFullyInitialized = true;
+                        console.log('Componente del juego completamente inicializado');
+                    }, 100);
+                },
+
+                loadCurrentUser() {
+                    // Cargar información del usuario desde el backend
+                    fetch('/api/current-user')
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            }
+                            throw new Error('Error en la respuesta del servidor');
+                        })
+                        .then(userData => {
+                            this.currentUser = {
+                                name: userData.fullname || 'Usuario Anónimo',
+                                email: userData.email || '',
+                                avatar: userData.profilePicture || 'https://via.placeholder.com/40'
+                            };
+                            console.log('Datos del usuario cargados:', this.currentUser);
+                        })
+                        .catch(err => {
+                            console.error('Error loading user data:', err);
+                            // Fallback con datos simulados
+                            this.currentUser = {
+                                name: 'Usuario Anónimo',
+                                email: '',
+                                avatar: 'https://via.placeholder.com/40'
+                            };
+                        });
+                },
+
+                setupSocketEvents() {
+                    // Log para verificar todos los eventos que llegan
+                    this.socket.onAny((eventName, ...args) => {
+                        console.log('📡 EVENTO RECIBIDO:', eventName, args);
+                    });
+
+                    this.socket.on('game-already-started', (data) => {
+                        console.log('Partida ya iniciada:', data);
+
+                        // Mostrar modal de partida ya iniciada
+                        this.showGameAlreadyStartedModal = true;
+                        this.gameAlreadyStartedCountdown = 5;
+
+                        // Iniciar cuenta regresiva
+                        this.gameAlreadyStartedTimer = setInterval(() => {
+                            this.gameAlreadyStartedCountdown--;
+                            if (this.gameAlreadyStartedCountdown <= 0) {
+                                clearInterval(this.gameAlreadyStartedTimer);
+                                this.cleanupGameData();
+                                window.location.href = '/dashboard';
+                            }
+                        }, 1000);
+                    });
+
+                    this.socket.on('room-state', (data) => {
+                        console.log('Estado de la sala:', data);
+                        this.players = data.players;
+                        this.isHost = data.isHost;
+
+                        if (data.gameState === 'playing') {
+                            this.gameState = 'playing';
+                            // CRÍTICO: Solo actualizar la cartilla si no la tenemos o está vacía
+                            if (!this.playerCards || this.playerCards.length === 0) {
+                                this.playerCards = data.playerCards || [];
+                            }
+                            this.currentCard = data.currentCard;
+                            this.currentCardIndex = data.currentCardIndex || 0;
+                            this.gameEnded = data.gameEnded || false;
+                            this.winner = data.winner;
+
+                            this.updateSelectedCards();
+
+                            if (data.timeLeft) {
+                                this.timeLeft = data.timeLeft;
+                                this.startTimer();
+                            }
+
+                            // Si se reconecta a una partida en curso, también entrar en pantalla completa
+                            this.enterFullscreen();
+                        } else if (data.gameState === 'starting') {
+                            this.gameState = 'starting';
+                        }
+                    });
+
+                    // SEPARAR: Manejo específico para actualizaciones de jugadores (NO debe afectar la cartilla)
+                    this.socket.on('players-updated', (data) => {
+                        console.log('Jugadores actualizados:', data);
+                        // Solo actualizar la lista de jugadores, NO la cartilla
+                        this.players = data.players;
+
+                        // Forzar reactividad en Alpine.js
+                        this.$nextTick(() => {
+                            console.log('Vista de jugadores actualizada');
+                        });
+                    });
+
+                    // Manejo mejorado de desconexiones de jugadores individuales
+                    this.socket.on('player-disconnected', (playerId) => {
+                        console.log('Jugador desconectado:', playerId);
+                        if (this.players[playerId]) {
+                            this.players[playerId].connected = false;
+
+                            // Si estamos en la sala de espera, remover el jugador
+                            if (this.gameState === 'waiting') {
+                                delete this.players[playerId];
+                            }
+
+                            // Forzar actualización de la vista
+                            this.$nextTick();
+                        }
+                    });
+
+                    this.socket.on('game-started', (data) => {
+                        console.log('Juego iniciado:', data);
+                        this.gameState = 'playing';
+                        this.playerCards = data.playerCards;
+                        this.currentCard = data.currentCard;
+                        this.currentCardIndex = data.index || 0;
+                        this.updateSelectedCards();
+
+                        // Si viene con carta y tiempo, iniciar temporizador sincronizado
+                        if (data.currentCard && data.timeLeft) {
+                            this.timeLeft = data.timeLeft;
+                            this.startTimer();
+                        }
+
+                        // Entrar automáticamente en pantalla completa al iniciar la partida
+                        this.enterFullscreen();
+                    });
+
+                    this.socket.on('new-card', (data) => {
+                        console.log('Nueva carta:', data);
+                        this.showNewCard(data.card, data.index);
+
+                        if (!this.muted) {
+                            this.playCardSound();
+                        }
+                    });
+
+                    // Sincronización de temporizador
+                    this.socket.on('time-update', (data) => {
+                        this.timeLeft = data.timeLeft;
+                    });
+
+                    this.socket.on('countdown-start', (data) => {
+                        console.log('Cuenta regresiva iniciada:', data);
+                        this.countdown = data.count;
+                        this.gameState = 'starting';
+                    });
+
+                    this.socket.on('countdown-update', (count) => {
+                        console.log('Cuenta regresiva:', count);
+                        this.countdown = count;
+                        if (count <= 0) {
+                            this.countdown = 0;
+                        }
+                    });
+
+                    this.socket.on('player-updated', (data) => {
+                        console.log('Jugador actualizado:', data);
+                        if (this.players[data.playerId]) {
+                            this.players[data.playerId].selectedCards = data.selectedCards;
+                        }
+                    });
+
+                    // Manejar tanto game-ended como game-finished por si cambia el servidor
+                    this.socket.on('game-ended', (data) => {
+                        console.log('🔥🔥🔥 EVENTO GAME-ENDED RECIBIDO 🔥🔥🔥');
+                        console.log('Juego terminado:', data);
+                        console.log('Winner ID:', data.winner);
+                        console.log('Current Player ID:', this.socket.id);
+                        console.log('¿El usuario actual ganó?:', data.winner === this.socket.id);
+                        this.handleGameEnd(data);
+                    });
+
+                    this.socket.on('game-finished', (data) => {
+                        console.log('🔥🔥🔥 EVENTO GAME-FINISHED RECIBIDO 🔥🔥🔥');
+                        console.log('Juego terminado:', data);
+                        console.log('Winner ID:', data.winner);
+                        console.log('Current Player ID:', this.socket.id);
+                        console.log('¿El usuario actual ganó?:', data.winner === this.socket.id);
+                        this.handleGameEnd(data);
+                    });
+
+                    this.socket.on('host-left', (data) => {
+                        console.log('Host abandonó la partida:', data);
+
+                        // Salir de pantalla completa si está activa
+                        if (document.fullscreenElement) {
+                            this.exitFullscreen();
+                        }
+
+                        // Mostrar modal y iniciar cuenta regresiva
+                        this.showHostDisconnectedModal = true;
+                        this.hostDisconnectedCountdown = 5;
+                        this.startHostDisconnectedCountdown();
+                    });
+
+                    // Manejo de desconexión del host durante el juego
+                    this.socket.on('host-disconnected', (data) => {
+                        console.log('Host se desconectó durante el juego:', data);
+
+                        // Salir de pantalla completa si está activa
+                        if (document.fullscreenElement) {
+                            this.exitFullscreen();
+                        }
+
+                        // Limpiar temporizadores
+                        this.stopTimer();
+
+                        // Mostrar modal y iniciar cuenta regresiva
+                        this.showHostDisconnectedModal = true;
+                        this.hostDisconnectedCountdown = 5;
+                        this.startHostDisconnectedCountdown();
+                    });
+                },
+
+                handleGameEnd(data) {
+                    this.gameEnded = true;
+                    this.winner = data.winner;
+
+                    if (this.players[data.winner]) {
+                        this.players[data.winner].winner = true;
+                    }
+
+                    this.stopTimer();
+
+                    // Marcar que los resultados están listos para mostrarse
+                    this.gameResultsReady = true;
+
+                    console.log('🎯 VARIABLES DE ESTADO ANTES DE MOSTRAR MODALES:');
+                    console.log('gameFullyInitialized:', this.gameFullyInitialized);
+                    console.log('gameResultsReady:', this.gameResultsReady);
+                    console.log('gameEnded:', this.gameEnded);
+                    console.log('gameState:', this.gameState);
+
+                    // Verificar si el usuario actual ganó o perdió
+                    const currentPlayerId = this.socket.id;
+
+                    // Usar setTimeout para asegurar que Alpine.js procese las variables correctamente
+                    setTimeout(() => {
+                        console.log('🎯 VARIABLES DE ESTADO DENTRO DEL SETTIMEOUT:');
+                        console.log('gameFullyInitialized:', this.gameFullyInitialized);
+                        console.log('gameResultsReady:', this.gameResultsReady);
+                        console.log('gameEnded:', this.gameEnded);
+                        console.log('gameState:', this.gameState);
+
+                        if (data.winner === currentPlayerId) {
+                            // El usuario actual ganó
+                            console.log('🏆 INTENTANDO MOSTRAR MODAL DE VICTORIA');
+                            console.log('Todas las condiciones:', {
+                                gameFullyInitialized: this.gameFullyInitialized,
+                                showVictoryModal: 'será true',
+                                gameResultsReady: this.gameResultsReady,
+                                gameEnded: this.gameEnded,
+                                condicionCompleta: this.gameFullyInitialized && this.gameResultsReady && this.gameEnded
+                            });
+                            this.showVictoryModal = true;
+
+                            // Verificar inmediatamente después
+                            setTimeout(() => {
+                                console.log('✅ showVictoryModal después de asignar:', this.showVictoryModal);
+                            }, 10);
+
+                        } else {
+                            // El usuario actual perdió
+                            console.log('💔 INTENTANDO MOSTRAR MODAL DE DERROTA');
+                            console.log('Todas las condiciones:', {
+                                gameFullyInitialized: this.gameFullyInitialized,
+                                showDefeatModal: 'será true',
+                                gameResultsReady: this.gameResultsReady,
+                                gameEnded: this.gameEnded,
+                                condicionCompleta: this.gameFullyInitialized && this.gameResultsReady && this.gameEnded
+                            });
+                            this.showDefeatModal = true;
+
+                            // Verificar inmediatamente después
+                            setTimeout(() => {
+                                console.log('✅ showDefeatModal después de asignar:', this.showDefeatModal);
+                            }, 10);
+                        }
+                    }, 100);
+
+                    if (!this.muted) {
+                        this.playWinSound();
+                    }
+
+                    // Notificar al servidor que la partida terminó y limpiar datos
+                    const gameCode = localStorage.getItem('gameCode');
+                    const isHost = localStorage.getItem('isHost') === 'true';
+
+                    if (gameCode && isHost) {
+                        fetch('/api/game-rooms/finish-room', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                code: gameCode,
+                                winner: data.winner
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(() => {
+                                console.log('Partida finalizada y eliminada del servidor');
+                                this.cleanupGameData();
+                            })
+                            .catch(error => {
+                                console.error('Error al finalizar partida:', error);
+                                this.cleanupGameData(); // Limpiar datos aunque falle
+                            });
+                    } else {
+                        // Si no es host, limpiar datos directamente
+                        this.cleanupGameData();
+                    }
+                },
+
+                startGame() {
+                    if (this.isHost && Object.keys(this.players).length >= 1) {
+                        this.socket.emit('start-game');
+                    }
+                },
+
+                selectCard(index) {
+                    console.log('🎮 selectCard llamada - Index:', index, 'GameEnded:', this.gameEnded);
+
+                    if (!this.currentCard || this.gameEnded) {
+                        console.log('🚫 No se puede seleccionar - currentCard:', !!this.currentCard, 'gameEnded:', this.gameEnded);
+                        return;
+                    }
+
+                    const card = this.playerCards[index];
+                    console.log('🃏 Carta a seleccionar:', card.name, 'Número:', card.number);
+                    console.log('🃏 Carta actual:', this.currentCard ? this.currentCard.name : 'null', 'Número:', this.currentCard ? this.currentCard.number : 'null');
+
+                    if (card.number === this.currentCard.number && !card.selected) {
+                        console.log('✅ Carta válida para seleccionar');
+                        card.selected = true;
+                        this.updateSelectedCards();
+
+                        console.log('📊 Cartas seleccionadas después de actualizar:', this.selectedCards);
+
+                        this.socket.emit('card-selected', {
+                            cardIndex: index,
+                            selectedCards: this.selectedCards
+                        });
+
+                        if (!this.muted) {
+                            this.playSelectSound();
+                        }
+
+                        // Verificar si ganó
+                        console.log('🏁 Verificando victoria - Cartas seleccionadas:', this.selectedCards);
+                        if (this.selectedCards === 16) {
+                            console.log('🎯 JUGADOR COMPLETÓ 16 CARTAS - ENVIANDO player-won');
+                            console.log('Socket ID:', this.socket.id);
+                            console.log('Cartas seleccionadas:', this.selectedCards);
+                            this.socket.emit('player-won');
+                        }
+                    } else {
+                        console.log('❌ Carta NO válida para seleccionar - Número coincide:', card.number === this.currentCard.number, 'Ya seleccionada:', card.selected);
+                    }
+                },
+
+                updateSelectedCards() {
+                    const previousCount = this.selectedCards;
+                    this.selectedCards = this.playerCards.filter(card => card.selected).length;
+                    console.log('📊 updateSelectedCards - Anterior:', previousCount, 'Nuevo:', this.selectedCards);
+                    console.log('📊 Total de cartas:', this.playerCards.length);
+                    console.log('📊 Cartas seleccionadas detalle:', this.playerCards.filter(card => card.selected).map(c => c.name));
+                },
+
+                startTimer() {
+                    this.stopTimer();
+                    this.timer = setInterval(() => {
+                        this.timeLeft--;
+                        if (this.timeLeft <= 0) {
+                            this.stopTimer();
+                        }
+                    }, 1000);
+                },
+
+                stopTimer() {
+                    if (this.timer) {
+                        clearInterval(this.timer);
+                        this.timer = null;
+                    }
+                },
+
+                showNewCard(card, index) {
+                    // Iniciar animación de salida
+                    this.isChangingCard = true;
+                    this.stopTimer();
+
+                    setTimeout(() => {
+                        // Cambiar la carta
+                        this.currentCard = card;
+                        this.currentCardIndex = index;
+                        this.isChangingCard = false;
+                        this.isAppearingCard = true;
+
+                        // Reiniciar temporizador sincronizado
+                        this.timeLeft = 5;
+                        this.startTimer();
+
+                        // Quitar clase de animación después de completarse
+                        setTimeout(() => {
+                            this.isAppearingCard = false;
+                        }, 500);
+                    }, 250);
+                },
+
+                onCardLoaded() {
+                    // Función para manejar cuando la imagen se carga completamente
+                    console.log('Carta cargada');
+                },
+
+                toggleMute() {
+                    this.muted = !this.muted;
+                },
+
+                toggleFullscreen() {
+                    if (!document.fullscreenElement) {
+                        this.enterFullscreen();
+                    } else {
+                        this.exitFullscreen();
+                    }
+                },
+
+                enterFullscreen() {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(err => {
+                            console.log('Error al entrar en pantalla completa:', err);
+                        });
+                    }
+                },
+
+                exitFullscreen() {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen().catch(err => {
+                            console.log('Error al salir de pantalla completa:', err);
+                        });
+                    }
+                },
+
+                goToDashboard() {
+                    // Salir de pantalla completa si está activa
+                    if (document.fullscreenElement) {
+                        this.exitFullscreen();
+                    }
+
+                    // Notificar al servidor que se abandona la sala
+                    const gameCode = localStorage.getItem('gameCode');
+                    if (gameCode) {
+                        fetch('/api/game-rooms/leave-room', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ code: gameCode })
+                        })
+                            .then(() => {
+                                this.cleanupGameData();
+                            })
+                            .catch(error => {
+                                console.error('Error al abandonar sala:', error);
+                                // Limpiar datos aunque falle la petición
+                                this.cleanupGameData();
+                            })
+                            .finally(() => {
+                                // Redirigir al dashboard
+                                window.location.href = '/dashboard';
+                            });
+                    } else {
+                        // Si no hay código de juego, limpiar datos y redirigir directamente
+                        this.cleanupGameData();
+                        window.location.href = '/dashboard';
+                    }
+                },
+
+                playCardSound() {
+                    // Aquí se puede agregar sonido para nueva carta
+                },
+
+                playSelectSound() {
+                    // Aquí se puede agregar sonido para selección
+                },
+
+                playWinSound() {
+                    // Aquí se puede agregar sonido para ganar
+                },
+
+                setupDropdown() {
+                    // Esperar a que el DOM esté listo
+                    setTimeout(() => {
+                        const userBtn = document.getElementById('game-user-btn');
+                        const userDropdown = document.getElementById('game-user-dropdown');
+                        const dropdownDivider = document.getElementById('dropdown-divider-game');
+
+                        if (userBtn && userDropdown && dropdownDivider) {
+                            userBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const expanded = userBtn.getAttribute('aria-expanded') === 'true';
+                                userBtn.setAttribute('aria-expanded', !expanded);
+                                userDropdown.classList.toggle('show');
+
+                                if (userDropdown.classList.contains('show')) {
+                                    dropdownDivider.style.display = 'block';
+                                } else {
+                                    dropdownDivider.style.display = 'none';
+                                }
+                            });
+
+                            userDropdown.addEventListener('click', e => e.stopPropagation());
+                        }
+                    }, 100);
+                },
+
+                // Funciones del dropdown del header
+                goHome() {
+                    // Cerrar dropdown inmediatamente SIN mostrar flash
+                    const userDropdown = document.getElementById('game-user-dropdown');
+                    const userBtn = document.getElementById('game-user-btn');
+                    if (userDropdown && userBtn) {
+                        userDropdown.style.display = 'none'; // Ocultar inmediatamente
+                        userBtn.setAttribute('aria-expanded', 'false');
+                        userDropdown.classList.remove('show');
+                        setTimeout(() => {
+                            userDropdown.style.display = ''; // Restaurar después
+                        }, 100);
+                    }
+
+                    // Salir de pantalla completa si está activa
+                    if (document.fullscreenElement) {
+                        this.exitFullscreen();
+                    }
+
+                    // Limpiar datos de la partida antes de abandonar
+                    this.cleanupGameData();
+
+                    // Si es el host, abandonar la partida eliminará la sala y redirigirá a todos
+                    if (this.isHost) {
+                        // Emitir evento para eliminar la partida
+                        this.socket.emit('host-abandon-game');
+                    } else {
+                        // Si no es host, simplemente abandonar la partida
+                        this.socket.emit('leave-game');
+                    }
+
+                    // Redirigir inmediatamente al dashboard
+                    window.location.href = '/dashboard';
+                },
+
+
+
+                logout() {
+                    // Cerrar dropdown inmediatamente SIN mostrar flash
+                    const userDropdown = document.getElementById('game-user-dropdown');
+                    const userBtn = document.getElementById('game-user-btn');
+                    if (userDropdown && userBtn) {
+                        userDropdown.style.display = 'none'; // Ocultar inmediatamente
+                        userBtn.setAttribute('aria-expanded', 'false');
+                        userDropdown.classList.remove('show');
+                        setTimeout(() => {
+                            userDropdown.style.display = ''; // Restaurar después
+                        }, 100);
+                    }
+
+                    // Salir de pantalla completa si está activa
+                    if (document.fullscreenElement) {
+                        this.exitFullscreen();
+                    }
+
+                    // Limpiar datos de la partida antes de abandonar
+                    this.cleanupGameData();
+
+                    // Si es el host, abandonar la partida eliminará la sala y redirigirá a todos
+                    if (this.isHost) {
+                        // Emitir evento para eliminar la partida
+                        this.socket.emit('host-abandon-game');
+                    } else {
+                        // Si no es host, simplemente abandonar la partida
+                        this.socket.emit('leave-game');
+                    }
+
+                    // Redirigir al logout
+                    setTimeout(() => {
+                        window.location.href = '/logout';
+                    }, 100);
+                },
+
+                async copyRoomCode() {
+                    try {
+                        await navigator.clipboard.writeText(this.roomCode);
+                        this.copySuccess = true;
+                        setTimeout(() => {
+                            this.copySuccess = false;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Error al copiar:', err);
+                        // Fallback para navegadores que no soporten clipboard API
+                        const textArea = document.createElement("textarea");
+                        textArea.value = this.roomCode;
+                        textArea.style.position = "fixed";
+                        textArea.style.left = "-999999px";
+                        textArea.style.top = "-999999px";
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        document.execCommand('copy');
+                        textArea.remove();
+                        this.copySuccess = true;
+                        setTimeout(() => {
+                            this.copySuccess = false;
+                        }, 2000);
+                    }
+                },
+
+                goToDashboardFromResult() {
+                    // Cerrar modales de resultado
+                    this.showVictoryModal = false;
+                    this.showDefeatModal = false;
+                    this.gameResultsReady = false; // Resetear la variable de control
+                    this.gameEnded = false; // Resetear estado del juego
+                    this.gameFullyInitialized = false; // Resetear inicialización
+
+                    // Salir de pantalla completa si está activa
+                    if (document.fullscreenElement) {
+                        this.exitFullscreen();
+                    }
+
+                    // Limpiar localStorage
+                    localStorage.removeItem('gameCode');
+                    localStorage.removeItem('isHost');
+
+                    // Desconectar socket
+                    if (this.socket) {
+                        this.socket.disconnect();
+                    }
+
+                    // Redirigir al dashboard
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 300);
+                },
+
+                cleanupGameData() {
+                    // Limpiar localStorage
+                    localStorage.removeItem('gameCode');
+                    localStorage.removeItem('gameConfig');
+                    localStorage.removeItem('isHost');
+
+                    // Disparar evento para resetear el dashboard
+                    window.dispatchEvent(new CustomEvent('game-finished'));
+
+                    console.log('Datos de juego limpiados y evento de reset disparado');
+                },
+
+                // Funciones para el modal de desconexión del host
+                startHostDisconnectedCountdown() {
+                    this.hostDisconnectedTimer = setInterval(() => {
+                        this.hostDisconnectedCountdown--;
+
+                        if (this.hostDisconnectedCountdown <= 0) {
+                            this.clearHostDisconnectedTimer();
+                            this.redirectToDashboard();
+                        }
+                    }, 1000);
+                },
+
+                clearHostDisconnectedTimer() {
+                    if (this.hostDisconnectedTimer) {
+                        clearInterval(this.hostDisconnectedTimer);
+                        this.hostDisconnectedTimer = null;
+                    }
+                },
+
+                goToDashboardFromGameStarted() {
+                    if (this.gameAlreadyStartedTimer) {
+                        clearInterval(this.gameAlreadyStartedTimer);
+                        this.gameAlreadyStartedTimer = null;
+                    }
+                    this.showGameAlreadyStartedModal = false;
+                    this.cleanupGameData();
+                    window.location.href = '/dashboard';
+                },
+
+                goToDashboardFromModal() {
+                    this.clearHostDisconnectedTimer();
+                    this.redirectToDashboard();
+                },
+
+                redirectToDashboard() {
+                    this.showHostDisconnectedModal = false;
+                    this.cleanupGameData();
+                    window.location.href = '/dashboard';
+                },
+
+                // Función para formatear nombres de jugadores en dos líneas
+                formatPlayerName(name) {
+                    if (!name) return 'Jugador';
+
+                    if (name.length <= 10) {
+                        return name;
+                    }
+
+                    // Para nombres largos, dividir en dos líneas
+                    const words = name.split(' ');
+                    if (words.length >= 2) {
+                        if (words[0].length + words[1].length <= 12) {
+                            return `${words[0]} ${words[1]}`;
+                        } else {
+                            return `${words[0]}<br>${words[1]}`;
+                        }
+                    }
+
+                    // Si es una sola palabra muy larga, dividir por la mitad
+                    if (name.length > 12) {
+                        const midPoint = Math.ceil(name.length / 2);
+                        return `${name.substring(0, midPoint)}<br>${name.substring(midPoint)}`;
+                    }
+
+                    return name;
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
