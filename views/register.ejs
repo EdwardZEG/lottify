@@ -368,7 +368,6 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
     <script>
         // Soporte para Enter en formularios - Estrategia simplificada
         document.addEventListener('DOMContentLoaded', function () {
@@ -611,23 +610,42 @@
             const name = nameInput.value.trim();
             const email = emailInput.value.trim();
             const password = passwordInput.value;
-            // Llama al backend para crear la preferencia de pago
-            const res = await fetch('/payment/create-preference', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fullname: name, email, password })
-            });
-            const result = await res.json();
-            if (result.id) {
-                const mp = new MercadoPago('APP_USR-6f1ecdc4-0e4e-4c96-a438-d32194c9ff2a', { locale: 'es-AR' });
-                mp.checkout({
-                    preference: { id: result.id },
-                    autoOpen: true
+            
+            // Registro directo sin pago
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        name: name,
+                        email: email,
+                        password: password,
+                        confirmPassword: password
+                    })
                 });
-            } else {
-                let msg = 'Error al iniciar el pago.';
-                if (result.error) msg += '\n' + result.error;
-                emailError.textContent = msg;
+                
+                if (res.redirected) {
+                    // Si hay redirección, seguirla
+                    window.location.href = res.url;
+                } else {
+                    // Si hay error, mostrar el contenido de la respuesta
+                    const text = await res.text();
+                    if (text.includes('error')) {
+                        // Extraer mensaje de error del HTML
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(text, 'text/html');
+                        const errorElement = doc.querySelector('.alert-danger, .error-message');
+                        const errorMsg = errorElement ? errorElement.textContent.trim() : 'Error en el registro';
+                        emailError.textContent = errorMsg;
+                        emailError.style.display = 'block';
+                    } else {
+                        // Registro exitoso
+                        window.location.href = '/login';
+                    }
+                }
+            } catch (error) {
+                console.error('Error en registro:', error);
+                emailError.textContent = 'Error de conexión. Intenta de nuevo.';
                 emailError.style.display = 'block';
             }
         });

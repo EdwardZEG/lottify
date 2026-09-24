@@ -12,7 +12,7 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Mercado Pago SDK -->
     <script src="https://sdk.mercadopago.com/js/v2"></script>
 
@@ -1415,8 +1415,13 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Animación suave cuando se expande el sidebar */
@@ -2410,24 +2415,28 @@
                         <div class="current-subscription-status mb-4">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    <% if (user.subscriptionStatus === 'premium') { %>
+                                    <% if (user.subscriptionStatus==='premium' ) { %>
                                         <div class="premium-status">
                                             <i class="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
                                             <h4 class="text-success">¡Suscripción Activa!</h4>
                                             <p class="text-muted">
-                                                Tu suscripción premium está activa hasta: 
-                                                <strong><%= user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('es-ES') : 'N/A' %></strong>
+                                                Tu suscripción premium está activa hasta:
+                                                <strong>
+                                                    <%= user.subscriptionExpiry ? new
+                                                        Date(user.subscriptionExpiry).toLocaleDateString('es-ES')
+                                                        : 'N/A' %>
+                                                </strong>
                                             </p>
                                         </div>
-                                    <% } else { %>
-                                        <div class="free-status">
-                                            <i class="bi bi-person-circle fs-1 mb-3 text-muted"></i>
-                                            <h4 class="text-muted">Plan Gratuito</h4>
-                                            <p class="text-muted">
-                                                Actualmente tienes acceso a las funciones básicas de Lottify
-                                            </p>
-                                        </div>
-                                    <% } %>
+                                        <% } else { %>
+                                            <div class="free-status">
+                                                <i class="bi bi-person-circle fs-1 mb-3 text-muted"></i>
+                                                <h4 class="text-muted">Plan Gratuito</h4>
+                                                <p class="text-muted">
+                                                    Actualmente tienes acceso a las funciones básicas de Lottify
+                                                </p>
+                                            </div>
+                                            <% } %>
                                 </div>
                             </div>
                         </div>
@@ -2450,17 +2459,23 @@
                                     <div class="plan-features mb-4">
                                         <h5 class="features-title">Beneficios incluidos:</h5>
                                         <ul class="features-list">
-                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Acceso ilimitado a todos los juegos</li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Salas privadas personalizadas</li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Estadísticas avanzadas de juego</li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Vocabulario premium con niveles avanzados</li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Soporte prioritario</li>
-                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Sin anuncios</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Acceso
+                                                ilimitado a todos los juegos</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Salas privadas
+                                                personalizadas</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Estadísticas
+                                                avanzadas de juego</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Vocabulario
+                                                premium con niveles avanzados</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Soporte
+                                                prioritario</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Sin anuncios
+                                            </li>
                                         </ul>
                                     </div>
 
                                     <div class="plan-action text-center">
-                                        <% if (user.subscriptionStatus !== 'premium') { %>
+                                        <% if (user.subscriptionStatus !=='premium' ) { %>
                                             <button class="btn btn-warning btn-lg px-5" id="subscribe-btn">
                                                 <i class="bi bi-star-fill me-2"></i>
                                                 Suscribirse Ahora
@@ -2468,12 +2483,12 @@
                                             <p class="subscription-note mt-2 text-muted">
                                                 <small>Pago seguro procesado por Mercado Pago</small>
                                             </p>
-                                        <% } else { %>
-                                            <button class="btn btn-success btn-lg px-5" disabled>
-                                                <i class="bi bi-check-circle-fill me-2"></i>
-                                                Ya Suscrito
-                                            </button>
-                                        <% } %>
+                                            <% } else { %>
+                                                <button class="btn btn-success btn-lg px-5" disabled>
+                                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                                    Ya Suscrito
+                                                </button>
+                                                <% } %>
                                     </div>
                                 </div>
                             </div>
@@ -3315,7 +3330,7 @@
         // Función para inicializar la sección de suscripción
         function initializeSubscriptionSection() {
             const subscribeBtn = document.getElementById('subscribe-btn');
-            
+
             if (subscribeBtn) {
                 subscribeBtn.addEventListener('click', handleSubscription);
             }
@@ -3327,11 +3342,11 @@
         // Manejar proceso de suscripción
         async function handleSubscription() {
             const subscribeBtn = document.getElementById('subscribe-btn');
-            
+
             try {
                 subscribeBtn.disabled = true;
                 subscribeBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Procesando...';
-                
+
                 const response = await fetch('/payment/create-subscription-preference', {
                     method: 'POST',
                     headers: {
@@ -3410,9 +3425,9 @@
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
-            
+
             document.body.appendChild(notification);
-            
+
             // Auto-dismiss después de 5 segundos
             setTimeout(() => {
                 if (notification.parentNode) {
