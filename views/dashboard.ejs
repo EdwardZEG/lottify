@@ -1,0 +1,2967 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <style>
+        body {
+            background: #fff;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 80px;
+            background: #000;
+            color: #fff;
+            padding: 1.2rem 0.5rem 1rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1040;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.expanded {
+            width: 300px;
+            align-items: center;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            left: 0 !important;
+            /* Asegura que el sidebar se muestre en móvil al expandirse */
+        }
+
+        .sidebar-logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            min-height: 60px;
+        }
+
+        .logo {
+            display: block;
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s cubic-bezier(0.4, 0, 0.2, 1), margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.expanded .logo {
+            width: 90px;
+            height: 90px;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0 auto 1.2rem auto;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            /* Mantener el mismo ancho base para los enlaces en ambos estados */
+        }
+
+        .sidebar.expanded .sidebar-menu {
+            align-items: flex-start;
+        }
+
+        .sidebar a {
+            color: #fff !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.65rem 1.2rem;
+            border-radius: 0.7rem;
+            margin-bottom: 0.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            opacity: 0;
+            pointer-events: none;
+            width: 100%;
+            min-width: 0;
+            max-width: 180px;
+            background: #000;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            transition: background 0.18s, color 0.18s, opacity 0.3s, max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.expanded a {
+            opacity: 1;
+            pointer-events: auto;
+            max-width: 300px;
+            width: 100%;
+            justify-content: flex-start;
+            text-align: left;
+            background: none;
+            color: #fff !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .sidebar a.active,
+        .sidebar a:hover {
+            background: #23233a;
+            color: #fff !important;
+        }
+
+        .sidebar a i {
+            color: #fff !important;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1.5px solid #23233a;
+            padding-top: 1.2rem;
+            display: none;
+            align-items: center;
+            gap: 0.7rem;
+            width: 100%;
+            justify-content: center;
+            position: relative;
+            background: #000;
+        }
+
+        .sidebar.expanded .sidebar-footer {
+            display: flex;
+        }
+
+        /* SOLO EN MÓVIL: mostrar siempre el footer cuando el sidebar está expandido */
+        @media (max-width: 600px) {
+            .sidebar {
+                position: fixed;
+                top: 60px !important;
+                left: -100vw;
+                width: 100vw !important;
+                min-width: 0 !important;
+                max-width: 100vw !important;
+                height: calc(100vh - 60px) !important;
+                padding: 0 !important;
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+                transition: left 0.3s, width 0.3s;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 320px;
+            }
+
+            .sidebar-logo-container {
+                flex: 0 0 auto;
+                pointer-events: none;
+                min-height: 48px;
+            }
+
+            .sidebar.expanded .sidebar-logo-container {
+                display: none !important;
+            }
+
+            .sidebar-menu {
+                flex: 1 1 0px !important;
+                min-height: 120px;
+                overflow-y: auto;
+                width: 100%;
+                margin-bottom: 0.5rem;
+                background: transparent;
+            }
+
+            .sidebar-menu .sidebar-footer {
+                display: flex !important;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.7rem;
+                width: 100%;
+                padding: 0.7rem 0.5rem 0.5rem 0.5rem !important;
+                border-top: 1.5px solid #23233a;
+                background: transparent !important;
+                margin-top: 0.5rem;
+                position: static;
+            }
+
+            .sidebar-menu .sidebar-footer .sidebar-footer-btn,
+            .sidebar-menu .sidebar-footer .user-avatar,
+            .sidebar-menu .sidebar-footer .user-name,
+            .sidebar-menu .sidebar-footer .user-email {
+                color: #fff !important;
+            }
+
+            .sidebar-menu .sidebar-footer .sidebar-footer-btn i {
+                color: #fff !important;
+            }
+
+            .sidebar-footer {
+                display: none !important;
+            }
+        }
+
+        .sidebar-footer-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 0.7rem;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 0.97rem;
+            font-weight: 400;
+            transition: background 0.18s;
+            position: relative;
+        }
+
+        .sidebar-footer-btn:hover,
+        .sidebar-footer-btn:focus {
+            background: #181818;
+        }
+
+        .sidebar-footer .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            color: #fff;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
+        }
+
+        .sidebar-footer .user-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #fff;
+            line-height: 1.1;
+            font-family: 'Poppins', Arial, sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
+        }
+
+        .sidebar-footer .user-email {
+            font-size: 0.81rem;
+            color: #bdbdbd;
+            margin-top: -2px;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .sidebar-footer .arrow {
+            margin-left: auto;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .sidebar-footer-btn[aria-expanded="true"] .arrow {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-footer-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            background: #181818;
+            /* Fondo oscuro, variante del negro del dashboard */
+            border-radius: 1rem;
+            /* box-shadow eliminado */
+            padding: 0.9rem 0.7rem 0.5rem 0.7rem;
+            z-index: 9999;
+            animation: fadeIn 0.18s;
+        }
+
+        .sidebar-footer-dropdown.show {
+            display: block;
+        }
+
+        .sidebar-footer-dropdown .user-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 0.95rem;
+            margin-bottom: 0.1rem;
+            background: #444;
+        }
+
+        .sidebar-footer-dropdown .user-name {
+            font-size: 0.93rem;
+            font-weight: 500;
+            color: #fff;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .sidebar-footer-dropdown .user-email {
+            font-size: 0.8rem;
+            color: #bdbdbd;
+            margin-bottom: 0.5rem;
+            font-family: 'Poppins', Arial, sans-serif;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer-dropdown .dropdown-divider {
+            border-top: 1px solid #23233a;
+            margin: 0.4rem 0;
+        }
+
+        .sidebar-footer-dropdown .dropdown-item {
+            color: #fff;
+            padding: 0.45rem 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-weight: 400;
+            transition: background 0.18s, color 0.18s;
+        }
+
+        .sidebar-footer-dropdown .dropdown-item:hover {
+            background: rgb(7, 10, 243);
+            color: #fff;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content {
+            margin-left: 80px;
+            min-height: 100vh;
+            background: #f8f9fa;
+            transition: margin-left 0.3s;
+            padding: 0;
+        }
+
+        .content.expanded {
+            margin-left: 300px;
+        }
+
+        /* Contenedor principal para ocupar toda la pantalla */
+        .container-fluid {
+            height: 100vh;
+            padding: 1rem !important;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #inicio-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #inicio-section .row {
+            flex: 1;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* CSS básico y compacto para las tarjetas del dashboard */
+        .dashboard-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+            height: 100%;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .dashboard-card:hover::before {
+            left: 100%;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+        }
+
+        .tip-icon {
+            font-size: 1rem;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* CSS para el botón de jugar */
+        .play-button-container {
+            text-align: center;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        .play-button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 1rem 2.5rem;
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .play-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 123, 255, 0.4);
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        }
+
+        .play-button:active {
+            transform: translateY(-1px);
+        }
+
+        .play-button-icon {
+            margin-right: 0.75rem;
+            font-size: 1.3rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* CSS para los enlaces de recursos */
+        .resource-link {
+            text-decoration: none;
+            color: inherit;
+            transition: color 0.3s ease;
+        }
+
+        .resource-link:hover {
+            color: #007bff !important;
+            text-decoration: none;
+        }
+
+        /* Estilos adicionales para el contenido expandido */
+        .text-purple {
+            color: #6f42c1 !important;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
+
+        .list-unstyled li {
+            line-height: 1.4;
+        }
+
+        .small {
+            font-size: 0.85rem;
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1.5px solid #e0e0e0;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-group {
+            max-width: 320px;
+        }
+
+        .dropdown .dropdown-toggle {
+            color: #222;
+            font-weight: 600;
+        }
+
+        .table {
+            background: #fff;
+            border-radius: 0.7rem;
+            overflow: hidden;
+        }
+
+        .card {
+            border-radius: 1rem;
+        }
+
+        .container-fluid.mt-4 {
+            margin-top: 0.5rem !important;
+        }
+
+        .row.my-4 {
+            margin-top: 0.2rem !important;
+            margin-bottom: 0.2rem !important;
+        }
+
+        .row.mt-5 {
+            margin-top: 0.5rem !important;
+        }
+
+        .table th,
+        .table td {
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            font-size: 0.82rem !important;
+        }
+
+        .card-header h5,
+        .container-fluid h3 {
+            font-size: 0.92rem !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+
+        /* Mostrar títulos completos y responsivos en el dashboard */
+        .dashboard-title,
+        .dashboard-title *,
+        .container-fluid h3,
+        .container-fluid h2,
+        .container-fluid h1,
+        .card-header h5,
+        .card-header h4,
+        .card-header h3,
+        .card-header h2,
+        .card-header h1 {
+            font-size: 1.1rem !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            display: block !important;
+        }
+
+        /* Estilos para el carrusel de vocabulario */
+        .vocabulary-container {
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 2rem !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            min-height: calc(100vh - 40px) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            position: relative !important;
+            z-index: 1 !important;
+            left: auto !important;
+            right: auto !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        .vocabulary-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .carousel-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            height: 450px;
+            perspective: 1000px;
+        }
+
+        .carousel-wrapper {
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .carousel-card {
+            position: absolute;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 300px;
+            height: 400px;
+            cursor: pointer;
+        }
+
+        .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* Carta central (activa) */
+        .carousel-card.active {
+            z-index: 10;
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+
+        .carousel-card.active img {
+            filter: brightness(1) saturate(1);
+            box-shadow: none;
+        }
+
+        /* Carta anterior (izquierda) */
+        .carousel-card.prev {
+            z-index: 5;
+            transform: translateX(-180px) scale(0.75);
+            opacity: 1;
+        }
+
+        .carousel-card.prev img {
+            filter: brightness(0.4) saturate(0.3);
+            background: #666;
+        }
+
+        /* Carta siguiente (derecha) */
+        .carousel-card.next {
+            z-index: 5;
+            transform: translateX(180px) scale(0.75);
+            opacity: 1;
+        }
+
+        .carousel-card.next img {
+            filter: brightness(0.4) saturate(0.3);
+            background: #666;
+        }
+
+        /* Cartas lejanas (ocultas) */
+        .carousel-card.hidden {
+            z-index: 1;
+            opacity: 0;
+            transform: scale(0.6);
+        }
+
+        .carousel-btn {
+            background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(66, 133, 244, 0.4);
+            z-index: 20;
+            position: relative;
+        }
+
+        .carousel-btn:hover {
+            background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+            transform: scale(1.1);
+            box-shadow: 0 12px 30px rgba(66, 133, 244, 0.6);
+        }
+
+        .carousel-btn:active {
+            transform: scale(0.95);
+        }
+
+        .carousel-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            background: #ccc;
+            box-shadow: none;
+        }
+
+        .carousel-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .carousel-counter {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .carousel-controls .btn {
+            background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+
+        .carousel-controls .btn:hover {
+            background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(66, 133, 244, 0.5);
+        }
+
+        /* Animación de entrada */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .vocabulary-container {
+            animation: slideIn 0.6s ease-out;
+            padding: 2rem;
+            height: auto;
+            overflow-y: visible;
+            background: transparent !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+
+        @media (max-width: 768px) {
+            #mobile-header {
+                display: flex !important;
+            }
+
+            .content-section {
+                left: 0 !important;
+                width: 100vw !important;
+                top: 60px !important;
+                height: calc(100vh - 60px) !important;
+            }
+
+            .content.expanded .content-section {
+                left: 0 !important;
+                width: 100vw !important;
+            }
+
+            #inicio-section {
+                padding: 20px 15px !important;
+            }
+
+            #inicio-section .container-fluid {
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+
+            #inicio-section .row {
+                margin: 0 !important;
+                width: 100% !important;
+            }
+
+            #inicio-section .col-lg-4 {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin-bottom: 20px !important;
+            }
+
+            #inicio-section .dashboard-card {
+                min-height: 400px !important;
+                margin-bottom: 0 !important;
+            }
+
+            #inicio-section .card-body {
+                padding: 1.5rem !important;
+            }
+
+            .play-button-container {
+                margin-top: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 60px !important;
+                left: -100vw;
+                width: 100vw !important;
+                height: calc(100vh - 60px) !important;
+                transition: left 0.3s;
+            }
+
+            /* Responsive para el carrusel */
+            .vocabulary-title {
+                font-size: 2rem;
+                color: #000;
+            }
+
+            .carousel-container {
+                gap: 1rem;
+                height: 350px;
+            }
+
+            .carousel-wrapper {
+                max-width: 600px;
+                height: 300px;
+            }
+
+            .carousel-card {
+                width: 200px;
+                height: 280px;
+            }
+
+            .carousel-card.prev {
+                transform: translateX(-120px) scale(0.65);
+            }
+
+            .carousel-card.next {
+                transform: translateX(120px) scale(0.65);
+            }
+
+            .carousel-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+
+            .vocabulary-container {
+                padding: 1rem !important;
+                min-height: calc(100vh - 120px) !important;
+                background: transparent !important;
+                position: relative !important;
+                z-index: 1 !important;
+            }
+
+            .carousel-controls {
+                gap: 1rem;
+                margin-top: 2rem;
+            }
+
+            .carousel-counter {
+                color: #333;
+            }
+
+            /* Extra responsive para móviles muy pequeños */
+            @media (max-width: 480px) {
+                .carousel-container {
+                    height: 280px;
+                    gap: 0.5rem;
+                }
+
+                .carousel-card {
+                    width: 150px;
+                    height: 200px;
+                }
+
+                .carousel-card.prev {
+                    transform: translateX(-80px) scale(0.55);
+                }
+
+                .carousel-card.next {
+                    transform: translateX(80px) scale(0.55);
+                }
+
+                .vocabulary-title {
+                    font-size: 1.5rem;
+                    margin-bottom: 2rem;
+                    color: #000;
+                }
+
+                .vocabulary-container {
+                    background: transparent !important;
+                }
+            }
+        }
+
+        /* Estilos personalizados para la sección Unirse a partida */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .border-3 {
+            border-width: 3px;
+        }
+
+        /* Animación mejorada para el cubo 3D */
+        @keyframes rotateCube {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+
+            25% {
+                transform: rotateX(-15deg) rotateY(90deg);
+            }
+
+            50% {
+                transform: rotateX(0deg) rotateY(180deg);
+            }
+
+            75% {
+                transform: rotateX(15deg) rotateY(270deg);
+            }
+
+            100% {
+                transform: rotateX(0deg) rotateY(360deg);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Efectos de brillo y sombra mejorados */
+        .text-glow {
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5), 0 0 20px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.1);
+        }
+
+        /* Efectos para el cubo 3D */
+        .cube-3d {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Mejoras visuales adicionales */
+        .input-enhanced:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2),
+                0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+        }
+
+        .btn-enhanced:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Asegurar que la sección ocupe toda la pantalla */
+        #unirse-section {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 1000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Sistema de secciones mejorado - contenido completo visible */
+        .content-section {
+            position: fixed !important;
+            top: 0 !important;
+            left: 80px !important;
+            width: calc(100vw - 80px) !important;
+            height: 100vh !important;
+            background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 100%) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            z-index: 5 !important;
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .content-section.active {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 15 !important;
+        }
+
+        /* Animaciones fluidas para sidebar expandido */
+        .content.expanded .content-section {
+            left: 300px !important;
+            width: calc(100vw - 300px) !important;
+        }
+
+        /* Eliminar padding/margin del content para evitar conflictos */
+        .content {
+            padding: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* Z-index específicos para evitar superposición */
+        #inicio-section {
+            z-index: 5 !important;
+        }
+
+        #inicio-section.active {
+            z-index: 15 !important;
+        }
+
+        #jugar-section {
+            z-index: 5 !important;
+        }
+
+        #jugar-section.active {
+            z-index: 15 !important;
+        }
+
+        #unirse-section {
+            z-index: 5 !important;
+        }
+
+        #unirse-section.active {
+            z-index: 15 !important;
+        }
+
+        #vocabulario-section {
+            z-index: 5 !important;
+        }
+
+        #vocabulario-section.active {
+            z-index: 15 !important;
+        }
+
+        .container-fluid {
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            height: 100% !important;
+        }
+
+        #inicio-section {
+            padding: 2rem 3rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            min-height: 100vh !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* Animaciones suaves para contenedores al expandir sidebar */
+        .content.expanded #inicio-section {
+            padding: 2rem 2rem !important;
+        }
+
+        #inicio-section .row {
+            flex: 1 !important;
+            align-items: start !important;
+            gap: 1.5rem !important;
+            margin: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        #inicio-section .row .col-12 {
+            padding: 0 0.75rem !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* ===== SECCIÓN INICIO - LAYOUT PERFECTO COMO LA IMAGEN ===== */
+        #inicio-section {
+            padding: 40px 20px !important;
+            display: block !important;
+            overflow-y: auto !important;
+        }
+
+        #inicio-section .container-fluid {
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+        }
+
+        #inicio-section .row {
+            margin: 0 !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: stretch !important;
+        }
+
+        /* FORZAR 3 COLUMNAS EN DESKTOP - COMPACTO */
+        @media (min-width: 992px) {
+
+            #inicio-section .col-xl-4,
+            #inicio-section .col-lg-4 {
+                flex: 0 0 33.333333% !important;
+                max-width: 33.333333% !important;
+                padding: 0 8px !important;
+                min-width: 280px !important;
+            }
+
+            #inicio-section .row {
+                margin: 0 -8px !important;
+            }
+
+            #inicio-section .dashboard-card {
+                min-height: 300px !important;
+                max-height: 350px !important;
+            }
+        }
+
+        /* EN TABLET MEDIANO, UNA COLUMNA COMPLETA */
+        @media (min-width: 768px) and (max-width: 991px) {
+
+            #inicio-section .col-xl-4,
+            #inicio-section .col-lg-4,
+            #inicio-section .col-md-4 {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                padding: 0 15px !important;
+                margin-bottom: 15px !important;
+            }
+        }
+
+        /* EN MÓVIL, UNA COLUMNA COMPLETA */
+        @media (max-width: 767px) {
+
+            #inicio-section .col-xl-4,
+            #inicio-section .col-lg-4,
+            #inicio-section .col-md-4,
+            #inicio-section .col-sm-12 {
+                flex: 0 0 100% !important;
+                max-width: 100% !important;
+                padding: 0 10px !important;
+                margin-bottom: 15px !important;
+            }
+        }
+
+        #inicio-section .dashboard-card {
+            height: 100% !important;
+            min-height: 500px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border-radius: 1.2rem !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        #inicio-section .card-body {
+            padding: 2rem !important;
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            flex-grow: 1 !important;
+        }
+
+        /* Iconos de las cards */
+        #inicio-section .card-icon {
+            font-size: 1.5rem !important;
+            margin-right: 0.75rem !important;
+        }
+
+        /* Títulos de las cards */
+        #inicio-section .card-title {
+            font-size: 1.3rem !important;
+            font-weight: 700 !important;
+        }
+
+        /* Hover effect para las cards */
+        #inicio-section .dashboard-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        /* Botón centrado abajo */
+        #inicio-section .text-center.mt-4 {
+            text-align: center !important;
+            margin-top: 3rem !important;
+            padding: 0 15px !important;
+        }
+
+        /* OVERRIDE Bootstrap col-* clases para esta sección */
+        #inicio-section .col-lg-4.col-md-12 {
+            position: relative !important;
+            width: 100% !important;
+            padding-right: 15px !important;
+            padding-left: 15px !important;
+        }
+
+        /* ===== SECCIÓN VOCABULARIO - RESTAURAR DISEÑO ORIGINAL ===== */
+        #vocabulario-section {
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Animación suave cuando se expande el sidebar */
+        .content.expanded #inicio-section .dashboard-card {
+            transform: translateX(5px) scale(0.98) !important;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 600px) {
+            #unirse-section {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                z-index: 1000 !important;
+            }
+        }
+
+        /* Estilos personalizados para animaciones de jugar */
+        .rotateY-10 {
+            transform: rotateY(10deg);
+        }
+
+        .rotateY-0 {
+            transform: rotateY(0deg);
+        }
+
+        .transform-gpu {
+            transform: translate3d(0, 0, 0);
+        }
+
+        /* Mejores sombras para las tarjetas */
+        .shadow-3xl {
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Efectos adicionales de animación */
+        @keyframes floatCard {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotateY(0deg);
+            }
+
+            50% {
+                transform: translateY(-5px) rotateY(2deg);
+            }
+        }
+
+        .animate-float-card {
+            animation: floatCard 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header móvil: negro, logo a la izquierda, menú hamburguesa a la derecha -->
+    <header id="mobile-header" class="d-block d-md-none"
+        style="position:fixed;top:0;left:0;width:100vw;height:60px;background:#000;z-index:3000;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;box-shadow:0 2px 12px rgba(0,0,0,0.18);">
+        <img src="/img/logo_formularios.svg" alt="Logo del proyecto" style="height:38px;width:auto;display:block;">
+        <button id="mobile-hamburger" aria-label="Abrir menú lateral"
+            style="background:transparent;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <i id="hamburger-icon" class="bi bi-list" style="color:#fff;font-size:2.2rem;"></i>
+        </button>
+    </header>
+    <!-- Fondo semitransparente para cubrir el contenido cuando el sidebar está abierto en móvil -->
+    <div id="sidebar-backdrop"
+        style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.32);z-index:1999;transition:opacity 0.3s;">
+    </div>
+    <!-- Barra lateral con navegación -->
+    <div id="sidebar" class="sidebar">
+        <div class="text-center mb-4 sidebar-logo-container">
+            <!-- Logo del proyecto como botón hamburguesa -->
+            <img src="/img/logo_formularios.svg" alt="Logo del proyecto" class="logo" id="sidebar-toggle">
+        </div>
+        <div class="sidebar-menu d-flex flex-column w-100">
+            <!-- Enlaces del menú lateral con iconos personalizados -->
+            <a href="#" class="sidebar-link active" data-section="inicio"><i class="bi bi-house-door me-2"></i> <span
+                    class="sidebar-link-text">Inicio</span></a>
+            <a href="#" class="sidebar-link" data-section="jugar"><i class="bi bi-controller me-2"></i> <span
+                    class="sidebar-link-text">Jugar</span></a>
+            <a href="#" class="sidebar-link" data-section="unirse"><i class="bi bi-people me-2"></i> <span
+                    class="sidebar-link-text">Unirse a partida</span></a>
+            <a href="#" class="sidebar-link" data-section="vocabulario"><i class="bi bi-book me-2"></i> <span
+                    class="sidebar-link-text">Estudiar Vocabulario</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <% if (user && user.fullname) { %>
+                <button class="sidebar-footer-btn" id="sidebar-user-btn" aria-expanded="false" type="button">
+                    <div class="user-avatar">
+                        <% if (user && user.profilePicture) { %>
+                            <img src="<%= user.profilePicture %>" alt="Avatar"
+                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            <% } else { %>
+                                <%= user.fullname ? user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2)
+                                : ' ?' %>
+                                    <% } %>
+                    </div>
+                    <span class="user-name">
+                        <%= user.fullname %>
+                    </span>
+                    <i class="bi bi-chevron-down arrow"></i>
+                </button>
+                <div class="sidebar-footer-dropdown" id="sidebar-user-dropdown">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="user-avatar me-2">
+                            <% if (user && user.profilePicture) { %>
+                                <img src="<%= user.profilePicture %>" alt="Avatar"
+                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                <% } else { %>
+                                    <%= user.fullname ? user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2)
+                                    : ' ?' %>
+                                        <% } %>
+                        </div>
+                        <div style="min-width:0;">
+                            <div class="user-name">
+                                <%= user.fullname %>
+                            </div>
+                            <div class="user-email">
+                                <%= user.email ? user.email : 'correo@ejemplo.com' %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider" id="dropdown-divider" style="display:none;"></div>
+                    <div class="dropdown-item" onclick="location.href='/config'">
+                        <i class="bi bi-gear me-2"></i>Configuración
+                    </div>
+                    <div class="dropdown-item" onclick="location.href='/logout'">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                    </div>
+                </div>
+                <% } else { %>
+                    <div style="color:yellow;font-weight:bold;">Usuario no definido</div>
+                    <% } %>
+        </div>
+    </div>
+    <!-- fin sidebar -->
+    <!-- El fondo será blanco, sin contenido principal -->
+    <div id="content" class="content">
+        <!-- Sección Inicio -->
+        <div id="inicio-section" class="content-section active">
+            <div class="container-fluid px-2">
+
+                <!-- Carrusel de contenidos de inicio -->
+                <div class="carousel-container">
+                    <button class="carousel-btn carousel-btn-prev" id="inicio-carousel-prev">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <div class="carousel-wrapper">
+                        <div class="carousel-track" id="inicio-carousel-track">
+                            <!-- Las cartas se generarán dinámicamente con JavaScript -->
+                        </div>
+                    </div>
+
+                    <button class="carousel-btn carousel-btn-next" id="inicio-carousel-next">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Controles del carrusel -->
+                <div class="carousel-controls text-center mt-4">
+                    <span class="carousel-counter" id="inicio-carousel-counter">1 / 3</span>
+                </div>
+
+                <!-- Botón centrado fuera del carrusel -->
+                <div class="text-center mt-4">
+                    <button
+                        class="group relative px-8 py-3 text-white font-semibold text-lg rounded-xl transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200 hover:shadow-xl transform hover:scale-105 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900"
+                        style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); min-height: 3.5rem;"
+                        onclick="goToPlaySection()">
+                        <div class="flex items-center space-x-3">
+                            <span>¡EMPEZAR A JUGAR!</span>
+                            <i
+                                class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                        </div>
+
+                        <!-- Efecto de brillo -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 transition-all duration-700 group-hover:translate-x-full rounded-xl">
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Sección Jugar -->
+        <div id="jugar-section" class="content-section">
+            <div class="w-full h-full flex flex-col px-6 py-4" x-data="{ 
+                    categoriaActual: 0,
+                    nivelActual: 0,
+                    modoActual: 0, // Empezar con Partida Offline (bloqueada)
+                    animandoCategoria: false,
+                    animandoNivel: false,
+                    animandoModo: false,
+                    categorias: [
+                        { 
+                            codigo: 'A1', 
+                            nombre: 'Principiante',
+                            icono: 'fas fa-seedling',
+                            disponible: true 
+                        },
+                        { 
+                            codigo: 'A2', 
+                            nombre: 'Básico',
+                            icono: 'fas fa-leaf',
+                            disponible: false 
+                        },
+                        { 
+                            codigo: 'B1', 
+                            nombre: 'Intermedio',
+                            icono: 'fas fa-tree',
+                            disponible: false 
+                        },
+                        { 
+                            codigo: 'B2', 
+                            nombre: 'Intermedio Alto',
+                            icono: 'fas fa-mountain',
+                            disponible: false 
+                        },
+                        { 
+                            codigo: 'C1', 
+                            nombre: 'Avanzado',
+                            icono: 'fas fa-crown',
+                            disponible: false 
+                        },
+                        { 
+                            codigo: 'C2', 
+                            nombre: 'Experto',
+                            icono: 'fas fa-trophy',
+                            disponible: false 
+                        }
+                    ],
+                    niveles: {
+                        0: [ // A1 - Solo nivel 1 desbloqueado
+                            { nombre: 'Nivel 1', disponible: true },
+                            { nombre: 'Nivel 2', disponible: false },
+                            { nombre: 'Nivel 3', disponible: false },
+                            { nombre: 'Nivel 4', disponible: false },
+                            { nombre: 'Nivel 5', disponible: false },
+                            { nombre: 'Nivel 6', disponible: false },
+                            { nombre: 'Nivel 7', disponible: false },
+                            { nombre: 'Nivel 8', disponible: false },
+                            { nombre: 'Nivel 9', disponible: false },
+                            { nombre: 'Nivel 10', disponible: false }
+                        ],
+                        1: [ // A2 - Todos bloqueados
+                            { nombre: 'Nivel 1', disponible: false },
+                            { nombre: 'Nivel 2', disponible: false },
+                            { nombre: 'Nivel 3', disponible: false },
+                            { nombre: 'Nivel 4', disponible: false },
+                            { nombre: 'Nivel 5', disponible: false },
+                            { nombre: 'Nivel 6', disponible: false },
+                            { nombre: 'Nivel 7', disponible: false },
+                            { nombre: 'Nivel 8', disponible: false },
+                            { nombre: 'Nivel 9', disponible: false },
+                            { nombre: 'Nivel 10', disponible: false }
+                        ],
+                        2: [ // B1 - Todos bloqueados
+                            { nombre: 'Nivel 1', disponible: false },
+                            { nombre: 'Nivel 2', disponible: false },
+                            { nombre: 'Nivel 3', disponible: false },
+                            { nombre: 'Nivel 4', disponible: false },
+                            { nombre: 'Nivel 5', disponible: false },
+                            { nombre: 'Nivel 6', disponible: false },
+                            { nombre: 'Nivel 7', disponible: false },
+                            { nombre: 'Nivel 8', disponible: false },
+                            { nombre: 'Nivel 9', disponible: false },
+                            { nombre: 'Nivel 10', disponible: false }
+                        ],
+                        3: [ // B2 - Todos bloqueados
+                            { nombre: 'Nivel 1', disponible: false },
+                            { nombre: 'Nivel 2', disponible: false },
+                            { nombre: 'Nivel 3', disponible: false },
+                            { nombre: 'Nivel 4', disponible: false },
+                            { nombre: 'Nivel 5', disponible: false },
+                            { nombre: 'Nivel 6', disponible: false },
+                            { nombre: 'Nivel 7', disponible: false },
+                            { nombre: 'Nivel 8', disponible: false },
+                            { nombre: 'Nivel 9', disponible: false },
+                            { nombre: 'Nivel 10', disponible: false }
+                        ],
+                        4: [ // C1 - Todos bloqueados
+                            { nombre: 'Nivel 1', disponible: false },
+                            { nombre: 'Nivel 2', disponible: false },
+                            { nombre: 'Nivel 3', disponible: false },
+                            { nombre: 'Nivel 4', disponible: false },
+                            { nombre: 'Nivel 5', disponible: false },
+                            { nombre: 'Nivel 6', disponible: false },
+                            { nombre: 'Nivel 7', disponible: false },
+                            { nombre: 'Nivel 8', disponible: false },
+                            { nombre: 'Nivel 9', disponible: false },
+                            { nombre: 'Nivel 10', disponible: false }
+                        ],
+                        5: [ // C2 - Todos bloqueados
+                            { nombre: 'Nivel 1', disponible: false },
+                            { nombre: 'Nivel 2', disponible: false },
+                            { nombre: 'Nivel 3', disponible: false },
+                            { nombre: 'Nivel 4', disponible: false },
+                            { nombre: 'Nivel 5', disponible: false },
+                            { nombre: 'Nivel 6', disponible: false },
+                            { nombre: 'Nivel 7', disponible: false },
+                            { nombre: 'Nivel 8', disponible: false },
+                            { nombre: 'Nivel 9', disponible: false },
+                            { nombre: 'Nivel 10', disponible: false }
+                        ]
+                    },
+                    modos: [
+                        { 
+                            nombre: 'Partida Offline', 
+                            descripcion: 'Juega sin conexión',
+                            icono: 'fas fa-user',
+                            disponible: false
+                        },
+                        { 
+                            nombre: 'Partida Online', 
+                            descripcion: 'Juega con otros usuarios',
+                            icono: 'fas fa-users',
+                            disponible: true
+                        }
+                    ],
+                    anteriorCategoria() {
+                        if (this.animandoCategoria) return;
+                        this.animandoCategoria = true;
+                        setTimeout(() => {
+                            this.categoriaActual = this.categoriaActual > 0 ? this.categoriaActual - 1 : this.categorias.length - 1;
+                            // Siempre empezar en el primer nivel de la categoría
+                            this.nivelActual = 0;
+                            setTimeout(() => { this.animandoCategoria = false; }, 200);
+                        }, 150);
+                    },
+                    siguienteCategoria() {
+                        if (this.animandoCategoria) return;
+                        this.animandoCategoria = true;
+                        setTimeout(() => {
+                            this.categoriaActual = this.categoriaActual < this.categorias.length - 1 ? this.categoriaActual + 1 : 0;
+                            // Siempre empezar en el primer nivel de la categoría
+                            this.nivelActual = 0;
+                            setTimeout(() => { this.animandoCategoria = false; }, 200);
+                        }, 150);
+                    },
+                    encontrarPrimerNivelDisponible() {
+                        const nivelesDisponibles = this.getNivelesDisponibles();
+                        for (let i = 0; i < nivelesDisponibles.length; i++) {
+                            if (nivelesDisponibles[i].disponible) {
+                                return i;
+                            }
+                        }
+                        return 0; // Si no hay ninguno disponible, mostrar el primero
+                    },
+                    anteriorNivel() {
+                        if (this.animandoNivel) return;
+                        this.animandoNivel = true;
+                        setTimeout(() => {
+                            const nivelesDisponibles = this.getNivelesDisponibles();
+                            // Navegar entre todos los niveles, no solo los disponibles
+                            this.nivelActual = this.nivelActual > 0 ? this.nivelActual - 1 : nivelesDisponibles.length - 1;
+                            setTimeout(() => { this.animandoNivel = false; }, 200);
+                        }, 150);
+                    },
+                    siguienteNivel() {
+                        if (this.animandoNivel) return;
+                        this.animandoNivel = true;
+                        setTimeout(() => {
+                            const nivelesDisponibles = this.getNivelesDisponibles();
+                            // Navegar entre todos los niveles, no solo los disponibles
+                            this.nivelActual = this.nivelActual < nivelesDisponibles.length - 1 ? this.nivelActual + 1 : 0;
+                            setTimeout(() => { this.animandoNivel = false; }, 200);
+                        }, 150);
+                    },
+                    anteriorModo() {
+                        if (this.animandoModo) return;
+                        this.animandoModo = true;
+                        setTimeout(() => {
+                            // Navegar entre todos los modos, no solo los disponibles
+                            this.modoActual = this.modoActual > 0 ? this.modoActual - 1 : this.modos.length - 1;
+                            setTimeout(() => { this.animandoModo = false; }, 200);
+                        }, 150);
+                    },
+                    siguienteModo() {
+                        if (this.animandoModo) return;
+                        this.animandoModo = true;
+                        setTimeout(() => {
+                            // Navegar entre todos los modos, no solo los disponibles
+                            this.modoActual = this.modoActual < this.modos.length - 1 ? this.modoActual + 1 : 0;
+                            setTimeout(() => { this.animandoModo = false; }, 200);
+                        }, 150);
+                    },
+                    getNivelesDisponibles() {
+                        return this.niveles[this.categoriaActual] || [];
+                    },
+                    puedeJugarNivel(nivelIndex) {
+                        const niveles = this.getNivelesDisponibles();
+                        return niveles[nivelIndex] && niveles[nivelIndex].disponible;
+                    },
+                    puedeJugar() {
+                        return this.categorias[this.categoriaActual].disponible;
+                    },
+                    crearPartida() {
+                        // Verificar que la categoría, nivel y modo estén disponibles
+                        if (!this.puedeJugar() || !this.puedeJugarNivel(this.nivelActual) || !this.modos[this.modoActual].disponible) {
+                            return;
+                        }
+                        
+                        // Mostrar indicador de carga
+                        const configuracion = {
+                            categoria: this.categorias[this.categoriaActual].codigo,
+                            nivel: this.getNivelesDisponibles()[this.nivelActual].nombre,
+                            modo: this.modos[this.modoActual].nombre
+                        };
+                        
+                        // Crear sala en el servidor
+                        fetch('/api/game-rooms/create-room', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(configuracion)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Guardar información en localStorage como respaldo
+                                localStorage.setItem('gameCode', data.room.code);
+                                localStorage.setItem('gameConfig', JSON.stringify({
+                                    ...configuracion,
+                                    codigo: data.room.code
+                                }));
+                                localStorage.setItem('isHost', 'true');
+                                
+                                // Ir a la sección de Unirse a partida
+                                showSection('unirse');
+                                
+                                // Llenar automáticamente el código
+                                setTimeout(() => {
+                                    const unirseSectionDiv = document.querySelector('#unirse-section > div');
+                                    if (unirseSectionDiv && Alpine.$data) {
+                                        const unirseSectionData = Alpine.$data(unirseSectionDiv);
+                                        if (unirseSectionData) {
+                                            unirseSectionData.codigo = data.room.code;
+                                            unirseSectionData.esHost = true;
+                                            unirseSectionData.showSuccessMessage = true;
+                                        }
+                                    }
+                                }, 300);
+                            } else {
+                                console.error('Error creando sala:', data.error);
+                                alert('Error al crear la sala: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error de red:', error);
+                            alert('Error de conexión. Inténtalo de nuevo.');
+                        });
+                    }
+                }">
+
+                <!-- Título principal con misma altura que Estudiar Vocabulario -->
+                <div class="text-center mt-2 mb-4 relative">
+                    <h1 class="text-4xl font-bold text-gray-800">Configurar Partida</h1>
+
+                    <!-- Mensaje de categoría bloqueada en upper right corner -->
+                    <div x-show="!puedeJugar()" class="absolute top-0 right-0"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 translate-y-2"
+                        x-transition:enter-end="opacity-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 translate-y-2">
+                        <div
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg shadow-lg backdrop-blur-sm">
+                            <div class="flex items-center space-x-2">
+                                <div class="bg-amber-100 rounded-full p-1.5">
+                                    <i class="fas fa-info-circle text-amber-600 text-sm"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-amber-800 font-semibold text-xs">Categoría bloqueada</p>
+                                    <p class="text-amber-700 text-xs">Estará disponible pronto</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenedor principal con las 3 secciones en altura optimizada -->
+                <div class="flex-1 flex flex-col justify-center max-w-4xl mx-auto space-y-6">
+
+                    <!-- 1. Selector de Categoría (A1, A2, B1, etc.) -->
+                    <div class="text-center">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-3">Selecciona la categoría</h2>
+
+                        <div class="flex items-center justify-center space-x-4">
+                            <button @click="anteriorCategoria()"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+
+                            <div class="relative">
+                                <div class="w-80 h-28 bg-black rounded-2xl shadow-xl flex items-center justify-center transition-all duration-300 relative overflow-hidden border"
+                                    style="color: #FFD600; border-color: #FFD600;"
+                                    :class="animandoCategoria ? 'scale-95 opacity-70' : 'scale-100 opacity-100'">
+                                    <!-- Icono de candado para categorías bloqueadas -->
+                                    <div x-show="!categorias[categoriaActual].disponible"
+                                        class="absolute top-2 right-2 bg-red-500 rounded-full w-7 h-7 flex items-center justify-center">
+                                        <i class="fas fa-lock text-white text-xs"></i>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <div class="mb-2">
+                                            <i :class="categorias[categoriaActual].icono" class="text-2xl"></i>
+                                        </div>
+                                        <h3 class="text-2xl font-bold mb-1" x-text="categorias[categoriaActual].codigo">
+                                        </h3>
+                                        <p class="text-sm opacity-90" x-text="categorias[categoriaActual].nombre">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="siguienteCategoria()"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Selector de Nivel (1-10) -->
+                    <div class="text-center">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-3">Selecciona el nivel</h2>
+
+                        <div class="flex items-center justify-center space-x-4">
+                            <button @click="anteriorNivel()"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+
+                            <div class="relative">
+                                <div class="w-80 h-20 bg-black rounded-2xl shadow-xl flex items-center justify-center transition-all duration-300 relative border"
+                                    style="color: #00E5FF; border-color: #00E5FF;" :class="[
+                                            animandoNivel ? 'scale-95 opacity-70' : 'scale-100 opacity-100',
+                                            !puedeJugar() ? 'opacity-50' : ''
+                                        ]">
+                                    <!-- Icono de candado para niveles bloqueados -->
+                                    <div x-show="!puedeJugar() || (puedeJugar() && getNivelesDisponibles().length > 0 && !puedeJugarNivel(nivelActual))"
+                                        class="absolute top-1 right-2 bg-red-500 rounded-full w-6 h-6 flex items-center justify-center">
+                                        <i class="fas fa-lock text-white text-xs"></i>
+                                    </div>
+
+                                    <!-- Mostrar nivel cuando la categoría está disponible -->
+                                    <div class="text-center"
+                                        x-show="puedeJugar() && getNivelesDisponibles().length > 0">
+                                        <h3 class="text-xl font-bold"
+                                            x-text="getNivelesDisponibles()[nivelActual]?.nombre || 'Nivel no disponible'"
+                                            :class="!puedeJugarNivel(nivelActual) ? 'opacity-60' : ''">
+                                        </h3>
+                                    </div>
+
+                                    <!-- Mostrar nivel cuando la categoría está bloqueada -->
+                                    <div class="text-center"
+                                        x-show="!puedeJugar() && getNivelesDisponibles().length > 0">
+                                        <h3 class="text-xl font-bold opacity-60"
+                                            x-text="getNivelesDisponibles()[nivelActual]?.nombre || 'Nivel no disponible'">
+                                        </h3>
+                                    </div>
+
+                                    <!-- Fallback cuando no hay niveles -->
+                                    <div class="text-center flex items-center space-x-2"
+                                        x-show="getNivelesDisponibles().length === 0">
+                                        <i class="fas fa-lock text-xl"></i>
+                                        <span class="text-sm font-semibold">Sin niveles disponibles</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="siguienteNivel()"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Selector de Modo -->
+                    <div class="text-center">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-3">Modo de juego</h2>
+
+                        <div class="flex items-center justify-center space-x-4">
+                            <button @click="anteriorModo()"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+
+                            <div class="relative">
+                                <div class="w-80 h-24 bg-black rounded-2xl shadow-xl flex items-center justify-center transition-all duration-300 relative border"
+                                    style="color: #FF4081; border-color: #FF4081;"
+                                    :class="animandoModo ? 'scale-95 opacity-70' : 'scale-100 opacity-100'">
+                                    <!-- Icono de candado para modos bloqueados -->
+                                    <div x-show="!modos[modoActual].disponible"
+                                        class="absolute top-2 right-2 bg-red-500 rounded-full w-6 h-6 flex items-center justify-center">
+                                        <i class="fas fa-lock text-white text-xs"></i>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <div class="mb-1">
+                                            <i :class="modos[modoActual].icono" class="text-2xl"
+                                                :class="!modos[modoActual].disponible ? 'opacity-60' : ''"></i>
+                                        </div>
+                                        <h3 class="text-lg font-bold mb-1" x-text="modos[modoActual].nombre"
+                                            :class="!modos[modoActual].disponible ? 'opacity-60' : ''"></h3>
+                                        <p class="text-xs opacity-90" x-text="modos[modoActual].descripcion"
+                                            :class="!modos[modoActual].disponible ? 'opacity-50' : ''"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="siguienteModo()"
+                                class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 transform hover:scale-110 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Contenedor inferior con botón y mensaje en posición estratégica -->
+                <div class="flex flex-col items-center space-y-6 mt-8 pb-8">
+                    <!-- Botón JUGAR estilo azul -->
+                    <button
+                        class="group relative px-8 py-3 text-white font-semibold text-lg rounded-xl transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200 hover:shadow-xl transform hover:scale-105"
+                        style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); min-height: 3.5rem;"
+                        :class="(puedeJugar() && puedeJugarNivel(nivelActual) && modos[modoActual].disponible) ? 'hover:shadow-xl transform hover:scale-105 hover:bg-gradient-to-br hover:from-blue-700 hover:to-blue-900' : 'opacity-50 cursor-not-allowed'"
+                        :disabled="!(puedeJugar() && puedeJugarNivel(nivelActual) && modos[modoActual].disponible)"
+                        @click="(puedeJugar() && puedeJugarNivel(nivelActual) && modos[modoActual].disponible) && crearPartida()">
+                        <div class="flex items-center space-x-3">
+                            <span>JUGAR</span>
+                            <i
+                                class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
+                        </div>
+
+                        <!-- Efecto de brillo -->
+                        <div x-show="puedeJugar()"
+                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 transition-all duration-700 group-hover:translate-x-full rounded-xl">
+                        </div>
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sección Unirse a partida -->
+        <div id="unirse-section" class="content-section">
+            <div class="w-full h-full flex flex-col items-center justify-center" x-data="{ 
+                    codigo: '',
+                    copied: false,
+                    esHost: false,
+                    loading: false,
+                    errorMessage: '',
+                    showSuccessMessage: false,
+                    init() {
+                        this.resetSection();
+                    },
+                    resetSection(forced = false) {
+                        // Si es un reset forzado (por ejemplo, después de terminar una partida)
+                        if (forced) {
+                            this.codigo = '';
+                            this.copied = false;
+                            this.esHost = false;
+                            this.loading = false;
+                            this.errorMessage = '';
+                            this.showSuccessMessage = false;
+                            this.limpiarLocalStorage();
+                            return;
+                        }
+                        
+                        // Restablecer completamente la sección
+                        this.codigo = '';
+                        this.copied = false;
+                        this.esHost = false;
+                        this.loading = false;
+                        this.errorMessage = '';
+                        this.showSuccessMessage = false;
+                        
+                        // Verificar si hay un código de partida creado solo si es host
+                        const gameCode = localStorage.getItem('gameCode');
+                        const isHost = localStorage.getItem('isHost') === 'true';
+                        if (gameCode && isHost) {
+                            // Verificar en el servidor si la sala sigue activa
+                            this.verificarSalaActiva(gameCode);
+                        } else {
+                            // Limpiar localStorage si no es host
+                            this.limpiarLocalStorage();
+                        }
+                    },
+                    onGameFinished() {
+                        // Función específica para cuando termina una partida
+                        console.log('Evento game-finished recibido - limpiando sección unirse');
+                        this.resetSection(true); // Reset forzado
+                    },
+                    verificarSalaActiva(code) {
+                        fetch(`/api/game-rooms/room-info/${code}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.room.status === 'waiting') {
+                                this.codigo = code;
+                                this.esHost = data.room.isHost;
+                                this.showSuccessMessage = this.esHost;
+                            } else {
+                                // La sala no existe o ya no está disponible
+                                this.limpiarLocalStorage();
+                            }
+                        })
+                        .catch(() => {
+                            // Error de red, limpiar por seguridad
+                            this.limpiarLocalStorage();
+                        });
+                    },
+                    limpiarLocalStorage() {
+                        localStorage.removeItem('gameCode');
+                        localStorage.removeItem('gameConfig');
+                        localStorage.removeItem('isHost');
+                    },
+                    copiarCodigo() {
+                        const codigoACopiar = this.codigo || '657-934';
+                        navigator.clipboard.writeText(codigoACopiar).then(() => {
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        }).catch(() => {
+                            // Fallback para navegadores sin clipboard API
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        });
+                    },
+                    unirseAPartida() {
+                        if (this.codigo.length < 6) {
+                            this.errorMessage = 'El código debe tener al menos 6 caracteres';
+                            setTimeout(() => { this.errorMessage = ''; }, 3000);
+                            return;
+                        }
+                        
+                        this.loading = true;
+                        this.errorMessage = '';
+                        
+                        // Determinar si crear o unirse a sala
+                        const endpoint = this.esHost ? '/api/game-rooms/room-info/' + this.codigo : '/api/game-rooms/join-room';
+                        const method = this.esHost ? 'GET' : 'POST';
+                        const body = this.esHost ? null : JSON.stringify({ code: this.codigo });
+                        
+                        const options = {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        };
+                        
+                        if (body) {
+                            options.body = body;
+                        }
+                        
+                        fetch(endpoint, options)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.loading = false;
+                            
+                            if (data.success) {
+                                console.log('Uniéndose/iniciando partida con código:', this.codigo);
+                                
+                                // Guardar información de la sala
+                                localStorage.setItem('gameCode', this.codigo);
+                                localStorage.setItem('isHost', data.room.isHost ? 'true' : 'false');
+                                
+                                // Redirigir al juego
+                                window.location.href = '/jugar?code=' + this.codigo;
+                            } else {
+                                this.errorMessage = data.error || 'Error desconocido';
+                                setTimeout(() => { this.errorMessage = ''; }, 5000);
+                            }
+                        })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error:', error);
+                            this.errorMessage = 'Error de conexión. Inténtalo de nuevo.';
+                            setTimeout(() => { this.errorMessage = ''; }, 5000);
+                        });
+                    },
+                    compartirCodigo() {
+                        if (navigator.share && this.codigo) {
+                            navigator.share({
+                                title: 'Juego de Lotería',
+                                text: 'Únete a mi partida con el código: ' + this.codigo,
+                                url: window.location.origin + '/jugar?code=' + this.codigo
+                            });
+                        } else {
+                            this.copiarCodigo();
+                        }
+                    },
+                    resetUserRooms() {
+                        // Función para limpiar todas las salas del usuario
+                        fetch('/api/game-rooms/reset-user-rooms', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                this.resetSection();
+                                console.log('Salas del usuario restablecidas');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error restableciendo salas:', error);
+                        });
+                    }
+                }" @game-finished.window="onGameFinished()" @page-leave.window="resetSection()">
+
+                <!-- Logo superior con más separación -->
+                <div class="mb-16 transform hover:scale-105 transition-all duration-300">
+                    <img src="/img/logo_formularios.svg" alt="Logo"
+                        class="w-36 h-36 mx-auto drop-shadow-xl filter saturate-110">
+                </div>
+
+                <!-- Campo de código con mejor diseño -->
+                <div class="mb-12">
+                    <div class="relative">
+                        <div class="bg-white rounded-3xl shadow-2xl border-2 border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-3xl focus-within:shadow-3xl focus-within:ring-4 focus-within:ring-blue-100 focus-within:border-blue-300"
+                            style="width: 420px; height: 70px;">
+                            <div class="flex items-center h-full">
+                                <input type="text" x-model="codigo" placeholder="657-934"
+                                    class="flex-1 px-6 py-4 text-xl font-bold text-center text-gray-800 bg-transparent border-0 focus:outline-none placeholder-gray-400 h-full"
+                                    maxlength="7" style="letter-spacing: 3px;">
+                                <div class="w-px h-10 bg-gray-200"></div>
+                                <button @click="copiarCodigo()"
+                                    class="group px-4 py-4 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset h-full flex items-center justify-center"
+                                    style="width: 70px;" :class="{ 'text-green-600 bg-green-50': copied }"
+                                    title="Copiar código de ejemplo">
+                                    <i class="fas text-lg transition-transform duration-300 group-hover:scale-110"
+                                        :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mensaje de copiado mejorado -->
+                        <div x-show="copied" x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                            x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 transform translate-y-2 scale-95"
+                            class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-1 rounded-lg text-sm font-semibold shadow-xl">
+                            <i class="fas fa-check mr-1"></i>¡Copiado!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón principal más compacto -->
+                <div class="mb-8">
+                    <!-- Mostrar mensaje especial si es host -->
+                    <!-- Mensaje de éxito para host -->
+                    <div x-show="showSuccessMessage && esHost" x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                        x-transition:enter-end="opacity-100 transform translate-y-0 scale-100" class="mb-4 text-center">
+                        <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4 max-w-md mx-auto">
+                            <div class="flex items-center justify-center space-x-2 text-green-800">
+                                <i class="fas fa-crown text-lg"></i>
+                                <span class="font-semibold">¡Partida creada!</span>
+                            </div>
+                            <p class="text-green-700 text-sm mt-1">Comparte el código con otros jugadores</p>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje de error -->
+                    <div x-show="errorMessage" x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                        x-transition:enter-end="opacity-100 transform translate-y-0 scale-100" class="mb-4 text-center">
+                        <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 max-w-md mx-auto">
+                            <div class="flex items-center justify-center space-x-2 text-red-800">
+                                <i class="fas fa-exclamation-triangle text-lg"></i>
+                                <span class="font-semibold">Error</span>
+                            </div>
+                            <p class="text-red-700 text-sm mt-1" x-text="errorMessage"></p>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex flex-col space-y-3">
+                        <button @click="unirseAPartida()"
+                            class="group relative px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-lg"
+                            :disabled="codigo.length < 6 || loading">
+                            <div class="flex items-center justify-center space-x-3">
+                                <!-- Spinner de carga -->
+                                <div x-show="loading" class="animate-spin">
+                                    <i class="fas fa-spinner text-lg"></i>
+                                </div>
+                                <!-- Ícono normal -->
+                                <i x-show="!loading"
+                                    class="fas fa-rocket text-lg transition-transform duration-300 group-hover:translate-x-1"></i>
+                                <!-- Texto del botón -->
+                                <span x-show="!loading" x-text="esHost ? 'Iniciar Partida' : 'Unirse a Partida'"></span>
+                                <span x-show="loading">Procesando...</span>
+                            </div>
+
+                            <!-- Efecto de brillo -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 transition-all duration-700 group-hover:translate-x-full rounded-xl">
+                            </div>
+                        </button>
+
+                        <!-- Botón compartir (solo para host) -->
+                        <button x-show="esHost && codigo.length >= 6" @click="compartirCodigo()"
+                            class="group relative px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-200 shadow-lg">
+                            <div class="flex items-center justify-center space-x-3">
+                                <i class="fas fa-share-alt text-lg"></i>
+                                <span>Compartir Código</span>
+                            </div>
+
+                            <!-- Efecto de brillo -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 transition-all duration-700 group-hover:translate-x-full rounded-xl">
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Indicador de estado simplificado -->
+                <div class="text-center max-w-sm" x-show="codigo.length > 0 && codigo.length < 6">
+                    <div
+                        class="text-amber-600 text-sm font-medium bg-amber-50/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-amber-200">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        El código debe tener al menos 6 caracteres
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sección Estudiar Vocabulario -->
+        <div id="vocabulario-section" class="content-section">
+            <div class="vocabulary-container">
+                <h2 class="vocabulary-title text-center mb-4">Nivel A1</h2>
+
+                <!-- Carrusel de cartas -->
+                <div class="carousel-container">
+                    <button class="carousel-btn carousel-btn-prev" id="carousel-prev">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <div class="carousel-wrapper">
+                        <div class="carousel-track" id="carousel-track">
+                            <!-- Las cartas se generarán dinámicamente con JavaScript -->
+                        </div>
+                    </div>
+
+                    <button class="carousel-btn carousel-btn-next" id="carousel-next">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Controles adicionales -->
+                <div class="carousel-controls text-center mt-4">
+                    <button class="btn btn-outline-primary me-2" id="carousel-sound">
+                        <i class="bi bi-volume-up"></i>
+                    </button>
+                    <span class="carousel-counter" id="carousel-counter">1 / 54</span>
+                    <button class="btn btn-outline-primary ms-2" id="carousel-play">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- fin content -->
+    <!-- Scripts Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar hamburguesa con header móvil
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const mobileHamburger = document.getElementById('mobile-hamburger');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        // Mostrar/ocultar sidebar en móvil
+        function openSidebar() {
+            sidebar.classList.add('expanded');
+            content.classList.add('expanded');
+            sidebarBackdrop.style.display = 'block';
+            setTimeout(() => { sidebarBackdrop.style.opacity = '1'; }, 10);
+            hamburgerIcon.classList.remove('bi-list');
+            hamburgerIcon.classList.add('bi-x');
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('expanded');
+            content.classList.remove('expanded');
+            sidebarBackdrop.style.opacity = '0';
+            setTimeout(() => { sidebarBackdrop.style.display = 'none'; }, 300);
+            hamburgerIcon.classList.remove('bi-x');
+            hamburgerIcon.classList.add('bi-list');
+        }
+        mobileHamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!sidebar.classList.contains('expanded')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        });
+        // Cerrar sidebar al tocar el fondo
+        sidebarBackdrop.addEventListener('click', closeSidebar);
+        // Cerrar sidebar con logo (en móvil y PC)
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.innerWidth <= 600) {
+                closeSidebar();
+            } else {
+                // En PC: no hacer nada, se maneja por hover
+                return;
+            }
+        });
+
+        // Funcionalidad hover para PC
+        if (window.innerWidth > 600) {
+            let hoverTimeout;
+
+            sidebar.addEventListener('mouseenter', () => {
+                clearTimeout(hoverTimeout);
+                sidebar.classList.add('expanded');
+                content.classList.add('expanded');
+            });
+
+            sidebar.addEventListener('mouseleave', () => {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = setTimeout(() => {
+                    sidebar.classList.remove('expanded');
+                    content.classList.remove('expanded');
+                }, 200); // Pequeño delay para evitar parpadeo
+            });
+        }
+
+        // Recargar hover functionality al redimensionar ventana
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 600) {
+                let hoverTimeout;
+
+                sidebar.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    sidebar.classList.add('expanded');
+                    content.classList.add('expanded');
+                });
+
+                sidebar.addEventListener('mouseleave', () => {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        sidebar.classList.remove('expanded');
+                        content.classList.remove('expanded');
+                    }, 200);
+                });
+            }
+        });
+        // Dropdown usuario sidebar
+        const userBtn = document.getElementById('sidebar-user-btn');
+        const userDropdown = document.getElementById('sidebar-user-dropdown');
+        const dropdownDivider = document.getElementById('dropdown-divider');
+        if (userBtn && userDropdown && dropdownDivider) {
+            userBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const expanded = userBtn.getAttribute('aria-expanded') === 'true';
+                userBtn.setAttribute('aria-expanded', !expanded);
+                userDropdown.classList.toggle('show');
+                if (userDropdown.classList.contains('show')) {
+                    dropdownDivider.style.display = 'block';
+                } else {
+                    dropdownDivider.style.display = 'none';
+                }
+            });
+            userDropdown.addEventListener('click', e => e.stopPropagation());
+        }
+
+        // Cerrar sidebar y dropdown al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const isMobile = window.innerWidth <= 600;
+
+            // Cerrar dropdown si está abierto y no se hizo clic en él o en el botón
+            if (userDropdown && userDropdown.classList.contains('show')) {
+                if (!userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                    userBtn.setAttribute('aria-expanded', 'false');
+                    if (dropdownDivider) {
+                        dropdownDivider.style.display = 'none';
+                    }
+                }
+            }
+
+            // Cerrar sidebar si está expandido y no se hizo clic en él (tanto móvil como PC)
+            if (sidebar.classList.contains('expanded')) {
+                if (!sidebar.contains(e.target) &&
+                    (!mobileHamburger || !mobileHamburger.contains(e.target))) {
+                    if (isMobile) {
+                        closeSidebar();
+                    } else {
+                        // En PC, contraer el sidebar
+                        sidebar.classList.remove('expanded');
+                        content.classList.remove('expanded');
+                    }
+                }
+            }
+        });
+        // Ajustar posición del dropdown en móvil
+        function adjustDropdownPosition() {
+            if (window.innerWidth <= 600) {
+                userDropdown.style.bottom = 'auto';
+                userDropdown.style.top = 'unset';
+                userDropdown.style.position = 'fixed';
+                userDropdown.style.left = '0';
+                userDropdown.style.right = '0';
+                userDropdown.style.width = '100vw';
+                userDropdown.style.zIndex = '3001';
+                userDropdown.style.background = '#181818';
+                userDropdown.style.borderRadius = '0 0 1rem 1rem';
+            } else {
+                userDropdown.style.position = '';
+                userDropdown.style.width = '';
+                userDropdown.style.left = '';
+                userDropdown.style.right = '';
+                userDropdown.style.bottom = '';
+                userDropdown.style.background = '';
+                userDropdown.style.borderRadius = '';
+            }
+        }
+        window.addEventListener('resize', adjustDropdownPosition);
+        adjustDropdownPosition();
+
+        // Sistema de navegación por secciones mejorado
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const contentSections = document.querySelectorAll('.content-section');
+
+        // Función para mostrar solo una sección y ocultar las demás
+        function showSection(sectionName) {
+            // Resetear sección "Unirse a partida" si se navega a otra sección
+            if (sectionName !== 'unirse') {
+                const unirseSectionDiv = document.querySelector('#unirse-section > div');
+                if (unirseSectionDiv && Alpine.$data) {
+                    const unirseSectionData = Alpine.$data(unirseSectionDiv);
+                    if (unirseSectionData && typeof unirseSectionData.resetSection === 'function') {
+                        unirseSectionData.resetSection();
+                    }
+                }
+            }
+
+            // Ocultar todas las secciones
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Mostrar la sección solicitada
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+
+                // Inicializar carrusel si es la sección de vocabulario
+                if (sectionName === 'vocabulario' && !vocabularyCarousel) {
+                    setTimeout(() => {
+                        vocabularyCarousel = new VocabularyCarousel();
+                    }, 100);
+                }
+
+                // Inicializar carrusel si es la sección de inicio
+                if (sectionName === 'inicio' && !inicioCarousel) {
+                    setTimeout(() => {
+                        inicioCarousel = new InicioCarousel();
+                    }, 100);
+                }
+
+                // Actualizar datos cuando se muestra la sección "Unirse a partida"
+                if (sectionName === 'unirse') {
+                    setTimeout(() => {
+                        const unirseSectionDiv = document.querySelector('#unirse-section > div');
+                        if (unirseSectionDiv && Alpine.$data) {
+                            const unirseSectionData = Alpine.$data(unirseSectionDiv);
+                            if (unirseSectionData) {
+                                // Recargar datos del localStorage
+                                const gameCode = localStorage.getItem('gameCode');
+                                const isHost = localStorage.getItem('isHost') === 'true';
+                                if (gameCode) {
+                                    unirseSectionData.codigo = gameCode;
+                                    unirseSectionData.esHost = isHost;
+                                    console.log('Sección Unirse cargada con código:', gameCode);
+                                }
+                            }
+                        }
+                    }, 100);
+                }
+            }
+
+            // Actualizar enlaces activos del sidebar
+            sidebarLinks.forEach(l => l.classList.remove('active'));
+            const activeLink = document.querySelector(`[data-section="${sectionName}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+
+            // Cerrar sidebar automáticamente solo en móvil
+            if (window.innerWidth <= 600) {
+                closeSidebar();
+            }
+        }
+
+        // Event listeners para los enlaces del sidebar
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionName = link.getAttribute('data-section');
+                showSection(sectionName);
+            });
+        });
+
+        // Función para ir a la sección Jugar (llamada desde el botón)
+        function goToPlaySection() {
+            showSection('jugar');
+        }
+
+        // Inicializar la primera sección como activa
+        document.addEventListener('DOMContentLoaded', function () {
+            showSection('inicio');
+        });
+
+        // Carrusel de vocabulario
+        let vocabularyCarousel = null;
+
+        class VocabularyCarousel {
+            constructor() {
+                this.currentIndex = 0;
+                this.totalCards = 54;
+                this.track = document.getElementById('carousel-track');
+                this.prevBtn = document.getElementById('carousel-prev');
+                this.nextBtn = document.getElementById('carousel-next');
+                this.counter = document.getElementById('carousel-counter');
+                this.soundBtn = document.getElementById('carousel-sound');
+                this.playBtn = document.getElementById('carousel-play');
+                this.cards = [];
+
+                this.init();
+            }
+
+            init() {
+                this.createCards();
+                this.updateCarousel();
+                this.updateCounter();
+                this.updateButtons();
+                this.bindEvents();
+            }
+
+            createCards() {
+                for (let i = 1; i <= this.totalCards; i++) {
+                    const card = document.createElement('div');
+                    card.className = 'carousel-card';
+                    card.dataset.index = i - 1;
+
+                    const img = document.createElement('img');
+                    img.src = `/img/carrusel/CARTA ${i}.svg`;
+                    img.alt = `Carta ${i}`;
+                    img.loading = 'lazy';
+
+                    card.appendChild(img);
+                    this.track.appendChild(card);
+                    this.cards.push(card);
+                }
+            }
+
+            updateCarousel() {
+                this.cards.forEach((card, index) => {
+                    card.classList.remove('active', 'prev', 'next', 'hidden');
+
+                    if (index === this.currentIndex) {
+                        card.classList.add('active');
+                    } else if (index === this.currentIndex - 1) {
+                        card.classList.add('prev');
+                    } else if (index === this.currentIndex + 1) {
+                        card.classList.add('next');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            }
+
+            bindEvents() {
+                this.prevBtn.addEventListener('click', () => this.goToPrevious());
+                this.nextBtn.addEventListener('click', () => this.goToNext());
+                this.soundBtn.addEventListener('click', () => this.playSound());
+                this.playBtn.addEventListener('click', () => this.toggleAutoplay());
+
+                // Soporte para teclado
+                document.addEventListener('keydown', (e) => {
+                    if (document.getElementById('vocabulario-section').style.display !== 'none') {
+                        if (e.key === 'ArrowLeft') this.goToPrevious();
+                        if (e.key === 'ArrowRight') this.goToNext();
+                        if (e.key === ' ') {
+                            e.preventDefault();
+                            this.playSound();
+                        }
+                    }
+                });
+
+                // Soporte para gestos touch
+                let startX = 0;
+                this.track.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                });
+
+                this.track.addEventListener('touchend', (e) => {
+                    const endX = e.changedTouches[0].clientX;
+                    const diff = startX - endX;
+
+                    if (Math.abs(diff) > 50) { // Mínimo swipe de 50px
+                        if (diff > 0) {
+                            this.goToNext();
+                        } else {
+                            this.goToPrevious();
+                        }
+                    }
+                });
+
+                // Click en cartas laterales para navegar
+                this.cards.forEach((card, index) => {
+                    card.addEventListener('click', () => {
+                        if (index !== this.currentIndex) {
+                            this.goToCard(index);
+                        }
+                    });
+                });
+            }
+
+            goToNext() {
+                if (this.currentIndex < this.totalCards - 1) {
+                    this.currentIndex++;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            goToPrevious() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            goToCard(index) {
+                if (index >= 0 && index < this.totalCards) {
+                    this.currentIndex = index;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            updateCounter() {
+                this.counter.textContent = `${this.currentIndex + 1} / ${this.totalCards}`;
+            }
+
+            updateButtons() {
+                this.prevBtn.disabled = this.currentIndex === 0;
+                this.nextBtn.disabled = this.currentIndex === this.totalCards - 1;
+            }
+
+            playSound() {
+                // Efecto visual para el botón de sonido
+                this.soundBtn.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.soundBtn.style.transform = 'scale(1)';
+                }, 150);
+
+                // Aquí se puede agregar la funcionalidad de audio real
+                console.log(`Reproduciendo sonido para carta ${this.currentIndex + 1}`);
+            }
+
+            toggleAutoplay() {
+                if (this.autoplayInterval) {
+                    clearInterval(this.autoplayInterval);
+                    this.autoplayInterval = null;
+                    this.playBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                } else {
+                    this.autoplayInterval = setInterval(() => {
+                        if (this.currentIndex < this.totalCards - 1) {
+                            this.goToNext();
+                        } else {
+                            this.goToCard(0); // Volver al inicio
+                        }
+                    }, 3000);
+                    this.playBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                }
+            }
+        }
+
+        // Carrusel de inicio
+        let inicioCarousel = null;
+
+        class InicioCarousel {
+            constructor() {
+                this.currentIndex = 0;
+                this.totalCards = 3;
+                this.track = document.getElementById('inicio-carousel-track');
+                this.prevBtn = document.getElementById('inicio-carousel-prev');
+                this.nextBtn = document.getElementById('inicio-carousel-next');
+                this.counter = document.getElementById('inicio-carousel-counter');
+                this.cards = [];
+                this.cardContents = [
+                    {
+                        title: 'Tips de Aprendizaje',
+                        icon: 'bi-lightbulb',
+                        color: 'warning',
+                        content: `
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-clock text-primary me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 1rem;">
+                                        <strong>Estudia diariamente:</strong> La constancia es clave para el aprendizaje efectivo.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-mic text-success me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 1rem;">
+                                        <strong>Practica hablando:</strong> Mejora pronunciación y fluidez.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-headphones text-info me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 1rem;">
+                                        <strong>Escucha contenido:</strong> Podcasts y videos en inglés.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-start mb-1">
+                                    <i class="bi bi-people text-warning me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 1rem;">
+                                        <strong>Conversa con otros:</strong> Acelera tu aprendizaje.
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-film text-danger me-2" style="font-size: 1rem;"></i>
+                                    <div style="font-size: 1rem;">
+                                        <strong>Ve películas:</strong> Con subtítulos para mejorar.
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Palabra Destacada',
+                        icon: 'bi-star',
+                        color: 'primary',
+                        content: `
+                            <div class="mb-3">
+                                <h3 class="fw-bold mb-1">Grateful</h3>
+                                <span class="text-muted">/ ˈɡreɪtfəl /</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Significado:</strong> <span class="text-success">Agradecido</span>
+                            </div>
+                            <div class="mb-2">
+                                <em>Ejemplo:</em> <span class="text-primary">I'm grateful for your help.</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Sinónimos comunes:</strong>
+                                <ul class="list-unstyled mt-1">
+                                    <li>• Thankful</li>
+                                    <li>• Appreciative</li>
+                                    <li>• Obliged</li>
+                                </ul>
+                            </div>
+                            <div class="mb-2">
+                                <span class="badge bg-success">Nivel Intermedio</span>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Recursos Útiles',
+                        icon: 'bi-link-45deg',
+                        color: 'info',
+                        content: `
+                            <div class="mb-3">
+                                <h6 class="fw-semibold mb-2">Diccionarios y traductores:</h6>
+                                <div class="mb-2">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-book text-primary me-2"></i>
+                                        <div>
+                                            <a href="https://www.wordreference.com" target="_blank" class="resource-link">
+                                                <strong>WordReference</strong><br>
+                                                <small class="text-muted">Diccionario bilingüe completo</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-translate text-info me-2"></i>
+                                        <div>
+                                            <a href="https://www.deepl.com" target="_blank" class="resource-link">
+                                                <strong>DeepL</strong><br>
+                                                <small class="text-muted">Traductor avanzado y natural</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="fw-semibold mb-2">Práctica y aprendizaje:</h6>
+                                <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-headphones text-warning me-2"></i>
+                                        <div>
+                                            <a href="https://www.elllo.org" target="_blank" class="resource-link">
+                                                <strong>ELLLO</strong><br>
+                                                <small class="text-muted">Escucha inglés real</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-phone text-success me-2"></i>
+                                        <div>
+                                            <strong>Duolingo</strong><br>
+                                            <small class="text-muted">Lecciones diarias</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.createCards();
+                this.updateCarousel();
+                this.updateCounter();
+                this.updateButtons();
+                this.bindEvents();
+            }
+
+            createCards() {
+                this.cardContents.forEach((content, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'carousel-card';
+                    card.dataset.index = index;
+
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card dashboard-card h-100 border-0 shadow-sm';
+                    cardElement.style.width = '100%';
+                    cardElement.style.height = '100%';
+                    cardElement.style.background = '#fff';
+                    cardElement.style.borderRadius = '15px';
+                    cardElement.style.padding = '2rem';
+                    cardElement.style.display = 'flex';
+                    cardElement.style.flexDirection = 'column';
+
+                    cardElement.innerHTML = `
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi ${content.icon} text-${content.color} me-3" style="font-size: 2rem;"></i>
+                            <h4 class="mb-0 text-${content.color} fw-bold">${content.title}</h4>
+                        </div>
+                        <div class="flex-grow-1">
+                            ${content.content}
+                        </div>
+                    `;
+
+                    card.appendChild(cardElement);
+                    this.track.appendChild(card);
+                    this.cards.push(card);
+                });
+            }
+
+            updateCarousel() {
+                this.cards.forEach((card, index) => {
+                    card.classList.remove('active', 'prev', 'next', 'hidden');
+
+                    if (index === this.currentIndex) {
+                        card.classList.add('active');
+                    } else if (index === this.currentIndex - 1) {
+                        card.classList.add('prev');
+                    } else if (index === this.currentIndex + 1) {
+                        card.classList.add('next');
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+            }
+
+            bindEvents() {
+                this.prevBtn.addEventListener('click', () => this.goToPrevious());
+                this.nextBtn.addEventListener('click', () => this.goToNext());
+
+                // Soporte para gestos touch
+                let startX = 0;
+                this.track.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                });
+
+                this.track.addEventListener('touchend', (e) => {
+                    const endX = e.changedTouches[0].clientX;
+                    const diff = startX - endX;
+
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) {
+                            this.goToNext();
+                        } else {
+                            this.goToPrevious();
+                        }
+                    }
+                });
+
+                // Click en cartas laterales para navegar
+                this.cards.forEach((card, index) => {
+                    card.addEventListener('click', () => {
+                        if (index !== this.currentIndex) {
+                            this.goToCard(index);
+                        }
+                    });
+                });
+            }
+
+            goToNext() {
+                if (this.currentIndex < this.totalCards - 1) {
+                    this.currentIndex++;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            goToPrevious() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            goToCard(index) {
+                if (index >= 0 && index < this.totalCards) {
+                    this.currentIndex = index;
+                    this.updateCarousel();
+                    this.updateCounter();
+                    this.updateButtons();
+                }
+            }
+
+            updateCounter() {
+                this.counter.textContent = `${this.currentIndex + 1} / ${this.totalCards}`;
+            }
+
+            updateButtons() {
+                this.prevBtn.disabled = this.currentIndex === 0;
+                this.nextBtn.disabled = this.currentIndex === this.totalCards - 1;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #fff;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 80px;
+            background: #000;
+            color: #fff;
+            padding: 1.2rem 0.5rem 1rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1040;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.expanded {
+            width: 300px;
+            align-items: center;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            left: 0 !important;
+            /* Asegura que el sidebar se muestre en móvil al expandirse */
+        }
+
+        .sidebar-logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            min-height: 60px;
+        }
+
+        .logo {
+            display: block;
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), height 0.35s cubic-bezier(0.4, 0, 0.2, 1), margin 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.expanded .logo {
+            width: 90px;
+            height: 90px;
+            max-width: 100%;
+            max-height: 100%;
+            margin: 0 auto 1.2rem auto;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            /* Mantener el mismo ancho base para los enlaces en ambos estados */
+        }
+
+        .sidebar.expanded .sidebar-menu {
+            align-items: flex-start;
+        }
+
+        .sidebar a {
+            color: #fff !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.65rem 1.2rem;
+            border-radius: 0.7rem;
+            margin-bottom: 0.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+            opacity: 0;
+            pointer-events: none;
+            width: 100%;
+            min-width: 0;
+            max-width: 180px;
+            background: #000;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            transition: background 0.18s, color 0.18s, opacity 0.3s, max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.expanded a {
+            opacity: 1;
+            pointer-events: auto;
+            max-width: 300px;
+            width: 100%;
+            justify-content: flex-start;
+            text-align: left;
+            background: none;
+            color: #fff !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .sidebar a.active,
+        .sidebar a:hover {
+            background: #23233a;
+            color: #fff !important;
+        }
+
+        .sidebar a i {
+            color: #fff !important;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1.5px solid #23233a;
+            padding-top: 1.2rem;
+            display: none;
+            align-items: center;
+            gap: 0.7rem;
+            width: 100%;
+            justify-content: center;
+            position: relative;
+            background: #000;
+        }
+
+        .sidebar.expanded .sidebar-footer {
+            display: flex;
+        }
+
+        /* SOLO EN MÓVIL: mostrar siempre el footer cuando el sidebar está expandido */
+        @media (max-width: 600px) {
+            .sidebar {
+                position: fixed;
+                top: 60px !important;
+                left: -100vw;
+                width: 100vw !important;
+                min-width: 0 !important;
+                max-width: 100vw !important;
+                height: calc(100vh - 60px) !important;
+                padding: 0 !important;
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+                transition: left 0.3s, width 0.3s;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 320px;
+            }
+
+            .sidebar-logo-container {
+                flex: 0 0 auto;
+                pointer-events: none;
+                min-height: 48px;
+            }
+
+            .sidebar.expanded .sidebar-logo-container {
+                display: none !important;
+            }
+
+            .sidebar-menu {
+                flex: 1 1 0px !important;
+                min-height: 120px;
+                overflow-y: auto;
+                width: 100%;
+                margin-bottom: 0.5rem;
+                background: transparent;
+            }
+
+            .sidebar-menu .sidebar-footer {
+                display: flex !important;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.7rem;
+                width: 100%;
+                padding: 0.7rem 0.5rem 0.5rem 0.5rem !important;
+                border-top: 1.5px solid #23233a;
+                background: transparent !important;
+                margin-top: 0.5rem;
+                position: static;
+            }
+
+            .sidebar-menu .sidebar-footer .sidebar-footer-btn,
+            .sidebar-menu .sidebar-footer .user-avatar,
+            .sidebar-menu .sidebar-footer .user-name,
+            .sidebar-menu .sidebar-footer .user-email {
+                color: #fff !important;
+            }
+
+            .sidebar-menu .sidebar-footer .sidebar-footer-btn i {
+                color: #fff !important;
+            }
+
+            .sidebar-footer {
+                display: none !important;
+            }
+        }
+
+        .sidebar-footer-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 0.7rem;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-size: 0.97rem;
+            font-weight: 400;
+            transition: background 0.18s;
+            position: relative;
+        }
+
+        .sidebar-footer-btn:hover,
+        .sidebar-footer-btn:focus {
+            background: #181818;
+        }
+
+        .sidebar-footer .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            color: #fff;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
+        }
+
+        .sidebar-footer .user-name {
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #fff;
+            line-height: 1.1;
+            font-family: 'Poppins', Arial, sans-serif;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
+        }
+
+        .sidebar-footer .user-email {
+            font-size: 0.81rem;
+            color: #bdbdbd;
+            margin-top: -2px;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .sidebar-footer .arrow {
+            margin-left: auto;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .sidebar-footer-btn[aria-expanded="true"] .arrow {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-footer-dropdown {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
+            background: #181818;
+            /* Fondo oscuro, variante del negro del dashboard */
+            border-radius: 1rem;
+            /* box-shadow eliminado */
+            padding: 0.9rem 0.7rem 0.5rem 0.7rem;
+            z-index: 9999;
+            animation: fadeIn 0.18s;
+        }
+
+        .sidebar-footer-dropdown.show {
+            display: block;
+        }
+
+        .sidebar-footer-dropdown .user-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 0.95rem;
+            margin-bottom: 0.1rem;
+            background: #444;
+        }
+
+        .sidebar-footer-dropdown .user-name {
+            font-size: 0.93rem;
+            font-weight: 500;
+            color: #fff;
+            font-family: 'Poppins', Arial, sans-serif;
+        }
+
+        .sidebar-footer-dropdown .user-email {
+            font-size: 0.8rem;
+            color: #bdbdbd;
+            margin-bottom: 0.5rem;
+            font-family: 'Poppins', Arial, sans-serif;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sidebar-footer-dropdown .dropdown-divider {
+            border-top: 1px solid #23233a;
+            margin: 0.4rem 0;
+        }
+
+        .sidebar-footer-dropdown .dropdown-item {
+            color: #fff;
+            padding: 0.45rem 0.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: 'Poppins', Arial, sans-serif;
+            font-weight: 400;
+            transition: background 0.18s, color 0.18s;
+        }
+
+        .sidebar-footer-dropdown .dropdown-item:hover {
+            background: rgb(7, 10, 243);
+            color: #fff;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content {
+            margin-left: 80px;
+            min-height: 100vh;
+            background: #fff;
+            transition: margin-left 0.3s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content.expanded {
+            margin-left: 300px;
+        }
+
+        @media (max-width: 600px) {
+            .content {
+                margin-left: 0 !important;
+            }
+
+            .content.expanded {
+                margin-left: 0 !important;
+            }
+        }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1.5px solid #e0e0e0;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-group {
+            max-width: 320px;
+        }
+
+        .dropdown .dropdown-toggle {
+            color: #222;
+            font-weight: 600;
+        }
+
+        .table {
+            background: #fff;
+            border-radius: 0.7rem;
+            overflow: hidden;
+        }
+
+        .card {
+            border-radius: 1rem;
+        }
+
+        .container-fluid.mt-4 {
+            margin-top: 0.5rem !important;
+        }
+
+        .row.my-4 {
+            margin-top: 0.2rem !important;
+            margin-bottom: 0.2rem !important;
+        }
+
+        .row.mt-5 {
+            margin-top: 0.5rem !important;
+        }
+
+        .table th,
+        .table td {
+            padding-top: 0.35rem !important;
+            padding-bottom: 0.35rem !important;
+            font-size: 0.82rem !important;
+        }
+
+        .card-header h5,
+        .container-fluid h3 {
+            font-size: 0.92rem !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+
+        /* Mostrar títulos completos y responsivos en el dashboard */
+        .dashboard-title,
+        .dashboard-title *,
+        .container-fluid h3,
+        .container-fluid h2,
+        .container-fluid h1,
+        .card-header h5,
+        .card-header h4,
+        .card-header h3,
+        .card-header h2,
+        .card-header h1 {
+            font-size: 1.1rem !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            display: block !important;
+        }
+
+        @media (max-width: 600px) {
+            #mobile-header {
+                display: flex !important;
+            }
+
+            #sidebar-backdrop {
+                display: none;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 60px !important;
+                left: -100vw;
+                width: 100vw !important;
+                min-width: 0 !important;
+                max-width: 100vw !important;
+                height: calc(100vh - 60px) !important;
+                padding: 0 !important;
+                box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+                transition: left 0.3s, width 0.3s;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 320px;
+            }
+
+            .sidebar-logo-container {
+                flex: 0 0 auto;
+                pointer-events: none;
+                min-height: 48px;
+            }
+
+            .sidebar.expanded .sidebar-logo-container {
+                display: none !important;
+            }
+
+            .sidebar-menu {
+                flex: 1 1 0px !important;
+                min-height: 120px;
+                overflow-y: auto;
+                width: 100%;
+                margin-bottom: 0.5rem;
+                background: transparent;
+            }
+
+            .sidebar-menu .sidebar-footer {
+                display: flex !important;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.7rem;
+                width: 100%;
+                padding: 0.7rem 0.5rem 0.5rem 0.5rem !important;
+                border-top: 1.5px solid #23233a;
+                background: transparent !important;
+                margin-top: 0.5rem;
+                position: static;
+            }
+
+            .sidebar-menu .sidebar-footer .sidebar-footer-btn,
+            .sidebar-menu .sidebar-footer .user-avatar,
+            .sidebar-menu .sidebar-footer .user-name,
+            .sidebar-menu .sidebar-footer .user-email {
+                color: #fff !important;
+            }
+
+            .sidebar-menu .sidebar-footer .sidebar-footer-btn i {
+                color: #fff !important;
+            }
+
+            .sidebar-footer {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 601px) {
+            #mobile-header {
+                display: none !important;
+            }
+
+            #sidebar-backdrop {
+                display: none !important;
+            }
+
+            .content,
+            .content.expanded {
+                margin-top: 0 !important;
+            }
+        }
+
+        /* Cards de usuario */
+        .user-rect-card {
+            background: #fff;
+            border-radius: 1.2rem;
+            border: 1.5px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            padding: 1.1rem 1.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Poppins', Arial, sans-serif;
+            transition: box-shadow 0.18s;
+        }
+
+        .user-rect-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+        }
+
+        .user-rect-id {
+            width: 7%;
+            min-width: 60px;
+            font-weight: 600;
+            color: #888;
+        }
+
+        .user-rect-status {
+            width: 13%;
+            min-width: 90px;
+        }
+
+        .user-rect-name {
+            width: 18%;
+            min-width: 120px;
+            font-weight: 600;
+        }
+
+        .user-rect-email {
+            width: 28%;
+            min-width: 140px;
+        }
+
+        .user-rect-profile {
+            width: 15%;
+            min-width: 80px;
+        }
+
+        .user-rect-actions {
+            width: 15%;
+            min-width: 100px;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 900px) {
+
+            .user-rect-id,
+            .user-rect-status,
+            .user-rect-name,
+            .user-rect-email,
+            .user-rect-profile,
+            .user-rect-actions {
+                width: auto;
+                min-width: 0;
+                flex: 1 1 100px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .user-rect-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
+                padding: 1rem 0.7rem;
+            }
+
+            .user-rect-id,
+            .user-rect-status,
+            .user-rect-name,
+            .user-rect-email,
+            .user-rect-profile,
+            .user-rect-actions {
+                width: 100%;
+                min-width: 0;
+                margin-bottom: 0.2rem;
+            }
+
+            .user-rect-actions {
+                justify-content: flex-start;
+            }
+        }
+
+        .modal-backdrop {
+            z-index: 1050 !important;
+            background: transparent !important;
+            opacity: 0 !important;
+        }
+
+        .modal {
+            z-index: 1060 !important;
+        }
+
+        /* Switch Bootstrap: círculo blanco y sin contorno azul */
+        .form-switch .form-check-input {
+            background-color: #e9ecef !important;
+            border: none !important;
+            position: relative;
+            min-width: 2.5em;
+            min-height: 1.5em;
+            border-radius: 1em;
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+            box-shadow: none !important;
+            transition: background-color 0.2s;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: #198754 !important;
+            /* verde Bootstrap */
+            border: none !important;
+        }
+
+        .form-switch .form-check-input:not(:checked) {
+            background-color: #dc3545 !important;
+            /* rojo Bootstrap */
+            border: none !important;
+        }
+
+        .form-switch .form-check-input::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 4px;
+            width: calc(1.1em);
+            height: calc(1.1em);
+            background: #fff !important;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            transition: left 0.2s;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .form-switch .form-check-input:checked::after {
+            left: calc(100% - 1.1em - 4px);
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .form-switch .form-check-input:checked {
+            background-color: #198754;
+            /* verde Bootstrap */
+            border: none;
+        }
+
+        .form-switch .form-check-input:focus {
+            box-shadow: none;
+            outline: none;
+        }
+
+        .form-switch .form-check-input::-webkit-slider-thumb {
+            display: none;
+        }
+
+        .form-switch .form-check-input::-moz-range-thumb {
+            display: none;
+        }
+
+        .form-switch .form-check-input::-ms-thumb {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header móvil: negro, logo a la izquierda, menú hamburguesa a la derecha -->
+    <header id="mobile-header" class="d-block d-md-none"
+        style="position:fixed;top:0;left:0;width:100vw;height:60px;background:#000;z-index:3000;display:flex;align-items:center;justify-content:space-between;padding:0 1rem;box-shadow:0 2px 12px rgba(0,0,0,0.18);">
+        <img src="/img/logo_formularios.svg" alt="Logo del proyecto" style="height:38px;width:auto;display:block;">
+        <button id="mobile-hamburger" aria-label="Abrir menú lateral"
+            style="background:transparent;border:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <i id="hamburger-icon" class="bi bi-list" style="color:#fff;font-size:2.2rem;"></i>
+        </button>
+    </header>
+    <div id="sidebar-backdrop"
+        style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.32);z-index:1999;transition:opacity 0.3s;">
+    </div>
+    <div id="sidebar" class="sidebar">
+        <div class="text-center mb-4 sidebar-logo-container">
+            <img src="/img/logo_formularios.svg" alt="Logo del proyecto" class="logo" id="sidebar-toggle">
+        </div>
+        <div class="sidebar-menu d-flex flex-column w-100">
+            <a href="#" class="active"><i class="bi bi-people me-2"></i> <span class="sidebar-link-text">Lista de
+                    usuarios</span></a>
+        </div>
+        <div class="sidebar-footer">
+            <% if (user && user.fullname) { %>
+                <button class="sidebar-footer-btn" id="sidebar-user-btn" aria-expanded="false" type="button">
+                    <div class="user-avatar">
+                        <% if (user && user.profilePicture) { %>
+                            <img src="<%= user.profilePicture %>" alt="Avatar"
+                                style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            <% } else { %>
+                                <%= user.fullname ? user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : 
+                                    ' ??' %>
+                                    <% } %>
+                    </div>
+                    <span class="user-name">
+                        <%= user.fullname %>
+                    </span>
+                    <i class="bi bi-chevron-down arrow"></i>
+                </button>
+                <div class="sidebar-footer-dropdown" id="sidebar-user-dropdown">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="user-avatar me-2">
+                            <% if (user && user.profilePicture) { %>
+                                <img src="<%= user.profilePicture %>" alt="Avatar"
+                                    style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                <% } else { %>
+                                    <%= user.fullname ? user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : 
+                                        ' ??' %>
+                                        <% } %>
+                        </div>
+                        <div style="min-width:0;">
+                            <div class="user-name">
+                                <%= user.fullname %>
+                            </div>
+                            <div class="user-email">
+                                <%= user.email ? user.email : 'correo@ejemplo.com' %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider" id="dropdown-divider" style="display:none;"></div>
+                    <div class="dropdown-item" onclick="location.href='/config'">
+                        <i class="bi bi-gear me-2"></i>Configuración
+                    </div>
+                    <div class="dropdown-item" onclick="location.href='/logout'">
+                        <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                    </div>
+                </div>
+                <% } else { %>
+                    <div style="color:yellow;font-weight:bold;">Usuario no definido</div>
+                    <% } %>
+        </div>
+    </div>
+    <div id="content" class="content">
+        <div class="container-fluid mt-4 px-3 px-md-5">
+            <!-- NUEVO PANEL DE ADMINISTRACIÓN DE USUARIOS EN RECTÁNGULOS -->
+            <div class="card mb-4 shadow-sm border-0" style="border-radius:1.5rem;">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                        <div class="bg-primary bg-opacity-10 rounded-4 px-4 py-2 mb-0 w-100 d-flex align-items-center"
+                            style="font-family:'Poppins',Arial,sans-serif;">
+                            <h4 class="mb-0 dashboard-title flex-grow-1 d-flex align-items-center gap-2"
+                                style="font-weight:700;">
+                                <span class="m-0 p-0" style="line-height:1;">Lista de Usuarios</span>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                        <div class="input-group search-group" style="max-width:320px;">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0" id="userSearchInput"
+                                placeholder="Buscar usuario..." style="font-family:'Poppins',Arial,sans-serif;">
+                        </div>
+                        <button class="btn btn-success d-flex align-items-center gap-1" id="addUserBtn"
+                            style="font-family:'Poppins',Arial,sans-serif;font-weight:600;">
+                            <i class="bi bi-person-plus-fill"></i> Agregar usuario
+                        </button>
+                    </div>
+                    <div class="mb-2">
+                        <span id="user-summary" class="badge bg-primary fs-6"
+                            style="font-family:'Poppins',Arial,sans-serif;font-weight:600;">Cargando...</span>
+                    </div>
+                    <!-- Encabezados como rectángulo -->
+                    <div class="bg-light rounded-4 px-3 py-2 mb-2 d-none d-md-flex align-items-center"
+                        style="font-family:'Poppins',Arial,sans-serif;font-weight:600;">
+                        <div class="col-1"><i class="bi bi-hash"></i> ID</div>
+                        <div class="col-2"><i class="bi bi-toggle-on"></i> Estado</div>
+                        <div class="col-2"><i class="bi bi-person"></i> Nombre</div>
+                        <div class="col-3"><i class="bi bi-envelope"></i> Correo</div>
+                        <div class="col-2"><i class="bi bi-person-badge"></i> Perfil</div>
+                        <div class="col-2"><i class="bi bi-gear"></i> Acciones</div>
+                    </div>
+                    <div id="users-rect-list" class="d-flex flex-column gap-3"></div>
+                </div>
+            </div>
+            <!-- FIN NUEVO PANEL -->
+
+            <!-- Modal Agregar Usuario -->
+            <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addUserModalLabel"><i
+                                    class="bi bi-person-plus-fill me-2"></i>Agregar Usuario</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addUserForm" novalidate>
+                                <div id="addUserError" class="alert alert-danger d-none p-2 mb-3"
+                                    style="font-size:0.95rem;border-radius:0.7rem;"></div>
+                                <div class="mb-3">
+                                    <label for="addUserName" class="form-label">Nombre y Apellido</label>
+                                    <input type="text" class="form-control" id="addUserName" required
+                                        pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$"
+                                        title="Debes ingresar nombre y apellido">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addUserEmail" class="form-label">Correo</label>
+                                    <input type="email" class="form-control" id="addUserEmail" required
+                                        pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9._%+\-]+\.[a-zA-Z]{2,}$"
+                                        title="Ingresa un correo electrónico válido">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addUserProfile" class="form-label">Perfil</label>
+                                    <select class="form-select" id="addUserProfile" required>
+                                        <option value="">Selecciona perfil</option>
+                                        <option value="Administrador">Administrador</option>
+                                        <option value="Usuario">Usuario</option>
+                                        <option value="Docente">Docente</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="addUserPassword" class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" id="addUserPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-success"><i class="bi bi-person-plus"></i> Crear
+                                    usuario</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal Editar Usuario -->
+            <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editUserModalLabel"><i
+                                    class="bi bi-pencil-square me-2"></i>Editar Usuario</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editUserForm" novalidate>
+                                <input type="hidden" id="editUserId">
+                                <div id="editUserError" class="alert alert-danger d-none p-2 mb-3"
+                                    style="font-size:0.95rem;border-radius:0.7rem;"></div>
+                                <div class="mb-3">
+                                    <label for="editUserName" class="form-label">Nombre y Apellido</label>
+                                    <input type="text" class="form-control" id="editUserName" required
+                                        pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$"
+                                        title="Debes ingresar nombre y apellido">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editUserEmail" class="form-label">Correo</label>
+                                    <input type="email" class="form-control" id="editUserEmail" required
+                                        pattern="^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9._%+\-]+\.[a-zA-Z]{2,}$"
+                                        title="Ingresa un correo electrónico válido">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="editUserProfile" class="form-label">Perfil</label>
+                                    <select class="form-select" id="editUserProfile" required>
+                                        <option value="">Selecciona perfil</option>
+                                        <option value="Administrador">Administrador</option>
+                                        <option value="Usuario">Usuario</option>
+                                        <option value="Docente">Docente</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar
+                                    cambios</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal Eliminar Usuario -->
+        <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteUserModalLabel"><i class="bi bi-trash3-fill me-2"></i>Eliminar
+                            Usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+                        <input type="hidden" id="deleteUserId">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteUser"><i class="bi bi-trash"></i>
+                            Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Definición segura de elementos del sidebar y contenido
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('content');
+        // Helper global para limpiar backdrop y modal-open
+        function limpiarModals() {
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
+            console.log('Limpieza forzada de modals/backdrop');
+        }
+        // Refuerza limpieza al cerrar cualquier modal (Bootstrap events)
+        ['addUserModal', 'editUserModal', 'deleteUserModal'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('hidden.bs.modal', function () {
+                    limpiarModals();
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '';
+                });
+                el.addEventListener('hide.bs.modal', function () {
+                    limpiarModals();
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '';
+                });
+                el.addEventListener('shown.bs.modal', function () {
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '';
+                });
+            }
+        });
+        // Función para cerrar el sidebar
+        function closeSidebar() {
+            if (sidebar) sidebar.classList.remove('expanded');
+            if (content) content.classList.remove('expanded');
+            if (sidebarBackdrop) sidebarBackdrop.style.display = 'none';
+        }
+        // Cerrar sidebar al tocar el fondo
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', closeSidebar);
+        }
+        // Cerrar sidebar con logo (en móvil y PC con hover)
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.innerWidth <= 600) {
+                    closeSidebar();
+                } else {
+                    // En PC: no hacer nada, se maneja por hover
+                    return;
+                }
+            });
+        }
+
+        // Funcionalidad hover para PC
+        if (window.innerWidth > 600 && sidebar && content) {
+            let hoverTimeout;
+
+            sidebar.addEventListener('mouseenter', () => {
+                clearTimeout(hoverTimeout);
+                sidebar.classList.add('expanded');
+                content.classList.add('expanded');
+            });
+
+            sidebar.addEventListener('mouseleave', () => {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = setTimeout(() => {
+                    sidebar.classList.remove('expanded');
+                    content.classList.remove('expanded');
+                }, 200);
+            });
+        }
+
+        // Recargar hover functionality al redimensionar ventana
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 600 && sidebar && content) {
+                let hoverTimeout;
+
+                sidebar.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    sidebar.classList.add('expanded');
+                    content.classList.add('expanded');
+                });
+
+                sidebar.addEventListener('mouseleave', () => {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        sidebar.classList.remove('expanded');
+                        content.classList.remove('expanded');
+                    }, 200);
+                });
+            }
+        });
+        // Dropdown usuario sidebar
+        const userBtn = document.getElementById('sidebar-user-btn');
+        const userDropdown = document.getElementById('sidebar-user-dropdown');
+        const dropdownDivider = document.getElementById('dropdown-divider');
+        if (userBtn && userDropdown && dropdownDivider) {
+            userBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const expanded = userBtn.getAttribute('aria-expanded') === 'true';
+                userBtn.setAttribute('aria-expanded', !expanded);
+                userDropdown.classList.toggle('show');
+                if (userDropdown.classList.contains('show')) {
+                    dropdownDivider.style.display = 'block';
+                } else {
+                    dropdownDivider.style.display = 'none';
+                }
+            });
+            userDropdown.addEventListener('click', e => e.stopPropagation());
+        }
+
+        // Cerrar sidebar y dropdown al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            const isMobile = window.innerWidth <= 600;
+
+            // Cerrar dropdown si está abierto y no se hizo clic en él o en el botón
+            if (userDropdown && userDropdown.classList.contains('show')) {
+                if (!userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                    userBtn.setAttribute('aria-expanded', 'false');
+                    if (dropdownDivider) {
+                        dropdownDivider.style.display = 'none';
+                    }
+                }
+            }
+
+            // Cerrar sidebar si está expandido y no se hizo clic en él (tanto móvil como PC)
+            if (sidebar.classList.contains('expanded')) {
+                if (!sidebar.contains(e.target) &&
+                    (!document.getElementById('mobile-hamburger') || !document.getElementById('mobile-hamburger').contains(e.target))) {
+                    if (isMobile) {
+                        closeSidebar();
+                    } else {
+                        // En PC, contraer el sidebar
+                        sidebar.classList.remove('expanded');
+                        content.classList.remove('expanded');
+                    }
+                }
+            }
+        });
+        // Ajustar posición del dropdown en móvil
+        function adjustDropdownPosition() {
+            if (window.innerWidth <= 600) {
+                userDropdown.style.bottom = 'auto';
+                userDropdown.style.top = 'unset';
+                userDropdown.style.position = 'fixed';
+                userDropdown.style.left = '0';
+                userDropdown.style.right = '0';
+                userDropdown.style.width = '100vw';
+                userDropdown.style.zIndex = '3001';
+                userDropdown.style.background = '#181818';
+                userDropdown.style.borderRadius = '0 0 1rem 1rem';
+            } else {
+                userDropdown.style.position = '';
+                userDropdown.style.width = '';
+                userDropdown.style.left = '';
+                userDropdown.style.right = '';
+                userDropdown.style.bottom = '';
+                userDropdown.style.background = '';
+                userDropdown.style.borderRadius = '';
+            }
+        }
+        window.addEventListener('resize', adjustDropdownPosition);
+        adjustDropdownPosition();
+
+        // Panel de administración de usuarios en rectángulos
+        let allUsers = [];
+        // Instancias únicas de modals
+        const editUserModalEl = document.getElementById('editUserModal');
+        let editUserModal = editUserModalEl ? bootstrap.Modal.getOrCreateInstance(editUserModalEl) : null;
+        const deleteUserModalEl = document.getElementById('deleteUserModal');
+        let deleteUserModal = deleteUserModalEl ? bootstrap.Modal.getOrCreateInstance(deleteUserModalEl) : null;
+        const addUserModalEl = document.getElementById('addUserModal');
+        let addUserModal = addUserModalEl ? bootstrap.Modal.getOrCreateInstance(addUserModalEl) : null;
+
+        // Helper para mostrar modal sin backdrops duplicados y con foco
+        function mostrarModalSeguro(modalInstance, modalEl) {
+            // Limpieza extrema antes de mostrar
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '';
+            if (modalInstance && modalEl) {
+                // Mostrar modal y asegurar foco/z-index
+                modalInstance.show();
+                let intentos = 0;
+                function refuerzaFoco() {
+                    // El modal debe estar visible y enfocado
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '';
+                    if (modalEl && modalEl.classList.contains('show')) {
+                        modalEl.focus();
+                        modalEl.style.zIndex = '1060';
+                        // Si el modal está enfocado, termina
+                        if (document.activeElement === modalEl || modalEl.contains(document.activeElement)) {
+                            return;
+                        }
+                    }
+                    intentos++;
+                    if (intentos < 8) {
+                        setTimeout(refuerzaFoco, 60);
+                    }
+                }
+                setTimeout(refuerzaFoco, 80);
+            }
+        }
+
+        function fetchUsers() {
+            fetch('/admin/users')
+                .then(async res => {
+                    let data;
+                    try {
+                        data = await res.json();
+                    } catch (e) {
+                        throw new Error('Respuesta inesperada del servidor');
+                    }
+                    if (!res.ok) {
+                        // Si el backend responde con error JSON
+                        if (data && data.error) {
+                            document.getElementById('user-summary').textContent = data.error;
+                            if (data.error.toLowerCase().includes('no autorizado') || data.error.toLowerCase().includes('solo el admin')) {
+                                // Redirigir a login si la sesión expiró o no es admin
+                                setTimeout(() => { window.location.href = '/login'; }, 1800);
+                            }
+                            throw new Error(data.error);
+                        } else {
+                            document.getElementById('user-summary').textContent = 'Error al cargar usuarios';
+                            throw new Error('Error al cargar usuarios');
+                        }
+                    }
+                    if (!Array.isArray(data)) {
+                        document.getElementById('user-summary').textContent = 'Respuesta inesperada del servidor';
+                        throw new Error('Respuesta inesperada del servidor');
+                    }
+                    allUsers = data;
+                    renderUsersRectList(data);
+                })
+                .catch(err => {
+                    // Mostrar el error en el dashboard
+                    document.getElementById('user-summary').textContent = err.message || 'Error al cargar usuarios';
+                    document.getElementById('user-summary').style.background = '#dc3545';
+                    document.getElementById('user-summary').style.color = '#fff';
+                    document.getElementById('user-summary').style.fontSize = '1.3rem';
+                    document.getElementById('user-summary').style.display = 'block';
+                    document.getElementById('user-summary').style.textAlign = 'center';
+                    document.getElementById('user-summary').style.padding = '1rem';
+                });
+        }
+        function renderUsersRectList(users) {
+            const list = document.getElementById('users-rect-list');
+            list.innerHTML = '';
+            let activos = 0, inactivos = 0;
+            users.forEach(user => {
+                if (user.status === 'activo') activos++; else inactivos++;
+                // Normalización del perfil
+                let perfil = user.profile ? user.profile.toLowerCase() : '-';
+                if (perfil === 'administrador') perfil = 'Administrador';
+                else if (perfil === 'usuario') perfil = 'Usuario';
+                else if (perfil === 'docente') perfil = 'Docente';
+                else if (perfil && perfil !== '-') perfil = perfil.charAt(0).toUpperCase() + perfil.slice(1);
+                const card = document.createElement('div');
+                card.className = 'user-rect-card';
+                card.innerHTML = `
+                    <div class="user-rect-id"><span class="text-muted small fw-bold">${user._id.slice(-6)}</span></div>
+                    <div class="user-rect-status">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input status-switch ${user.status === 'activo' ? 'bg-success' : 'bg-danger'}" type="checkbox" role="switch" data-id="${user._id}" data-status="${user.status}" ${user.status === 'activo' ? 'checked' : ''}>
+                            </div>
+                            <span class="badge ms-2 fw-bold ${user.status === 'activo' ? 'bg-success' : 'bg-danger'}" style="font-family: 'Poppins', Arial, sans-serif;">${user.status}</span>
+                        </div>
+                        <!-- Modal de confirmación para cambiar estatus -->
+                        <div class="modal fade" id="confirmStatusModal-${user._id}" tabindex="-1" aria-labelledby="confirmStatusModalLabel-${user._id}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="confirmStatusModalLabel-${user._id}"></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>¿Seguro que quieres <b>${user.status === 'activo' ? 'desactivar' : 'activar'}</b> este usuario?<br><b>Usuario:</b> ${user.fullname}<br><b>Correo:</b> ${user.email}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                       <button type="button" class="btn ${user.status === 'activo' ? 'btn-danger' : 'btn-success'} confirm-status-btn" data-id="${user._id}" data-status="${user.status === 'activo' ? 'inactivo' : 'activo'}">
+                                           <i class="bi bi-check-circle"></i> Confirmar
+                                       </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-rect-name"><i class="bi bi-person-circle me-1"></i> ${user.fullname}</div>
+                    <div class="user-rect-email"><i class="bi bi-envelope me-1"></i> ${user.email}</div>
+                    <div class="user-rect-profile"><i class="bi bi-person-badge me-1"></i> 
+                        <input type="text" class="form-control form-control-sm" value="${perfil}" readonly style="background:#f8f9fa;border:none;font-weight:600;color:#198754;max-width:120px;display:inline-block;">
+                    </div>
+                    <div class="user-rect-actions">
+                        <button class="btn btn-sm btn-outline-primary edit-user-btn me-1" data-id="${user._id}" title="Editar"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn btn-sm btn-outline-danger delete-user-btn" data-id="${user._id}" title="Eliminar"><i class="bi bi-trash3"></i></button>
+                    </div>
+                    <!-- Modal de confirmación para eliminar usuario -->
+                    <div class="modal fade" id="confirmDeleteModal-${user._id}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel-${user._id}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteModalLabel-${user._id}"><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>¿Estás seguro de eliminar?</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Esta acción no se puede deshacer.<br><b>Usuario:</b> ${user.fullname}<br><b>Correo:</b> ${user.email}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="button" class="btn btn-danger confirm-delete-btn" data-id="${user._id}"><i class="bi bi-trash"></i> Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            document.getElementById('user-summary').textContent = `Activos: ${activos} | Inactivos: ${inactivos} | Total: ${users.length}`;
+        }
+        fetchUsers();
+        // Barra de búsqueda de usuarios
+        document.getElementById('userSearchInput').addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            const filtered = allUsers.filter(user =>
+                user.fullname.toLowerCase().includes(query) ||
+                (user.email && user.email.toLowerCase().includes(query)) ||
+                (user.profile && user.profile.toLowerCase().includes(query))
+            );
+            renderUsersRectList(filtered);
+        });
+        // Cambiar estado usuario
+        // Cambiar estado usuario con modal de confirmación visual
+        document.addEventListener('change', function (e) {
+            if (e.target.classList.contains('status-switch')) {
+                const id = e.target.dataset.id;
+                const currentStatus = e.target.dataset.status;
+                // Revertir el cambio visualmente hasta confirmar
+                e.target.checked = currentStatus === 'activo';
+                // Mostrar el modal de confirmación
+                const confirmStatusModalEl = document.getElementById(`confirmStatusModal-${id}`);
+                if (confirmStatusModalEl) {
+                    const confirmStatusModal = bootstrap.Modal.getOrCreateInstance(confirmStatusModalEl);
+                    mostrarModalSeguro(confirmStatusModal, confirmStatusModalEl);
+                }
+            }
+        });
+        // Confirmar cambio de estatus desde el modal visual
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('confirm-status-btn')) {
+                const id = e.target.dataset.id;
+                const newStatus = e.target.dataset.status;
+                fetch(`/admin/user/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error('No se pudo cambiar el estado');
+                        // Ocultar el modal de confirmación
+                        const confirmStatusModalEl = document.getElementById(`confirmStatusModal-${id}`);
+                        if (confirmStatusModalEl) {
+                            const confirmStatusModal = bootstrap.Modal.getOrCreateInstance(confirmStatusModalEl);
+                            confirmStatusModal.hide();
+                        }
+                        limpiarModals();
+                        fetchUsers();
+                    })
+                    .catch(err => {
+                        alert('Error al cambiar estado: ' + err.message);
+                        const confirmStatusModalEl = document.getElementById(`confirmStatusModal-${id}`);
+                        if (confirmStatusModalEl) {
+                            const confirmStatusModal = bootstrap.Modal.getOrCreateInstance(confirmStatusModalEl);
+                            confirmStatusModal.hide();
+                        }
+                        limpiarModals();
+                    });
+            }
+        });
+        // Editar usuario
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.edit-user-btn')) {
+                const id = e.target.closest('.edit-user-btn').dataset.id;
+                fetch(`/admin/user/${id}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error('No se pudo obtener el usuario');
+                        return res.json();
+                    })
+                    .then(user => {
+                        document.getElementById('editUserId').value = user._id;
+                        document.getElementById('editUserName').value = user.fullname;
+                        document.getElementById('editUserEmail').value = user.email || '';
+                        const profileSelect = document.getElementById('editUserProfile');
+                        // Normalizar el valor para que coincida con las opciones del select
+                        let perfil = (user.profile || '').toLowerCase();
+                        if (perfil === 'administrador') perfil = 'Administrador';
+                        else if (perfil === 'usuario') perfil = 'Usuario';
+                        else if (perfil === 'docente') perfil = 'Docente';
+                        else if (perfil) perfil = perfil.charAt(0).toUpperCase() + perfil.slice(1);
+                        profileSelect.value = perfil;
+                        // Si el valor no está en las opciones, lo agrega temporalmente
+                        if (!["Administrador", "Usuario", "Docente"].includes(profileSelect.value)) {
+                            if (profileSelect.value) {
+                                let opt = document.createElement('option');
+                                opt.value = profileSelect.value;
+                                opt.textContent = profileSelect.value + ' (otro)';
+                                profileSelect.appendChild(opt);
+                                profileSelect.value = perfil;
+                            }
+                        }
+                        mostrarModalSeguro(editUserModal, editUserModalEl);
+                    })
+                    .catch(err => {
+                        alert('Error al cargar usuario: ' + err.message);
+                        if (editUserModal) editUserModal.hide();
+                        limpiarModals();
+                    });
+            }
+        });
+        document.getElementById('editUserForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('editUserId').value;
+            const fullname = document.getElementById('editUserName').value.trim();
+            const email = document.getElementById('editUserEmail').value.trim();
+            const profile = document.getElementById('editUserProfile').value.trim();
+            const errorDiv = document.getElementById('editUserError');
+            errorDiv.classList.add('d-none');
+            let errorMsg = '';
+            const nombreApellidoRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$/;
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!nombreApellidoRegex.test(fullname)) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Debes ingresar <b>nombre y apellido</b>.';
+                document.getElementById('editUserName').focus();
+            } else if (!emailRegex.test(email)) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Ingresa un <b>correo electrónico válido</b>.';
+                document.getElementById('editUserEmail').focus();
+            } else if (!profile) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Selecciona un <b>perfil</b>.';
+                document.getElementById('editUserProfile').focus();
+            }
+            if (errorMsg) {
+                errorDiv.innerHTML = errorMsg;
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            fetch(`/admin/user/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullname, email, profile })
+            })
+                .then(async res => {
+                    let data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        errorDiv.innerHTML = `<i class="bi bi-x-circle me-1"></i> ${data.error || 'No se pudo editar el usuario'}`;
+                        errorDiv.classList.remove('d-none');
+                        if (res.status === 401 || res.status === 403) window.location.href = '/login';
+                        throw new Error(data.error || 'No se pudo editar el usuario');
+                    }
+                    if (editUserModal) editUserModal.hide();
+                    limpiarModals();
+                    fetchUsers();
+                })
+                .catch(err => {
+                    errorDiv.innerHTML = `<i class="bi bi-x-circle me-1"></i> Error al editar usuario: ${err.message}`;
+                    errorDiv.classList.remove('d-none');
+                    if (editUserModal) editUserModal.hide();
+                    limpiarModals();
+                });
+        });
+        // Eliminar usuario
+        // Eliminar usuario con modal de confirmación visual
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.delete-user-btn')) {
+                const id = e.target.closest('.delete-user-btn').dataset.id;
+                // Mostrar el modal de confirmación específico para el usuario
+                const confirmModalEl = document.getElementById(`confirmDeleteModal-${id}`);
+                if (confirmModalEl) {
+                    const confirmModal = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+                    mostrarModalSeguro(confirmModal, confirmModalEl);
+                }
+            }
+            // Confirmar eliminación desde el modal visual
+            if (e.target.classList.contains('confirm-delete-btn')) {
+                const id = e.target.dataset.id;
+                fetch(`/admin/user/${id}`, { method: 'DELETE' })
+                    .then(async res => {
+                        let data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            alert(data.error || 'No se pudo eliminar el usuario');
+                            if (res.status === 401 || res.status === 403) window.location.href = '/login';
+                            throw new Error(data.error || 'No se pudo eliminar el usuario');
+                        }
+                        // Ocultar el modal de confirmación
+                        const confirmModalEl = document.getElementById(`confirmDeleteModal-${id}`);
+                        if (confirmModalEl) {
+                            const confirmModal = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+                            confirmModal.hide();
+                        }
+                        limpiarModals();
+                        fetchUsers();
+                    })
+                    .catch(err => {
+                        alert('Error al eliminar usuario: ' + err.message);
+                        const confirmModalEl = document.getElementById(`confirmDeleteModal-${id}`);
+                        if (confirmModalEl) {
+                            const confirmModal = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+                            confirmModal.hide();
+                        }
+                        limpiarModals();
+                    });
+            }
+        });
+        // Agregar usuario
+        document.getElementById('addUserBtn').addEventListener('click', function () {
+            mostrarModalSeguro(addUserModal, addUserModalEl);
+        });
+        document.getElementById('addUserForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const fullname = document.getElementById('addUserName').value.trim();
+            const email = document.getElementById('addUserEmail').value.trim();
+            const profile = document.getElementById('addUserProfile').value.trim();
+            const password = document.getElementById('addUserPassword').value;
+            const errorDiv = document.getElementById('addUserError');
+            errorDiv.classList.add('d-none');
+            let errorMsg = '';
+            const nombreApellidoRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\s+[A-Za-zÁÉÍÓÚáéíóúÑñ]+)+$/;
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!nombreApellidoRegex.test(fullname)) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Debes ingresar <b>nombre y apellido</b>.';
+                document.getElementById('addUserName').focus();
+            } else if (!emailRegex.test(email)) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Ingresa un <b>correo electrónico válido</b>.';
+                document.getElementById('addUserEmail').focus();
+            } else if (!profile) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Selecciona un <b>perfil</b>.';
+                document.getElementById('addUserProfile').focus();
+            } else if (!password) {
+                errorMsg = '<i class="bi bi-exclamation-circle me-1"></i> Ingresa una <b>contraseña</b>.';
+                document.getElementById('addUserPassword').focus();
+            }
+            if (errorMsg) {
+                errorDiv.innerHTML = errorMsg;
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            fetch('/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullname, email, profile, password })
+            })
+                .then(async res => {
+                    let data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        errorDiv.innerHTML = `<i class="bi bi-x-circle me-1"></i> ${data.error || 'No se pudo agregar el usuario'}`;
+                        errorDiv.classList.remove('d-none');
+                        if (res.status === 401 || res.status === 403) window.location.href = '/login';
+                        throw new Error(data.error || 'No se pudo agregar el usuario');
+                    }
+                    if (addUserModal) addUserModal.hide();
+                    limpiarModals();
+                    document.getElementById('addUserForm').reset();
+                    fetchUsers();
+                })
+                .catch(err => {
+                    errorDiv.innerHTML = `<i class="bi bi-x-circle me-1"></i> Error al agregar usuario: ${err.message}`;
+                    errorDiv.classList.remove('d-none');
+                    if (addUserModal) addUserModal.hide();
+                    limpiarModals();
+                });
+        });
+    </script>
+</body>
+
+</html>

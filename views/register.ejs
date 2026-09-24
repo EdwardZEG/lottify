@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #000 !important;
+        }
+
+        body,
+        .card,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        label,
+        .form-label,
+        .form-control,
+        .btn,
+        .btn-primary,
+        strong {
+            font-family: 'Poppins', Arial, sans-serif !important;
+        }
+
+        .card {
+            border-radius: 1.5rem;
+            background: #fff;
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.0), 0 0 0 0 rgba(0, 0, 0, 0.0);
+            backdrop-filter: blur(16px) saturate(1.3);
+            border: 3px solid #111;
+            position: relative;
+            overflow: visible;
+            animation: shadow-colors 10s linear infinite;
+            max-width: 420px;
+            width: 100%;
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
+        }
+
+        @keyframes shadow-colors {
+            0% {
+                box-shadow: 0 0 32px 0 #b44eb6, 0 8px 32px 0 #1b7fc7;
+            }
+
+            20% {
+                box-shadow: 0 0 32px 0 #1b7fc7, 0 8px 32px 0 #bfe0ee;
+            }
+
+            40% {
+                box-shadow: 0 0 32px 0 #bfe0ee, 0 8px 32px 0 #b7d36b;
+            }
+
+            60% {
+                box-shadow: 0 0 32px 0 #b7d36b, 0 8px 32px 0 #f6f6b2;
+            }
+
+            80% {
+                box-shadow: 0 0 32px 0 #f6f6b2, 0 8px 32px 0 #f5f6f7;
+            }
+
+            100% {
+                box-shadow: 0 0 32px 0 #b44eb6, 0 8px 32px 0 #1b7fc7;
+            }
+        }
+
+        .form-control,
+        .input-group-text,
+        input,
+        select,
+        textarea {
+            border: 1px solid #111 !important;
+            background: #fff;
+            color: #111;
+        }
+
+        .form-control {
+            height: 32px !important;
+            font-size: 0.97rem !important;
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+        }
+
+        .input-group-text {
+            height: 32px !important;
+            font-size: 1.05rem !important;
+            padding-top: 2px !important;
+            padding-bottom: 2px !important;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem #0d6efd33;
+            border-color: #111 !important;
+        }
+
+        .btn-primary {
+            width: 40px;
+            height: 40px;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            min-height: 40px !important;
+            max-height: 40px !important;
+            padding: 0;
+            border-radius: 50% !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111 !important;
+            border: none !important;
+            color: #fff !important;
+            font-size: 1.45rem;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            transition: none;
+            margin: 0 auto;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background: #111 !important;
+            color: #fff !important;
+            border: none !important;
+        }
+
+        .btn-primary svg {
+            display: block;
+            margin: auto;
+            transition: color 0.18s;
+            color: #fff;
+        }
+
+        .btn-primary:hover svg,
+        .btn-primary:focus svg {
+            color: rgb(7, 10, 243) !important;
+        }
+
+        .toggle-password {
+            border: 1px solid #111 !important;
+            background: #111 !important;
+            color: #fff !important;
+            box-shadow: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px !important;
+            min-width: 38px !important;
+            max-width: 38px !important;
+            padding: 0 !important;
+            border-radius: 0 0.375rem 0.375rem 0 !important;
+        }
+
+        .toggle-password i {
+            color: #fff !important;
+            font-size: 1.2rem;
+            transition: none !important;
+            animation: none !important;
+        }
+
+        .toggle-password.active i {
+            color: rgb(7, 10, 243) !important;
+        }
+
+        /* Elimina cualquier efecto de hover o focus en el icono y fuerza el color blanco o azul según el estado */
+        .toggle-password:focus i,
+        .toggle-password:hover i {
+            color: #fff !important;
+        }
+
+        .toggle-password.active:focus i,
+        .toggle-password.active:hover i {
+            color: rgb(7, 10, 243) !important;
+        }
+
+        .logo-formulario {
+            width: 140px;
+            height: 140px;
+            max-width: 50vw;
+            max-height: 24vh;
+            object-fit: contain;
+            display: inline-block;
+        }
+
+        @media (max-width: 600px) {
+            .card {
+                max-width: 98vw;
+                padding: 1.2rem 0.5rem;
+                border-radius: 1rem;
+            }
+
+            .logo-formulario {
+                width: 90px;
+                height: 90px;
+            }
+        }
+
+        @media (max-width: 900px) and (min-width: 601px) {
+            .card {
+                max-width: 90vw;
+                padding: 2rem 1.2rem;
+            }
+        }
+
+        .titulo-form {
+            text-align: left;
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 1.1rem;
+            margin-left: 0.1rem;
+        }
+
+        .auth-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.22rem;
+            margin-top: 1.5rem;
+        }
+
+        .auth-link {
+            color: #2563eb;
+            font-weight: 400;
+            text-decoration: none;
+            font-size: 0.89rem;
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            transition: color 0.18s, opacity 0.18s;
+            padding: 0.13rem 0.2rem;
+            border-radius: 0.3rem;
+            letter-spacing: 0.01em;
+        }
+
+        .auth-link i {
+            font-size: 1em;
+            margin-right: 0.5em;
+            opacity: 0.7;
+        }
+
+        .auth-link:hover,
+        .auth-link:focus {
+            color: #1741a6;
+            opacity: 1;
+            background: #e8f0fe;
+            text-decoration: underline;
+        }
+
+        .auth-link b,
+        .auth-link strong {
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-left: 0.18em;
+        }
+
+        .auth-link span {
+            margin-left: 0.18em;
+            margin-right: 0.18em;
+        }
+
+        .auth-link.text-primary-emphasis:hover,
+        .auth-link.text-primary-emphasis:focus {
+            color: #0d6efd !important;
+            background: #e7f1ff !important;
+            opacity: 1;
+        }
+
+        .auth-link.text-success-emphasis:hover,
+        .auth-link.text-success-emphasis:focus {
+            color: #198754 !important;
+            background: #e7fff1 !important;
+            opacity: 1;
+        }
+
+        .auth-link.text-danger-emphasis:hover,
+        .auth-link.text-danger-emphasis:focus {
+            color: #dc3545 !important;
+            background: #ffe7e7 !important;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card p-4">
+                <div class="text-center">
+                    <img src="/img/logo_formularios.svg" alt="Logo" class="logo-formulario mb-5">
+                </div>
+                <h2 class="titulo-form mb-3">Registro</h2>
+                <% if (typeof error !=='undefined' ) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                    <% } %>
+                        <form method="POST" action="/register" autocomplete="off" id="registerForm">
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" class="form-control" id="name" name="name" required
+                                        placeholder="Nombre y apellido">
+                                </div>
+                                <div id="nameHelp" class="form-text text-danger mt-1" style="display:none;"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" required
+                                        placeholder="Correo electrónico">
+                                </div>
+                                <div id="emailError" class="form-text text-danger mt-1" style="display:none;"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" required
+                                        placeholder="Contraseña">
+                                    <button type="button" class="btn btn-outline-secondary toggle-password"
+                                        tabindex="-1"><i class="bi bi-eye"></i></button>
+                                </div>
+                                <div class="progress mt-1" style="height: 5px;">
+                                    <div id="passwordBar" class="progress-bar" role="progressbar" style="width: 0%;">
+                                    </div>
+                                </div>
+                                <div id="passwordHelp" class="form-text text-danger mt-1" style="display:none;"></div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                    <input type="password" class="form-control" id="confirmPassword"
+                                        name="confirmPassword" required placeholder="Confirmar contraseña">
+                                    <button type="button" class="btn btn-outline-secondary toggle-password"
+                                        tabindex="-1"><i class="bi bi-eye"></i></button>
+                                </div>
+                                <div class="progress mt-1" style="height: 5px;">
+                                    <div id="confirmBar" class="progress-bar" role="progressbar" style="width: 0%;">
+                                    </div>
+                                </div>
+                                <div id="confirmHelp" class="form-text text-danger mt-1" style="display:none;"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm d-block mx-auto"
+                                aria-label="Registrarse" disabled>
+                                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;">
+                                    <path d="M4 11H18" stroke="currentColor" stroke-width="3.2"
+                                        stroke-linecap="round" />
+                                    <path d="M12.5 6L18 11L12.5 16" stroke="currentColor" stroke-width="3.2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        </form>
+                        <div class="mt-4 text-center">
+                            <div class="auth-links">
+                                <a href="/login" class="auth-link text-primary-emphasis">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                    <span>¿Ya tienes&nbsp;cuenta?</span> <b class="text-primary">Inicia sesión</b>
+                                </a>
+                            </div>
+                        </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+    <script>
+        // Soporte para Enter en formularios - Estrategia simplificada
+        document.addEventListener('DOMContentLoaded', function () {
+            const registerForm = document.getElementById('registerForm');
+
+            // Agregar atributo para envío con Enter directamente al formulario
+            registerForm.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const submitButton = registerForm.querySelector('button[type="submit"]');
+                    if (submitButton && !submitButton.disabled) {
+                        setTimeout(() => submitButton.click(), 10);
+                    }
+                }
+            });
+
+            // También agregar a cada input individualmente
+            const inputs = registerForm.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const submitButton = registerForm.querySelector('button[type="submit"]');
+                        if (submitButton && !submitButton.disabled) {
+                            setTimeout(() => submitButton.click(), 10);
+                        }
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const input = this.parentElement.querySelector('input[type="password"], input[type="text"]');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    this.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                    this.classList.add('active');
+                } else {
+                    input.type = 'password';
+                    this.innerHTML = '<i class="bi bi-eye"></i>';
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    <script>
+        // Validación de registro con mensajes en campos y bloqueo de enter
+        const regForm = document.getElementById('registerForm');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const nameHelp = document.getElementById('nameHelp');
+        const passwordHelp = document.getElementById('passwordHelp');
+        const confirmHelp = document.getElementById('confirmHelp');
+        const emailError = document.getElementById('emailError');
+        const submitBtn = regForm.querySelector('button[type="submit"]');
+
+        function validateName() {
+            const value = nameInput.value.trim();
+            if (value === '') {
+                nameHelp.textContent = '';
+                nameHelp.style.display = 'none';
+                nameInput.classList.remove('is-invalid');
+                nameInput.classList.remove('is-valid');
+                return false;
+            }
+            if (value.split(/\s+/).length < 2) {
+                nameHelp.textContent = 'Ingresa tu nombre y apellido.';
+                nameHelp.style.display = 'block';
+                nameInput.classList.add('is-invalid');
+                nameInput.classList.remove('is-valid');
+                return false;
+            } else {
+                nameHelp.textContent = '';
+                nameHelp.style.display = 'none';
+                nameInput.classList.remove('is-invalid');
+                nameInput.classList.add('is-valid');
+                return true;
+            }
+        }
+
+        function validatePassword() {
+            const value = passwordInput.value;
+            if (value === '') {
+                passwordHelp.textContent = '';
+                passwordHelp.style.display = 'none';
+                passwordInput.classList.remove('is-invalid');
+                passwordInput.classList.remove('is-valid');
+                return false;
+            }
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+            if (!regex.test(value)) {
+                passwordHelp.textContent = 'Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.';
+                passwordHelp.style.display = 'block';
+                passwordInput.classList.add('is-invalid');
+                passwordInput.classList.remove('is-valid');
+                return false;
+            } else {
+                passwordHelp.textContent = '';
+                passwordHelp.style.display = 'none';
+                passwordInput.classList.remove('is-invalid');
+                passwordInput.classList.add('is-valid');
+                return true;
+            }
+        }
+
+        function validateConfirm() {
+            if (confirmInput.value === '') {
+                confirmHelp.textContent = '';
+                confirmHelp.style.display = 'none';
+                confirmInput.classList.remove('is-invalid');
+                confirmInput.classList.remove('is-valid');
+                return false;
+            }
+            if (confirmInput.value !== passwordInput.value) {
+                confirmHelp.textContent = 'Las contraseñas no coinciden.';
+                confirmHelp.style.display = 'block';
+                confirmInput.classList.add('is-invalid');
+                confirmInput.classList.remove('is-valid');
+                return false;
+            } else {
+                confirmHelp.textContent = '';
+                confirmHelp.style.display = 'none';
+                confirmInput.classList.remove('is-invalid');
+                confirmInput.classList.add('is-valid');
+                return true;
+            }
+        }
+
+        let lastEmailChecked = '';
+        let emailIsAvailable = false;
+        async function validateEmail() {
+            const value = emailInput.value.trim();
+            if (value === '') {
+                emailError.textContent = '';
+                emailError.style.display = 'none';
+                emailInput.classList.remove('is-invalid');
+                emailInput.classList.remove('is-valid');
+                emailInput.setCustomValidity('');
+                emailIsAvailable = false;
+                return false;
+            }
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!regex.test(value)) {
+                emailError.textContent = 'Ingresa un correo electrónico válido.';
+                emailError.style.display = 'block';
+                emailInput.classList.remove('is-valid');
+                emailInput.classList.add('is-invalid');
+                emailInput.setCustomValidity('Correo inválido');
+                emailIsAvailable = false;
+                return false;
+            } else {
+                // Solo consultar si el correo cambió
+                if (value !== lastEmailChecked) {
+                    lastEmailChecked = value;
+                    if (value.length > 5) {
+                        try {
+                            const res = await fetch('/register/check-email', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ email: value })
+                            });
+                            const result = await res.json();
+                            if (result.exists) {
+                                emailError.textContent = 'El correo electrónico ya está registrado. Usa otro.';
+                                emailError.style.display = 'block';
+                                emailInput.classList.remove('is-valid');
+                                emailInput.classList.add('is-invalid');
+                                emailInput.setCustomValidity('Correo ya usado');
+                                emailIsAvailable = false;
+                                return false;
+                            } else {
+                                emailError.textContent = '';
+                                emailError.style.display = 'none';
+                                emailInput.classList.remove('is-invalid');
+                                emailInput.classList.add('is-valid');
+                                emailInput.setCustomValidity('');
+                                emailIsAvailable = true;
+                                return true;
+                            }
+                        } catch (err) {
+                            emailError.textContent = 'Error al validar correo.';
+                            emailError.style.display = 'block';
+                            emailInput.classList.remove('is-valid');
+                            emailInput.classList.add('is-invalid');
+                            emailInput.setCustomValidity('Error al validar correo');
+                            emailIsAvailable = false;
+                            return false;
+                        }
+                    }
+                } else {
+                    // Si el correo no cambió, mantener el estado anterior
+                    if (!emailIsAvailable) {
+                        emailInput.classList.remove('is-valid');
+                        emailInput.classList.add('is-invalid');
+                    } else {
+                        emailInput.classList.remove('is-invalid');
+                        emailInput.classList.add('is-valid');
+                    }
+                    return emailIsAvailable;
+                }
+                return emailIsAvailable;
+            }
+        }
+
+        function updateSubmitState() {
+            Promise.resolve(validateEmail()).then(emailValid => {
+                const valid = validateName() && validatePassword() && validateConfirm() && emailValid;
+                submitBtn.disabled = !valid;
+            });
+        }
+        nameInput.addEventListener('input', function () { validateName(); updateSubmitState(); });
+        passwordInput.addEventListener('input', function () { validatePassword(); validateConfirm(); updateSubmitState(); });
+        confirmInput.addEventListener('input', function () { validateConfirm(); updateSubmitState(); });
+        emailInput.addEventListener('input', function () { validateEmail().then(updateSubmitState); });
+        emailInput.addEventListener('blur', function () { validateEmail().then(updateSubmitState); });
+        emailInput.addEventListener('invalid', function (e) {
+            e.preventDefault();
+            validateEmail().then(updateSubmitState);
+        });
+
+        // Bloquear enter solo si hay errores críticos (eliminamos este código conflictivo)
+        // El formulario ya maneja el enter correctamente arriba
+
+        // Validación al enviar
+        regForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            let valid = true;
+            if (!validateName()) valid = false;
+            if (!validatePassword()) valid = false;
+            if (!validateConfirm()) valid = false;
+            if (!await validateEmail()) valid = false;
+            if (!valid) {
+                submitBtn.disabled = true;
+                return;
+            }
+            // Obtener valores
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            // Llama al backend para crear la preferencia de pago
+            const res = await fetch('/payment/create-preference', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullname: name, email, password })
+            });
+            const result = await res.json();
+            if (result.id) {
+                const mp = new MercadoPago('APP_USR-6f1ecdc4-0e4e-4c96-a438-d32194c9ff2a', { locale: 'es-AR' });
+                mp.checkout({
+                    preference: { id: result.id },
+                    autoOpen: true
+                });
+            } else {
+                let msg = 'Error al iniciar el pago.';
+                if (result.error) msg += '\n' + result.error;
+                emailError.textContent = msg;
+                emailError.style.display = 'block';
+            }
+        });
+    </script>
+    <script>
+        // ...todo el código de validación y registro está en el script anterior...
+    </script>
+    <script>
+        // ...el código de validación de email ya está incluido en el bloque anterior...
+    </script>
+    <script>
+        // --- Logout automático por inactividad (5 minutos) ---
+        (function () {
+            let inactivityTimeout;
+            const logoutAfter = 5 * 60 * 1000; // 5 minutos en ms
+            const resetInactivityTimer = () => {
+                clearTimeout(inactivityTimeout);
+                inactivityTimeout = setTimeout(() => {
+                    window.location.href = '/logout';
+                }, logoutAfter);
+            };
+            ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'].forEach(evt => {
+                window.addEventListener(evt, resetInactivityTimer, true);
+            });
+            resetInactivityTimer();
+        })();
+    </script>
+</body>
+
+</html>
