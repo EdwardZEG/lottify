@@ -605,7 +605,8 @@
                             <button class="upload-btn" @click="$refs.fileInput.click()">
                                 <i class="fas fa-camera"></i>
                             </button>
-                            <input type="file" x-ref="fileInput" @change="handleFileUpload($event)" accept="image/*"
+                            <input type="file" x-ref="fileInput" @change="handleFileUpload($event)"
+                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" capture="environment"
                                 style="display: none;">
                         </div>
                         <div>
@@ -729,6 +730,8 @@
                     const file = event.target.files[0];
                     if (!file) return;
 
+                    console.log('Archivo seleccionado:', file.name, file.type, file.size);
+
                     if (!file.type.startsWith('image/')) {
                         this.showMessage('Por favor selecciona un archivo de imagen válido', 'error');
                         return;
@@ -745,23 +748,34 @@
                         const formData = new FormData();
                         formData.append('profilePicture', file);
 
+                        console.log('Enviando archivo al servidor...');
+
                         const response = await fetch('/api/user/profile-picture', {
                             method: 'POST',
                             body: formData
                         });
 
                         const data = await response.json();
+                        console.log('Respuesta del servidor:', data);
 
                         if (data.success) {
                             this.profilePicture = data.profilePicture;
                             this.showMessage('Foto de perfil actualizada exitosamente', 'success');
+
+                            // Recargar página para actualizar avatares
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         } else {
                             this.showMessage(data.message || 'Error al actualizar la foto de perfil', 'error');
                         }
                     } catch (error) {
-                        this.showMessage('Error al subir la imagen', 'error');
+                        console.error('Error al subir imagen:', error);
+                        this.showMessage('Error al subir la imagen: ' + error.message, 'error');
                     } finally {
                         this.loading = false;
+                        // Limpiar el input para permitir seleccionar el mismo archivo otra vez
+                        event.target.value = '';
                     }
                 },
 
