@@ -41,13 +41,17 @@ const gameRoomSchema = new mongoose.Schema({
     },
     players: [{
         userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            type: mongoose.Schema.Types.Mixed, // Permite ObjectId o String para invitados
+            required: true
         },
         name: String,
         joinedAt: {
             type: Date,
             default: Date.now
+        },
+        isGuest: {
+            type: Boolean,
+            default: false
         }
     }],
     maxPlayers: {
@@ -128,7 +132,7 @@ gameRoomSchema.statics.cleanExpiredRooms = async function() {
 };
 
 // Método para agregar un jugador
-gameRoomSchema.methods.addPlayer = function(userId, userName) {
+gameRoomSchema.methods.addPlayer = function(userId, userName, isGuest = false) {
     if (this.players.length >= this.maxPlayers) {
         throw new Error('La sala está llena');
     }
@@ -141,7 +145,8 @@ gameRoomSchema.methods.addPlayer = function(userId, userName) {
     
     this.players.push({
         userId,
-        name: userName
+        name: userName,
+        isGuest: isGuest
     });
     
     return true;
