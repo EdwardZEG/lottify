@@ -80,14 +80,21 @@ app.use("/api/game-rooms", gameRoomRoutes);
 // API para obtener información del usuario actual
 app.get("/api/current-user", (req, res) => {
   if (!req.session.user) {
-    return res.status(401).json({ error: "No authenticated user" });
+    // Usuario no autenticado - devolver información de invitado
+    return res.json({ 
+      fullname: "Invitado",
+      email: "",
+      profilePicture: null,
+      isGuest: true
+    });
   }
   
-  // Devolver directamente los datos del usuario
+  // Devolver directamente los datos del usuario autenticado
   res.json({
     fullname: req.session.user.fullname,
     email: req.session.user.email,
-    profilePicture: req.session.user.profilePicture
+    profilePicture: req.session.user.profilePicture,
+    isGuest: false
   });
 });
 
@@ -202,6 +209,11 @@ app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
+// Ruta de prueba para verificar imágenes
+app.get("/test-images", (req, res) => {
+  res.render("test-images");
+});
+
 // Socket.io para manejar las partidas con autenticación de sesión
 io.on('connection', (socket) => {
   console.log('Usuario conectado:', socket.id);
@@ -212,7 +224,7 @@ io.on('connection', (socket) => {
 
   // Unirse a una sala (nueva estructura con datos de usuario)
   socket.on('join-room', async (data) => {
-    let gameCode, userSessionId;
+    let gameCode, userSessionId, guestUserData;
     
     // Permitir tanto string como objeto
     if (typeof data === 'string') {
@@ -220,24 +232,35 @@ io.on('connection', (socket) => {
     } else {
       gameCode = data.roomCode;
       userSessionId = data.sessionId;
+      guestUserData = data.user; // Datos del usuario invitado
     }
     
     console.log(`Socket ${socket.id} uniéndose a sala ${gameCode}`);
+    console.log('Datos recibidos:', data);
     
     if (!gameCode) {
       socket.emit('error', 'Código de sala requerido');
       return;
     }
 
-    // Obtener información del usuario desde la sesión
+    // Obtener información del usuario desde la sesión o datos de invitado
     let userInfo = {
       name: 'Usuario Anónimo',
       avatar: null,
       email: ''
     };
 
+    // Si hay datos de usuario invitado, usarlos
+    if (guestUserData && guestUserData.name) {
+      userInfo = {
+        name: guestUserData.name,
+        avatar: guestUserData.avatar || null,
+        email: guestUserData.email || ''
+      };
+      console.log('Datos de invitado recibidos:', userInfo);
+    }
     // Intentar obtener datos del usuario de la sesión
-    if (socket.request.session && socket.request.session.user) {
+    else if (socket.request.session && socket.request.session.user) {
       const sessionUser = socket.request.session.user;
       userInfo = {
         name: sessionUser.fullname || 'Usuario Anónimo',
@@ -1081,6 +1104,21 @@ io.on('connection', (socket) => {
   });
 });
 
+// Mapeo de números de carta a nombres en inglés para TTS
+const cardNames = {
+  1: "Tree", 2: "Flower", 3: "Grass", 4: "Mountain", 5: "Fish",
+  6: "Bird", 7: "Cat", 8: "Dog", 9: "Car", 10: "Bus",
+  11: "Bike", 12: "Apple", 13: "Banana", 14: "Watermelon", 15: "Carrot",
+  16: "Tomato", 17: "Grapes", 18: "Strawberry", 19: "Pineapple", 20: "Spring",
+  21: "Summer", 22: "Autumn", 23: "Winter", 24: "Sunny", 25: "Rainy",
+  26: "Cloudy", 27: "Snowy", 28: "Windy", 29: "Hot", 30: "Cold",
+  31: "Warm", 32: "Stormy", 33: "Foggy", 34: "Sun", 35: "Moon",
+  36: "Star", 37: "Sky", 38: "Rainbow", 39: "Thunder", 40: "Lightning",
+  41: "Mercury", 42: "Venus", 43: "Earth", 44: "Mars", 45: "Jupiter",
+  46: "Saturn", 47: "Uranus", 48: "Neptune", 49: "Comet", 50: "Rocket",
+  51: "Eclipse", 52: "Sunrise", 53: "Sunset", 54: "Nightfall"
+};
+
 // Función para generar cartilla de jugador (nueva estructura)
 function generatePlayerCards(player) {
   const allCards = [];
@@ -1090,7 +1128,8 @@ function generatePlayerCards(player) {
     allCards.push({
       number: i,
       name: `Carta ${i}`,
-      filename: `CARTA ${i}.svg`,
+      englishName: cardNames[i] || `Card ${i}`,
+      filename: `A1 - ${i}.svg`,
       selected: false
     });
   }
@@ -1163,7 +1202,8 @@ function initializeNewGameDeck(game) {
     game.availableCards.push({
       number: i,
       name: `Carta ${i}`,
-      filename: `CARTA ${i}.svg`
+      englishName: cardNames[i] || `Card ${i}`,
+      filename: `A1 - ${i}.svg`
     });
   }
   

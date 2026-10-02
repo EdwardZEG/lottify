@@ -1407,6 +1407,63 @@
                 font-size: 1.2rem;
             }
         }
+
+        /* Estilos para el modal de nombre de invitados - IDÉNTICO A PC */
+        .guest-name-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .name-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .guest-name-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .guest-name-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .guest-name-input:focus {
+            outline: none;
+            border-color: rgb(7, 10, 243);
+            box-shadow: 0 0 15px rgba(7, 10, 243, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .guest-join-button {
+            margin-top: 0.5rem;
+            background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+            border-color: #22C55E;
+        }
+
+        .guest-join-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+            border-color: #16A34A;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .guest-join-button:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
     </style>
 </head>
 
@@ -1648,7 +1705,7 @@
                     <div style="height: 1.2em;"></div>
                     <!-- Carta actual sin ningún fondo ni contenedor -->
                     <template x-if="currentCard">
-                        <img :src="currentCard.img || ('/img/carrusel/' + currentCard.filename)" :alt="currentCard.name"
+                        <img :src="currentCard.img || ('/img/partida/' + currentCard.filename)" :alt="currentCard.name"
                             :class="{ 'changing': isChangingCard, 'appearing': isAppearingCard }"
                             class="current-card-pure"
                             style="width: min(30vw, 110px); height: auto; aspect-ratio: 140/190; display: block; border-radius: 10px; box-shadow: 0 1vw 3vw rgba(0,0,0,0.13); max-width: 90vw; background: transparent; margin-bottom: 8px; transition: all 0.6s ease;" />
@@ -1715,7 +1772,7 @@
                                      'pulse': card.pulse
                                  }" @click="selectCard(index)"
                                 style="background: #f8fafc; border-radius: 1.8vw; box-shadow: 0 1vw 3vw rgba(0,0,0,0.07); border: 1.6px solid #e5e7eb; aspect-ratio: 140/190; width: 100%; max-width: 100%; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;">
-                                <img :src="'/img/carrusel/' + card.filename" :alt="card.name"
+                                <img :src="'/img/partida/' + card.filename" :alt="card.name"
                                     style="width: 80%; height: 80%; object-fit: contain; border-radius: 0.9vw;" />
                                 <!-- Overlay para cartas seleccionadas -->
                                 <div x-show="card.selected" class="mobile-card-overlay"
@@ -1726,20 +1783,6 @@
                         </template>
                     </div>
                 </div>
-            </div>
-
-            <!-- Botón Lotería -->
-            <div class="w-100 d-flex justify-content-center mt-2 mb-3">
-                <button @click="callLoteria()" :disabled="selectedCards < 4 || gameEnded"
-                    class="btn fw-bold text-uppercase d-flex align-items-center justify-content-center gap-2"
-                    style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: #000; border: none; padding: 12px 30px; border-radius: 25px; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); min-width: 150px;"
-                    :style="selectedCards < 4 || gameEnded ? 'background: #333; color: #666; cursor: not-allowed; box-shadow: none;' : ''"
-                    onmouseover="if(!this.disabled) { this.style.transform = 'translateY(-2px)'; this.style.boxShadow = '0 6px 20px rgba(255, 107, 107, 0.4)'; }"
-                    onmouseout="if(!this.disabled) { this.style.transform = 'translateY(0)'; this.style.boxShadow = '0 4px 15px rgba(255, 107, 107, 0.3)'; }">
-                    <i class="fas fa-trophy"></i>
-                    <span>¡LOTERÍA!</span>
-                    <span x-text="'(' + selectedCards + '/4)'"></span>
-                </button>
             </div>
         </div>
     </template>
@@ -1755,6 +1798,35 @@
             <button class="btn-status" @click="handleStatusAction()" x-text="gameStatus.buttonText"
                 style="font-size: clamp(11.2px, 3.2vw, 16px); padding: clamp(6.4px, 1.6vw, 12.8px) clamp(14.4px, 4vw, 28.8px);"></button>
         </template>
+    </div>
+
+    <!-- MODAL DE NOMBRE PARA INVITADOS - DISEÑO IDÉNTICO A PC -->
+    <div x-show="showGuestNameModal" x-cloak x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" class="host-disconnection-modal">
+
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="modal-title">¡Bienvenido a la partida!</div>
+            <div class="modal-subtitle">Ingresa tu nombre para unirte</div>
+
+            <form @submit.prevent="submitGuestName()" class="guest-name-form">
+                <div class="name-input-group">
+                    <input type="text" x-model="guestFirstName" placeholder="Nombre" class="guest-name-input"
+                        maxlength="20" required>
+                    <input type="text" x-model="guestLastName" placeholder="Apellido" class="guest-name-input"
+                        maxlength="20" required>
+                </div>
+                <button type="submit" class="modal-button guest-join-button"
+                    :disabled="!guestFirstName.trim() || !guestLastName.trim()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Unirse a la partida
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- MODALES DE RESULTADO DEL JUEGO - FUERA DE TEMPLATES PARA QUE ESTÉN SIEMPRE DISPONIBLES -->
@@ -1836,6 +1908,17 @@
                 userProfilePicture: '',
                 userInitials: '',
 
+                // Variables para sistema de invitados
+                showGuestNameModal: false,
+                guestFirstName: '',
+                guestLastName: '',
+                isGuest: false,
+                currentUser: {
+                    name: '',
+                    email: '',
+                    avatar: null
+                },
+
                 // Variables de temporizadores
                 socket: null,
                 timer: null,
@@ -1845,19 +1928,100 @@
                 cardTimer: null,
 
                 init() {
-                    // Obtener datos de usuario del HTML
-                    const userData = document.getElementById('user-data');
-                    if (userData) {
-                        this.userFullname = userData.dataset.fullname || '';
-                        this.userEmail = userData.dataset.email || '';
-                        this.userProfilePicture = userData.dataset.profilePicture || '';
-                        this.userInitials = this.getInitials(this.userFullname);
-                    }
+                    // Inicializar Text-to-Speech
+                    this.initializeTTS();
 
-                    // Inicializar socket y conectar al juego
-                    this.initSocket();
+                    // Cargar información del usuario actual desde la sesión
+                    this.loadCurrentUser();
 
                     setTimeout(() => this.loading = false, 500);
+                },
+
+                loadCurrentUser() {
+                    // Cargar información del usuario desde el backend
+                    fetch('/api/current-user')
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
+                            }
+                            throw new Error('Error en la respuesta del servidor');
+                        })
+                        .then(userData => {
+                            console.log('Datos del usuario recibidos (móvil):', userData);
+
+                            // Verificar si es un usuario registrado o invitado
+                            if (!userData.isGuest && userData.fullname && userData.fullname !== 'Usuario Anónimo' && userData.fullname !== 'Invitado') {
+                                // Usuario registrado - conectar directamente
+                                this.currentUser = {
+                                    name: userData.fullname,
+                                    email: userData.email || '',
+                                    avatar: userData.profilePicture || null
+                                };
+                                this.isGuest = false;
+
+                                // También actualizar las variables de usuario para compatibilidad
+                                this.userFullname = userData.fullname;
+                                this.userEmail = userData.email || '';
+                                this.userProfilePicture = userData.profilePicture || '';
+                                this.userInitials = this.getInitials(userData.fullname);
+
+                                console.log('Usuario registrado conectado:', this.currentUser);
+                                this.connectToRoom();
+                            } else {
+                                // Usuario invitado - mostrar modal de nombre
+                                this.isGuest = true;
+                                this.showGuestNameModal = true;
+                                console.log('Invitado detectado - mostrando modal de nombre');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error loading user data:', err);
+                            // Si hay error, tratar como invitado
+                            this.isGuest = true;
+                            this.showGuestNameModal = true;
+                            console.log('Error al cargar usuario - tratando como invitado');
+                        });
+                },
+
+                connectToRoom() {
+                    // Inicializar socket y conectar al juego
+                    this.initSocket();
+                },
+
+                submitGuestName() {
+                    // Validar que ambos campos estén llenos
+                    if (!this.guestFirstName.trim() || !this.guestLastName.trim()) {
+                        alert('Por favor completa ambos campos');
+                        return;
+                    }
+
+                    // Crear el nombre completo del invitado
+                    const fullName = `${this.guestFirstName.trim()} ${this.guestLastName.trim()}`;
+
+                    this.currentUser = {
+                        name: fullName,
+                        email: '',
+                        avatar: null
+                    };
+
+                    // También actualizar las variables de usuario para compatibilidad
+                    this.userFullname = fullName;
+                    this.userEmail = '';
+                    this.userProfilePicture = '';
+                    this.userInitials = this.getInitials(fullName);
+
+                    // Cerrar el modal
+                    this.showGuestNameModal = false;
+
+                    console.log('Invitado configurado:', this.currentUser);
+
+                    // Conectar al room con los datos del invitado
+                    this.connectToRoom();
+                },
+
+                closeGuestModal() {
+                    // Cerrar modal sin conectar (volver a dashboard)
+                    window.location.href = '/dashboard';
                 },
 
                 initSocket() {
@@ -1869,7 +2033,15 @@
                         console.log('Socket conectado:', this.socket.id);
                         if (this.roomCode) {
                             console.log('Uniéndose a la sala:', this.roomCode);
-                            this.socket.emit('join-room', this.roomCode);
+
+                            // Enviar datos del usuario junto con el room code
+                            const userData = {
+                                roomCode: this.roomCode,
+                                user: this.currentUser
+                            };
+
+                            console.log('Datos del usuario enviados (móvil):', userData);
+                            this.socket.emit('join-room', userData);
                         }
                     });
 
@@ -1924,8 +2096,23 @@
                     this.socket.on('game-started', (data) => {
                         console.log('Juego iniciado:', data);
                         this.gameState = 'playing';
-                        this.playerCards = data.playerCards;
-                        this.currentCard = data.currentCard;
+
+                        // Si no tenemos cartas precargadas, cargarlas ahora
+                        if (!this.playerCards || this.playerCards.length === 0) {
+                            console.log('⚠️ Cartas no precargadas, cargando ahora...');
+                            this.playerCards = data.playerCards;
+                            this.preloadCardImages(); // Cargar de forma asíncrona
+                        } else {
+                            console.log('✅ Usando cartas ya precargadas');
+                        }
+
+                        // Configurar carta actual si no está precargada
+                        if (!this.currentCard && data.currentCard) {
+                            this.currentCard = data.currentCard;
+                            // Reproducir voz de la primera carta usando TTS
+                            this.speakCardName(data.currentCard);
+                        }
+
                         this.currentCardIndex = data.index || 0;
                         this.updateSelectedCards();
 
@@ -1955,6 +2142,21 @@
                         console.log('Cuenta regresiva iniciada:', data);
                         this.countdown = data.count;
                         this.gameState = 'starting';
+
+                        // PRECARGA DE CARTILLAS DURANTE EL CONTEO REGRESIVO
+                        if (data.playerCards && data.playerCards.length > 0) {
+                            console.log('🎴 Precargando cartilla durante conteo regresivo...');
+                            this.playerCards = data.playerCards;
+                            this.preloadCardImages();
+                            this.updateSelectedCards();
+                        }
+
+                        // También precargar la primera carta si está disponible
+                        if (data.currentCard) {
+                            console.log('🃏 Precargando carta actual...');
+                            this.currentCard = data.currentCard;
+                            this.currentCardIndex = data.index || 0;
+                        }
                     });
 
                     this.socket.on('countdown-update', (count) => {
@@ -2086,6 +2288,53 @@
                     this.selectedCards = this.playerCards.filter(card => card.selected).length;
                 },
 
+                // FUNCIÓN PARA PRECARGAR IMÁGENES DE LAS CARTAS
+                async preloadCardImages() {
+                    console.log('🎴 Iniciando precarga de imágenes...');
+                    const imagePromises = [];
+
+                    // Precargar todas las cartas de la cartilla
+                    this.playerCards.forEach((card, index) => {
+                        const imgPromise = new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                console.log(`✅ Carta ${index + 1} precargada: ${card.filename}`);
+                                resolve(img);
+                            };
+                            img.onerror = () => {
+                                console.warn(`⚠️ Error precargando carta ${index + 1}: ${card.filename}`);
+                                resolve(null); // No fallar por una imagen
+                            };
+                            img.src = `/img/partida/${card.filename}`;
+                        });
+                        imagePromises.push(imgPromise);
+                    });
+
+                    // Precargar la carta actual si existe
+                    if (this.currentCard) {
+                        const currentCardPromise = new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                console.log(`✅ Carta actual precargada: ${this.currentCard.filename}`);
+                                resolve(img);
+                            };
+                            img.onerror = () => {
+                                console.warn(`⚠️ Error precargando carta actual: ${this.currentCard.filename}`);
+                                resolve(null);
+                            };
+                            img.src = this.currentCard.img || `/img/partida/${this.currentCard.filename}`;
+                        });
+                        imagePromises.push(currentCardPromise);
+                    }
+
+                    try {
+                        await Promise.all(imagePromises);
+                        console.log('🎉 Todas las cartas han sido precargadas exitosamente');
+                    } catch (error) {
+                        console.error('❌ Error en la precarga de cartas:', error);
+                    }
+                },
+
                 showNewCard(card, index) {
                     this.isChangingCard = true;
                     this.stopTimer();
@@ -2095,6 +2344,9 @@
                         this.currentCardIndex = index;
                         this.isChangingCard = false;
                         this.isAppearingCard = true;
+
+                        // Reproducir voz de la carta usando TTS
+                        this.speakCardName(card);
 
                         this.timeLeft = 5;
                         this.startTimer();
@@ -2119,6 +2371,76 @@
                     if (this.timer) {
                         clearInterval(this.timer);
                         this.timer = null;
+                    }
+                },
+
+                // Función para reproducir el nombre de la carta con TTS
+                speakCardName(card) {
+                    if (!this.muted && 'speechSynthesis' in window) {
+                        try {
+                            // Cancelar cualquier síntesis previa
+                            speechSynthesis.cancel();
+
+                            const utterance = new SpeechSynthesisUtterance();
+
+                            // Usar el nombre en inglés si está disponible, sino usar el nombre regular
+                            const textToSpeak = card.englishName || card.name || `Card ${card.number}`;
+                            utterance.text = textToSpeak;
+
+                            // Configuración de voz
+                            utterance.lang = 'en-US'; // Inglés americano
+                            utterance.rate = 0.8; // Velocidad un poco más lenta
+                            utterance.pitch = 1.0; // Tono normal
+                            utterance.volume = 0.8; // Volumen al 80%
+
+                            // Intentar usar una voz específica de Google si está disponible
+                            const voices = speechSynthesis.getVoices();
+                            const googleVoice = voices.find(voice =>
+                                voice.name.includes('Google') && voice.lang.startsWith('en')
+                            );
+                            const femaleVoice = voices.find(voice =>
+                                voice.lang.startsWith('en') && voice.name.toLowerCase().includes('female')
+                            );
+                            const maleVoice = voices.find(voice =>
+                                voice.lang.startsWith('en') && voice.name.toLowerCase().includes('male')
+                            );
+
+                            // Prioridad: Google > Female > Male > Primera disponible
+                            utterance.voice = googleVoice || femaleVoice || maleVoice || voices.find(voice => voice.lang.startsWith('en'));
+
+                            console.log(`🎵 Pronunciando: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
+
+                            // Reproducir
+                            speechSynthesis.speak(utterance);
+
+                        } catch (error) {
+                            console.error('Error con Text-to-Speech:', error);
+                        }
+                    }
+                },
+
+                // Función para inicializar las voces de TTS
+                initializeTTS() {
+                    if ('speechSynthesis' in window) {
+                        // Cargar las voces disponibles
+                        const loadVoices = () => {
+                            const voices = speechSynthesis.getVoices();
+                            console.log('🎵 Voces TTS disponibles:', voices.length);
+                            voices.forEach(voice => {
+                                if (voice.lang.startsWith('en')) {
+                                    console.log(`  - ${voice.name} (${voice.lang})`);
+                                }
+                            });
+                        };
+
+                        // Las voces pueden no estar disponibles inmediatamente
+                        if (speechSynthesis.getVoices().length > 0) {
+                            loadVoices();
+                        } else {
+                            speechSynthesis.addEventListener('voiceschanged', loadVoices);
+                        }
+                    } else {
+                        console.warn('⚠️ Text-to-Speech no soportado en este navegador');
                     }
                 },
 
