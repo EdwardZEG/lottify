@@ -1613,88 +1613,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Modal de Victoria -->
-            <div x-show="showVictoryModal === true" x-transition:enter="transition ease-out duration-500"
-                x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-90" class="game-result-modal victory"
-                style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(34, 197, 94, 0.9); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 3000;">
-                <div class="game-result-content victory"
-                    style="text-align: center; animation: victoryPulse 2s infinite alternate; padding: 2rem;">
-
-                    <!-- Icono de victoria -->
-                    <div style="margin-bottom: 2rem;">
-                        <div
-                            style="width: 120px; height: 120px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);">
-                            <i class="fas fa-trophy"
-                                style="font-size: 3.5rem; color: #FFD700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);"></i>
-                        </div>
-                    </div>
-
-                    <!-- Título de victoria -->
-                    <div class="result-title victory"
-                        style="font-size: 3.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'Inter', sans-serif; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); color: #ffffff; margin: 0 0 1rem 0;">
-                        ¡GANASTE!
-                    </div>
-
-                    <!-- Mensaje adicional -->
-                    <div
-                        style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 3rem; font-weight: 500;">
-                        🎉 ¡Felicitaciones! ¡Completaste la lotería! 🎉
-                    </div>
-
-                    <!-- Botón de acción -->
-                    <button class="result-button" @click="goToDashboardFromResult()"
-                        style="background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.8); color: white; border-radius: 50px; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);"
-                        onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 1)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.4)';"
-                        onmouseout="this.style.background='rgba(0, 0, 0, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.8)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                        <i class="fas fa-home" style="font-size: 1.1rem;"></i>
-                        Volver al Inicio
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal de Derrota -->
-            <div x-show="showDefeatModal === true" x-transition:enter="transition ease-out duration-500"
-                x-transition:enter-start="opacity-0 scale-90" x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-90" class="game-result-modal defeat"
-                style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(239, 68, 68, 0.9); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 3000;">
-                <div class="game-result-content defeat"
-                    style="text-align: center; animation: defeatPulse 2s infinite alternate; padding: 2rem;">
-
-                    <!-- Icono de derrota -->
-                    <div style="margin-bottom: 2rem;">
-                        <div
-                            style="width: 120px; height: 120px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);">
-                            <i class="fas fa-skull-crossbones"
-                                style="font-size: 3.5rem; color: #FF6B6B; text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);"></i>
-                        </div>
-                    </div>
-
-                    <!-- Título de derrota -->
-                    <div class="result-title defeat"
-                        style="font-size: 3.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; font-family: 'Inter', sans-serif; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); color: #ffffff; margin: 0 0 1rem 0;">
-                        GAME OVER
-                    </div>
-
-                    <!-- Mensaje adicional -->
-                    <div
-                        style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 3rem; font-weight: 500;">
-                        😔 Otro jugador completó la lotería primero
-                    </div>
-
-                    <!-- Botón de acción -->
-                    <button class="result-button" @click="goToDashboardFromResult()"
-                        style="background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(255, 255, 255, 0.8); color: white; border-radius: 50px; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; gap: 0.7rem; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);"
-                        onmouseover="this.style.background='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 1)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(0, 0, 0, 0.4)';"
-                        onmouseout="this.style.background='rgba(0, 0, 0, 0.2)'; this.style.borderColor='rgba(255, 255, 255, 0.8)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                        <i class="fas fa-home" style="font-size: 1.1rem;"></i>
-                        Volver al Inicio
-                    </button>
-                </div>
-            </div>
         </div>
     </template>
 
@@ -1839,6 +1757,35 @@
         </template>
     </div>
 
+    <!-- MODALES DE RESULTADO DEL JUEGO - FUERA DE TEMPLATES PARA QUE ESTÉN SIEMPRE DISPONIBLES -->
+    <!-- Modal de Victoria -->
+    <div x-show="showVictoryModal === true" x-cloak x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" class="game-result-modal victory">
+        <div class="game-result-content victory">
+            <div class="result-title victory">YOU WON!</div>
+            <button class="result-button" @click="goToDashboardFromResult()">
+                <i class="fas fa-home"></i>
+                INICIO
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Derrota -->
+    <div x-show="showDefeatModal === true" x-cloak x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" class="game-result-modal defeat">
+        <div class="game-result-content defeat">
+            <div class="result-title defeat">GAME OVER</div>
+            <button class="result-button" @click="goToDashboardFromResult()">
+                <i class="fas fa-home"></i>
+                INICIO
+            </button>
+        </div>
+    </div>
+
     <script>
 
 
@@ -1873,6 +1820,15 @@
                 gameAlreadyStartedCountdown: 10,
                 gameAlreadyStartedTimer: null,
                 showGameAlreadyStartedModal: false,
+
+                // Variable gameStatus que falta
+                gameStatus: {
+                    show: false,
+                    title: '',
+                    message: '',
+                    showButton: false,
+                    buttonText: ''
+                },
 
                 // Usuario data desde el HTML data-*
                 userFullname: '',
@@ -2279,16 +2235,24 @@
 
                 // Gestión de modales
                 handleGameEnd(data) {
+                    console.log('🎯 Manejando fin de juego:', data);
                     this.gameEnded = true;
                     this.winner = data.winner;
                     this.gameResultsReady = true;
 
                     const currentPlayerId = this.socket.id;
+                    console.log('🆔 Winner ID:', data.winner);
+                    console.log('🆔 Current Player ID:', currentPlayerId);
 
                     setTimeout(() => {
-                        if (data.winner === currentPlayerId) {
+                        // Si hay un ganador específico y es el jugador actual
+                        if (data.winner && data.winner === currentPlayerId) {
+                            console.log('🏆 Mostrando modal de victoria');
                             this.showVictoryModal = true;
-                        } else {
+                        }
+                        // Si el juego terminó pero no hay ganador o no es el jugador actual
+                        else {
+                            console.log('💀 Mostrando modal de derrota');
                             this.showDefeatModal = true;
                         }
                     }, 100);
@@ -2300,6 +2264,11 @@
                         localStorage.removeItem('gameCode');
                         localStorage.removeItem('isHost');
                     }
+                },
+
+                handleStatusAction() {
+                    // Función para manejar acciones del gameStatus
+                    console.log('Acción de estado del juego ejecutada');
                 },
 
                 goToDashboardFromResult() {
