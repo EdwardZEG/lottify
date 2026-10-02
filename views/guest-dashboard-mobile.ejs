@@ -114,6 +114,47 @@
             background: #fff;
         }
 
+        /* Sistema de secciones mejorado - contenido completo visible para móvil */
+        .content-section {
+            position: fixed !important;
+            top: 60px !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 60px) !important;
+            background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 100%) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            z-index: 1000 !important;
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .content-section.active {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 1000 !important;
+        }
+
+        /* Z-index específicos para evitar superposición */
+        #unirse-section {
+            z-index: 1000 !important;
+        }
+
+        #unirse-section.active {
+            z-index: 1000 !important;
+        }
+
+        /* Eliminar padding/margin del content para evitar conflictos */
+        .content {
+            padding: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
         @media (min-width: 601px) {
             .sidebar {
                 left: 0 !important;
@@ -135,6 +176,19 @@
             .content.expanded {
                 margin-top: 0 !important;
                 margin-left: 80px;
+            }
+
+            /* Ajustes para escritorio */
+            .content-section {
+                top: 0 !important;
+                left: 80px !important;
+                width: calc(100vw - 80px) !important;
+                height: 100vh !important;
+            }
+
+            .content.expanded .content-section {
+                left: 300px !important;
+                width: calc(100vw - 300px) !important;
             }
         }
 
@@ -446,18 +500,124 @@
         </div>
     </div>
     <div id="content" class="content">
-        <!-- Sección Unirse a partida para invitados -->
-        <div style="position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); z-index: 1000;">
-            <div class="w-full h-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center px-4"
-                x-data="{ 
-                codigo: '',
-                copied: false,
-                copiarCodigo() {
-                    navigator.clipboard.writeText(this.codigo || '657-934');
-                    this.copied = true;
-                    setTimeout(() => { this.copied = false; }, 2000);
-                }
-            }">
+        <!-- Sección Unirse a partida -->
+        <div id="unirse-section" class="content-section active">
+            <div class="w-full h-full flex flex-col items-center justify-center px-4" x-data="{ 
+                    codigo: '',
+                    copied: false,
+                    esHost: false,
+                    loading: false,
+                    errorMessage: '',
+                    showSuccessMessage: false,
+                    init() {
+                        this.resetSection();
+                    },
+                    resetSection(forced = false) {
+                        // Si es un reset forzado (por ejemplo, después de terminar una partida)
+                        if (forced) {
+                            this.codigo = '';
+                            this.copied = false;
+                            this.esHost = false;
+                            this.loading = false;
+                            this.errorMessage = '';
+                            this.showSuccessMessage = false;
+                            this.limpiarLocalStorage();
+                            return;
+                        }
+                        
+                        // Restablecer completamente la sección
+                        this.codigo = '';
+                        this.copied = false;
+                        this.esHost = false;
+                        this.loading = false;
+                        this.errorMessage = '';
+                        this.showSuccessMessage = false;
+                        
+                        // Para invitados, no verificar localStorage ya que no pueden crear salas
+                        this.limpiarLocalStorage();
+                    },
+                    onGameFinished() {
+                        // Función específica para cuando termina una partida
+                        console.log('Evento game-finished recibido - limpiando sección unirse');
+                        this.resetSection(true); // Reset forzado
+                    },
+                    limpiarLocalStorage() {
+                        localStorage.removeItem('gameCode');
+                        localStorage.removeItem('gameConfig');
+                        localStorage.removeItem('isHost');
+                    },
+                    copiarCodigo() {
+                        const codigoACopiar = this.codigo || '657-934';
+                        navigator.clipboard.writeText(codigoACopiar).then(() => {
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        }).catch(() => {
+                            // Fallback para navegadores sin clipboard API
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        });
+                    },
+                    unirseAPartida() {
+                        if (this.codigo.length < 6) {
+                            this.errorMessage = 'El código debe tener al menos 6 caracteres';
+                            setTimeout(() => { this.errorMessage = ''; }, 3000);
+                            return;
+                        }
+                        
+                        this.loading = true;
+                        this.errorMessage = '';
+                        
+                        // Para invitados, usar la ruta especial sin autenticación
+                        const endpoint = '/api/game-rooms/join-room-guest';
+                        const body = JSON.stringify({ code: this.codigo });
+                        
+                        const options = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: body
+                        };
+                        
+                        fetch(endpoint, options)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.loading = false;
+                            
+                            if (data.success) {
+                                console.log('Uniéndose a partida con código:', this.codigo);
+                                
+                                // Guardar información de la sala
+                                localStorage.setItem('gameCode', this.codigo);
+                                localStorage.setItem('isHost', 'false'); // Siempre false para invitados
+                                localStorage.setItem('guestId', data.room.guestId); // Guardar ID de invitado
+                                
+                                // Redirigir al juego
+                                window.location.href = '/jugar?code=' + this.codigo;
+                            } else {
+                                this.errorMessage = data.error || 'Error desconocido';
+                                setTimeout(() => { this.errorMessage = ''; }, 5000);
+                            }
+                        })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error:', error);
+                            this.errorMessage = 'Error de conexión. Inténtalo de nuevo.';
+                            setTimeout(() => { this.errorMessage = ''; }, 5000);
+                        });
+                    },
+                    compartirCodigo() {
+                        if (navigator.share && this.codigo) {
+                            navigator.share({
+                                title: 'Juego de Lotería',
+                                text: 'Únete a mi partida con el código: ' + this.codigo,
+                                url: window.location.origin + '/jugar?code=' + this.codigo
+                            });
+                        } else {
+                            this.copiarCodigo();
+                        }
+                    }
+                }" @game-finished.window="onGameFinished()" @page-leave.window="resetSection()">
 
                 <!-- Logo superior -->
                 <div class="mb-8 transform hover:scale-105 transition-all duration-300">
@@ -477,9 +637,9 @@
                         <div class="bg-white rounded-3xl shadow-2xl border-2 border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-3xl focus-within:shadow-3xl focus-within:ring-4 focus-within:ring-blue-100 focus-within:border-blue-300"
                             style="height: 60px;">
                             <div class="flex items-center h-full">
-                                <input type="text" x-model="codigo" placeholder="ABC123"
-                                    class="flex-1 px-4 py-3 text-lg font-bold text-center text-gray-800 bg-transparent border-0 focus:outline-none placeholder-gray-400 h-full uppercase"
-                                    maxlength="6" style="letter-spacing: 2px;">
+                                <input type="text" x-model="codigo" placeholder="657-934"
+                                    class="flex-1 px-4 py-3 text-lg font-bold text-center text-gray-800 bg-transparent border-0 focus:outline-none placeholder-gray-400 h-full"
+                                    maxlength="7" style="letter-spacing: 2px;">
                                 <div class="w-px h-8 bg-gray-200"></div>
                                 <button @click="copiarCodigo()"
                                     class="group px-3 py-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset h-full flex items-center justify-center"
@@ -504,15 +664,36 @@
                     </div>
                 </div>
 
+                <!-- Mensaje de error -->
+                <div x-show="errorMessage" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                    x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                    class="mb-4 text-center w-full max-w-sm">
+                    <div class="bg-red-50 border-2 border-red-200 rounded-lg p-3">
+                        <div class="flex items-center justify-center space-x-2 text-red-800">
+                            <i class="fas fa-exclamation-triangle text-sm"></i>
+                            <span class="font-semibold text-sm">Error</span>
+                        </div>
+                        <p class="text-red-700 text-xs mt-1" x-text="errorMessage"></p>
+                    </div>
+                </div>
+
                 <!-- Botón principal -->
                 <div class="mb-6 w-full max-w-sm">
-                    <button @click="codigo.length >= 6 ? window.location.href = '/partida/' + codigo : null"
-                        class="group relative w-full px-6 py-3 bg-gray-600 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold text-base rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-lg"
-                        :disabled="codigo.length < 6">
+                    <button @click="unirseAPartida()"
+                        class="group relative w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold text-base rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-lg"
+                        :disabled="codigo.length < 6 || loading">
                         <div class="flex items-center justify-center space-x-2">
-                            <i
+                            <!-- Spinner de carga -->
+                            <div x-show="loading" class="animate-spin">
+                                <i class="fas fa-spinner text-sm"></i>
+                            </div>
+                            <!-- Ícono normal -->
+                            <i x-show="!loading"
                                 class="fas fa-rocket text-sm transition-transform duration-300 group-hover:translate-x-1"></i>
-                            <span>Ir a partida</span>
+                            <!-- Texto del botón -->
+                            <span x-show="!loading">Unirse a Partida</span>
+                            <span x-show="loading">Procesando...</span>
                         </div>
 
                         <!-- Efecto de brillo -->
@@ -527,12 +708,12 @@
                     <div
                         class="text-amber-600 text-xs font-medium bg-amber-50/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-amber-200">
                         <i class="fas fa-exclamation-triangle mr-1"></i>
-                        El código debe tener 6 caracteres
+                        El código debe tener al menos 6 caracteres
                     </div>
                 </div>
 
                 <!-- Mensaje para invitados -->
-                <div class="text-center w-full max-w-sm">
+                <div class="text-center w-full max-w-sm mb-6">
                     <div
                         class="text-blue-600 text-xs font-medium bg-blue-50/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-blue-200">
                         <i class="fas fa-info-circle mr-1"></i>
@@ -540,14 +721,6 @@
                             class="text-blue-700 font-semibold underline hover:text-blue-800">Regístrate</a> para más
                         funciones.
                     </div>
-                </div>
-
-                <!-- Botón de login alternativo -->
-                <div class="mt-6 w-full max-w-sm">
-                    <a href="/login"
-                        class="w-full block text-center px-4 py-2 bg-white text-gray-700 font-medium text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Iniciar sesión
-                    </a>
                 </div>
 
             </div>

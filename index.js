@@ -104,33 +104,53 @@ app.get("/jugar", (req, res) => {
   console.log("Session:", req.session);
   console.log("User in session:", req.session.user);
   
-  // Verificar si el usuario está autenticado
-  if (!req.session.user) {
-    console.log("Usuario no autenticado, redirigiendo a login");
-    return res.redirect("/login");
-  }
-  
-  // Obtener código de partida de query params o generar uno nuevo
+  // Obtener código de partida de query params
   let roomCode = req.query.code;
   
-  if (!roomCode) {
-    // Generar código de sala aleatorio de 6 caracteres
-    roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    console.log("Código de sala generado:", roomCode);
-  }
+  // Verificar si es invitado (sin autenticación) o usuario registrado
+  const isGuest = !req.session.user;
   
-  console.log("Room code:", roomCode);
-  
-  if (isMobile(req)) {
-    res.render("jugar-mobile", {
-      user: req.session.user,
-      roomCode: roomCode
-    });
+  if (isGuest) {
+    // Para invitados, requiere código de sala
+    if (!roomCode) {
+      console.log("Invitado sin código de sala, redirigiendo");
+      return res.redirect("/guest-dashboard");
+    }
+    
+    console.log("Invitado accediendo con código:", roomCode);
+    
+    if (isMobile(req)) {
+      res.render("jugar-mobile", {
+        user: { fullname: "Invitado", isGuest: true },
+        roomCode: roomCode
+      });
+    } else {
+      res.render("jugar", {
+        user: { fullname: "Invitado", isGuest: true },
+        roomCode: roomCode
+      });
+    }
   } else {
-    res.render("jugar", {
-      user: req.session.user,
-      roomCode: roomCode
-    });
+    // Usuario autenticado
+    if (!roomCode) {
+      // Generar código de sala aleatorio de 6 caracteres
+      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      console.log("Código de sala generado:", roomCode);
+    }
+    
+    console.log("Usuario autenticado con código:", roomCode);
+    
+    if (isMobile(req)) {
+      res.render("jugar-mobile", {
+        user: req.session.user,
+        roomCode: roomCode
+      });
+    } else {
+      res.render("jugar", {
+        user: req.session.user,
+        roomCode: roomCode
+      });
+    }
   }
 });
 

@@ -566,6 +566,138 @@
                 margin-top: 0 !important;
             }
         }
+
+        /* Estilos personalizados para la sección Unirse a partida */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .border-3 {
+            border-width: 3px;
+        }
+
+        /* Animación mejorada para el cubo 3D */
+        @keyframes rotateCube {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+
+            25% {
+                transform: rotateX(-15deg) rotateY(90deg);
+            }
+
+            50% {
+                transform: rotateX(0deg) rotateY(180deg);
+            }
+
+            75% {
+                transform: rotateX(15deg) rotateY(270deg);
+            }
+
+            100% {
+                transform: rotateX(0deg) rotateY(360deg);
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Efectos de brillo y sombra mejorados */
+        .text-glow {
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.5), 0 0 20px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.1);
+        }
+
+        /* Efectos para el cubo 3D */
+        .cube-3d {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Mejoras visuales adicionales */
+        .input-enhanced:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2),
+                0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+        }
+
+        .btn-enhanced:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Sistema de secciones mejorado - contenido completo visible */
+        .content-section {
+            position: fixed !important;
+            top: 0 !important;
+            left: 80px !important;
+            width: calc(100vw - 80px) !important;
+            height: 100vh !important;
+            background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 100%) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            z-index: 5 !important;
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        .content-section.active {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 15 !important;
+        }
+
+        /* Animaciones fluidas para sidebar expandido */
+        .content.expanded .content-section {
+            left: 300px !important;
+            width: calc(100vw - 300px) !important;
+        }
+
+        /* Eliminar padding/margin del content para evitar conflictos */
+        .content {
+            padding: 0 !important;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+
+        /* Z-index específicos para evitar superposición */
+        #unirse-section {
+            z-index: 5 !important;
+        }
+
+        #unirse-section.active {
+            z-index: 15 !important;
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 600px) {
+            .content-section {
+                left: 0 !important;
+                width: 100vw !important;
+                margin-top: 60px !important;
+                height: calc(100vh - 60px) !important;
+            }
+
+            .content.expanded .content-section {
+                left: 0 !important;
+                width: 100vw !important;
+            }
+        }
     </style>
 </head>
 
@@ -626,26 +758,132 @@
         </div>
     </div>
     <div id="content" class="content">
-        <!-- Sección Unirse a partida para invitados -->
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1000;">
-            <div class="w-full h-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center"
-                x-data="{ 
-                codigo: '',
-                copied: false,
-                copiarCodigo() {
-                    navigator.clipboard.writeText(this.codigo || '657-934');
-                    this.copied = true;
-                    setTimeout(() => { this.copied = false; }, 2000);
-                }
-            }">
+        <!-- Sección Unirse a partida -->
+        <div id="unirse-section" class="content-section active">
+            <div class="w-full h-full flex flex-col items-center justify-center" x-data="{ 
+                    codigo: '',
+                    copied: false,
+                    esHost: false,
+                    loading: false,
+                    errorMessage: '',
+                    showSuccessMessage: false,
+                    init() {
+                        this.resetSection();
+                    },
+                    resetSection(forced = false) {
+                        // Si es un reset forzado (por ejemplo, después de terminar una partida)
+                        if (forced) {
+                            this.codigo = '';
+                            this.copied = false;
+                            this.esHost = false;
+                            this.loading = false;
+                            this.errorMessage = '';
+                            this.showSuccessMessage = false;
+                            this.limpiarLocalStorage();
+                            return;
+                        }
+                        
+                        // Restablecer completamente la sección
+                        this.codigo = '';
+                        this.copied = false;
+                        this.esHost = false;
+                        this.loading = false;
+                        this.errorMessage = '';
+                        this.showSuccessMessage = false;
+                        
+                        // Para invitados, no verificar localStorage ya que no pueden crear salas
+                        this.limpiarLocalStorage();
+                    },
+                    onGameFinished() {
+                        // Función específica para cuando termina una partida
+                        console.log('Evento game-finished recibido - limpiando sección unirse');
+                        this.resetSection(true); // Reset forzado
+                    },
+                    limpiarLocalStorage() {
+                        localStorage.removeItem('gameCode');
+                        localStorage.removeItem('gameConfig');
+                        localStorage.removeItem('isHost');
+                    },
+                    copiarCodigo() {
+                        const codigoACopiar = this.codigo || '657-934';
+                        navigator.clipboard.writeText(codigoACopiar).then(() => {
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        }).catch(() => {
+                            // Fallback para navegadores sin clipboard API
+                            this.copied = true;
+                            setTimeout(() => { this.copied = false; }, 2000);
+                        });
+                    },
+                    unirseAPartida() {
+                        if (this.codigo.length < 6) {
+                            this.errorMessage = 'El código debe tener al menos 6 caracteres';
+                            setTimeout(() => { this.errorMessage = ''; }, 3000);
+                            return;
+                        }
+                        
+                        this.loading = true;
+                        this.errorMessage = '';
+                        
+                        // Para invitados, usar la ruta especial sin autenticación
+                        const endpoint = '/api/game-rooms/join-room-guest';
+                        const body = JSON.stringify({ code: this.codigo });
+                        
+                        const options = {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: body
+                        };
+                        
+                        fetch(endpoint, options)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.loading = false;
+                            
+                            if (data.success) {
+                                console.log('Uniéndose a partida con código:', this.codigo);
+                                
+                                // Guardar información de la sala
+                                localStorage.setItem('gameCode', this.codigo);
+                                localStorage.setItem('isHost', 'false'); // Siempre false para invitados
+                                localStorage.setItem('guestId', data.room.guestId); // Guardar ID de invitado
+                                
+                                // Redirigir al juego
+                                window.location.href = '/jugar?code=' + this.codigo;
+                            } else {
+                                this.errorMessage = data.error || 'Error desconocido';
+                                setTimeout(() => { this.errorMessage = ''; }, 5000);
+                            }
+                        })
+                        .catch(error => {
+                            this.loading = false;
+                            console.error('Error:', error);
+                            this.errorMessage = 'Error de conexión. Inténtalo de nuevo.';
+                            setTimeout(() => { this.errorMessage = ''; }, 5000);
+                        });
+                    },
+                    compartirCodigo() {
+                        if (navigator.share && this.codigo) {
+                            navigator.share({
+                                title: 'Juego de Lotería',
+                                text: 'Únete a mi partida con el código: ' + this.codigo,
+                                url: window.location.origin + '/jugar?code=' + this.codigo
+                            });
+                        } else {
+                            this.copiarCodigo();
+                        }
+                    }
+                }" @game-finished.window="onGameFinished()" @page-leave.window="resetSection()">
 
-                <!-- Logo superior -->
+                <!-- Logo superior con más separación -->
                 <div class="mb-16 transform hover:scale-105 transition-all duration-300">
                     <img src="/img/logo_formularios.svg" alt="Logo"
                         class="w-36 h-36 mx-auto drop-shadow-xl filter saturate-110">
                 </div>
 
-                <!-- Campo de código -->
+                <!-- Campo de código con mejor diseño -->
                 <div class="mb-12">
                     <div class="relative">
                         <div class="bg-white rounded-3xl shadow-2xl border-2 border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-3xl focus-within:shadow-3xl focus-within:ring-4 focus-within:ring-blue-100 focus-within:border-blue-300"
@@ -665,7 +903,7 @@
                             </div>
                         </div>
 
-                        <!-- Mensaje de copiado -->
+                        <!-- Mensaje de copiado mejorado -->
                         <div x-show="copied" x-transition:enter="transition ease-out duration-300"
                             x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
                             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
@@ -678,15 +916,36 @@
                     </div>
                 </div>
 
-                <!-- Botón principal -->
+                <!-- Botón principal más compacto -->
                 <div class="mb-8">
-                    <button @click="codigo.length >= 6 ? window.location.href = '/partida/' + codigo : null"
-                        class="group relative px-8 py-3 bg-gray-600 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-lg"
-                        :disabled="codigo.length < 6">
-                        <div class="flex items-center space-x-3">
-                            <i
+                    <!-- Mensaje de error -->
+                    <div x-show="errorMessage" x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                        x-transition:enter-end="opacity-100 transform translate-y-0 scale-100" class="mb-4 text-center">
+                        <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 max-w-md mx-auto">
+                            <div class="flex items-center justify-center space-x-2 text-red-800">
+                                <i class="fas fa-exclamation-triangle text-lg"></i>
+                                <span class="font-semibold">Error</span>
+                            </div>
+                            <p class="text-red-700 text-sm mt-1" x-text="errorMessage"></p>
+                        </div>
+                    </div>
+
+                    <!-- Botón principal -->
+                    <button @click="unirseAPartida()"
+                        class="group relative px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold text-lg rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-lg"
+                        :disabled="codigo.length < 6 || loading">
+                        <div class="flex items-center justify-center space-x-3">
+                            <!-- Spinner de carga -->
+                            <div x-show="loading" class="animate-spin">
+                                <i class="fas fa-spinner text-lg"></i>
+                            </div>
+                            <!-- Ícono normal -->
+                            <i x-show="!loading"
                                 class="fas fa-rocket text-lg transition-transform duration-300 group-hover:translate-x-1"></i>
-                            <span>Ir a partida</span>
+                            <!-- Texto del botón -->
+                            <span x-show="!loading">Unirse a Partida</span>
+                            <span x-show="loading">Procesando...</span>
                         </div>
 
                         <!-- Efecto de brillo -->
@@ -696,7 +955,7 @@
                     </button>
                 </div>
 
-                <!-- Indicador de estado -->
+                <!-- Indicador de estado simplificado -->
                 <div class="text-center max-w-sm" x-show="codigo.length > 0 && codigo.length < 6">
                     <div
                         class="text-amber-600 text-sm font-medium bg-amber-50/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg border border-amber-200">
