@@ -276,6 +276,91 @@ app.get("/test-images", (req, res) => {
 });
 
 // Socket.io para manejar las partidas con autenticación de sesión
+// Sistema de limpieza periódica para remover jugadores desconectados
+setInterval(async () => {
+  const now = Date.now();
+  const GRACE_PERIOD_MS = 30000; // 30 segundos para el host
+  const PLAYER_GRACE_PERIOD_MS = 15000; // 15 segundos para jugadores normales
+  
+  for (const [gameCode, game] of activeGames.entries()) {
+    if (game.gameState === 'playing' || game.gameState === 'starting') {
+      const playersToRemove = [];
+      
+      // Revisar cada jugador desconectado
+      for (const [playerId, player] of Object.entries(game.players)) {
+        if (!player.connected && player.disconnectedAt) {
+          const timeSinceDisconnect = now - player.disconnectedAt;
+          const isHost = game.host === playerId;
+          const graceLimit = isHost ? GRACE_PERIOD_MS : PLAYER_GRACE_PERIOD_MS;
+          
+          if (timeSinceDisconnect > graceLimit) {
+            playersToRemove.push({ playerId, player, isHost });
+          }
+        }
+      }
+      
+      // Remover jugadores que excedieron el período de gracia
+      for (const { playerId, player, isHost } of playersToRemove) {
+        console.log(`Removiendo jugador ${player.name} por exceder período de gracia`);
+        
+        if (isHost) {
+          // Si era el host, buscar nuevo host o eliminar partida
+          const connectedPlayers = Object.values(game.players).filter(p => p.connected !== false && p.id !== playerId);
+          
+          if (connectedPlayers.length > 0) {
+            // Asignar nuevo host
+            const newHost = connectedPlayers[0];
+            const newHostId = Object.keys(game.players).find(id => game.players[id] === newHost);
+            game.host = newHostId;
+            
+            console.log(`Nuevo host asignado: ${newHost.name}`);
+            io.to(gameCode).emit('new-host', { 
+              hostId: newHostId,
+              hostName: newHost.name,
+              message: `${newHost.name} es ahora el host de la partida.`
+            });
+          } else {
+            // No quedan jugadores conectados, eliminar partida
+            console.log(`Eliminando partida ${gameCode} - no quedan jugadores`);
+            
+            // Actualizar estado en la base de datos
+            try {
+              const GameRoom = require('./models/GameRoom');
+              await GameRoom.findOneAndUpdate(
+                { code: gameCode },
+                { status: 'abandoned' },
+                { new: true }
+              );
+              console.log(`Estado de partida ${gameCode} actualizado a 'abandoned' en BD`);
+            } catch (error) {
+              console.error('Error actualizando estado de partida en BD:', error);
+            }
+            
+            activeGames.delete(gameCode);
+            continue;
+          }
+        }
+        
+        // Remover al jugador
+        delete game.players[playerId];
+        
+        // Notificar a los demás
+        io.to(gameCode).emit('player-removed', {
+          playerId: playerId,
+          playerName: player.name
+        });
+        
+        // Actualizar lista de jugadores
+        io.to(gameCode).emit('players-updated', {
+          players: game.players,
+          playersCount: Object.keys(game.players).length,
+          connectedCount: Object.values(game.players).filter(p => p.connected !== false).length
+        });
+      }
+    }
+  }
+}, 5000); // Ejecutar cada 5 segundos
+
 io.on('connection', (socket) => {
   console.log('Usuario conectado:', socket.id);
 
@@ -410,6 +495,18 @@ io.on('connection', (socket) => {
       // Es una reconexión - actualizar el socket ID y marcar como conectado
       const existingPlayer = game.players[existingPlayerId];
       
+      // Cancelar timer de desconexión si existe
+      if (game.hostDisconnectionTimer && game.host === existingPlayerId) {
+        clearTimeout(game.hostDisconnectionTimer);
+        game.hostDisconnectionTimer = null;
+        console.log(`Timer de desconexión del host cancelado para ${userInfo.name}`);
+        
+        // Notificar a todos que el host se reconectó
+        socket.to(gameCode).emit('host-reconnected', {
+          message: `El host ${userInfo.name} se ha reconectado.`
+        });
+      }
+      
       // Remover el jugador con el ID anterior
       delete game.players[existingPlayerId];
       
@@ -417,7 +514,8 @@ io.on('connection', (socket) => {
       game.players[socket.id] = {
         ...existingPlayer,
         id: socket.id,
-        connected: true
+        connected: true,
+        disconnectedAt: null // Limpiar marca de desconexión
       };
       
       // Verificar que tenga su cartilla, si no generarla
@@ -431,7 +529,20 @@ io.on('connection', (socket) => {
         game.host = socket.id;
       }
       
-      console.log(`Jugador ${userInfo.name} reconectado con nuevo socket ID: ${socket.id}`);
+      console.log(`Jugador ${userInfo.name} reconectado exitosamente con nuevo socket ID: ${socket.id}`);
+      
+      // Notificar a los demás jugadores sobre la reconexión
+      socket.to(gameCode).emit('player-reconnected', {
+        playerId: socket.id,
+        playerName: userInfo.name
+      });
+      
+      // Actualizar lista de jugadores para todos
+      io.to(gameCode).emit('players-updated', {
+        players: game.players,
+        playersCount: Object.keys(game.players).length,
+        connectedCount: Object.values(game.players).filter(p => p.connected !== false).length
+      });
     } else {
       // Es un jugador nuevo
       // Verificar si la partida está llena
@@ -991,7 +1102,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Desconexión - Mejorado para detectar desconexiones en tiempo real
+  // Desconexión - Sistema mejorado con período de gracia para reconexiones
   socket.on('disconnect', async () => {
     console.log('Usuario desconectado:', socket.id);
     
@@ -1002,25 +1113,110 @@ io.on('connection', (socket) => {
         const player = game.players[socket.id];
         const wasHost = game.host === socket.id;
         
-        if (game.gameState === 'playing') {
-          // Marcar como desconectado durante el juego
+        if (game.gameState === 'playing' || game.gameState === 'starting') {
+          // Sistema mejorado: Marcar como desconectado con período de gracia
           player.connected = false;
-          io.to(gameCode).emit('player-disconnected', socket.id);
+          player.disconnectedAt = Date.now();
           
-          // Actualizar estado de sala para todos los jugadores
-          io.to(gameCode).emit('room-state', {
-            players: game.players,
-            isHost: false, // Se actualizará individualmente para cada socket
-            gameState: game.gameState,
-            playerCards: [], // No enviamos las cartas en la desconexión
-            currentCard: game.currentCard,
-            currentCardIndex: game.currentCardIndex,
-            gameEnded: game.gameEnded,
-            winner: game.winner,
-            timeLeft: game.timeLeft
+          console.log(`Jugador ${player.name} marcado como desconectado durante el juego. Período de gracia de 30 segundos iniciado.`);
+          
+          // Notificar a los otros jugadores que el jugador se desconectó (pero sigue en la partida)
+          socket.to(gameCode).emit('player-disconnected', {
+            playerId: socket.id,
+            playerName: player.name,
+            gracePeriod: true
           });
+          
+          // Actualizar lista de jugadores en tiempo real para todos los conectados
+          io.to(gameCode).emit('players-updated', {
+            players: game.players,
+            playersCount: Object.keys(game.players).length,
+            connectedCount: Object.values(game.players).filter(p => p.connected !== false).length
+          });
+          
+          // Para el host: dar tiempo extra antes de eliminar la partida
+          if (wasHost) {
+            console.log(`Host ${player.name} desconectado. Iniciando período de gracia de 30 segundos.`);
+            
+            // Notificar a todos los jugadores que el host se desconectó temporalmente
+            socket.to(gameCode).emit('host-disconnected-temp', {
+              message: `El host ${player.name} se desconectó. Esperando reconexión...`,
+              gracePeriod: 30000 // 30 segundos
+            });
+            
+            // Configurar timer para eliminar la partida si no se reconecta
+            game.hostDisconnectionTimer = setTimeout(async () => {
+              // Verificar si el host se reconectó
+              const currentHost = game.players[game.host];
+              if (!currentHost || !currentHost.connected) {
+                console.log(`Host no se reconectó. Eliminando partida ${gameCode}`);
+                
+                // Actualizar estado en la base de datos
+                try {
+                  const GameRoom = require('./models/GameRoom');
+                  await GameRoom.findOneAndUpdate(
+                    { code: gameCode },
+                    { status: 'abandoned' },
+                    { new: true }
+                  );
+                  console.log(`Estado de partida ${gameCode} actualizado a 'abandoned' en BD`);
+                } catch (error) {
+                  console.error('Error actualizando estado de partida en BD:', error);
+                }
+                
+                // Notificar a todos los jugadores que la partida se eliminó
+                io.to(gameCode).emit('host-disconnected', {
+                  message: 'El host no se reconectó. La partida ha terminado.'
+                });
+                
+                // Eliminar partida
+                activeGames.delete(gameCode);
+              }
+            }, 30000); // 30 segundos de gracia
+          } else {
+            // Para jugadores normales: período de gracia más corto
+            setTimeout(() => {
+              // Verificar si el jugador se reconectó
+              const currentPlayer = game.players[socket.id];
+              if (currentPlayer && !currentPlayer.connected) {
+                console.log(`Jugador ${player.name} no se reconectó. Removiendo de la partida.`);
+                
+                // Remover al jugador definitivamente
+                delete game.players[socket.id];
+                
+                // Notificar a los demás
+                io.to(gameCode).emit('player-removed', {
+                  playerId: socket.id,
+                  playerName: player.name
+                });
+                
+                // Actualizar lista de jugadores
+                io.to(gameCode).emit('players-updated', {
+                  players: game.players,
+                  playersCount: Object.keys(game.players).length
+                });
+              }
+            }, 15000); // 15 segundos de gracia para jugadores normales
+          }
+          
+          // Actualizar estado de sala manteniendo al jugador desconectado
+          const connectedSockets = await io.in(gameCode).fetchSockets();
+          connectedSockets.forEach(connectedSocket => {
+            connectedSocket.emit('room-state', {
+              players: game.players,
+              isHost: game.host === connectedSocket.id,
+              gameState: game.gameState,
+              playerCards: game.players[connectedSocket.id]?.playerCards || [],
+              currentCard: game.currentCard,
+              currentCardIndex: game.currentCardIndex,
+              gameEnded: game.gameEnded,
+              winner: game.winner,
+              timeLeft: game.timeLeft
+            });
+          });
+          
         } else {
-          // Si es el host y está en sala de espera, eliminar partida
+          // Si es el host y está en sala de espera, eliminar partida inmediatamente
           if (wasHost && game.gameState === 'waiting') {
             console.log(`Host desconectado en sala de espera. Eliminando partida ${gameCode}`);
             
@@ -1039,33 +1235,6 @@ io.on('connection', (socket) => {
             
             // Notificar a todos los jugadores que la partida fue eliminada
             io.to(gameCode).emit('host-left', {
-              message: 'El host ha abandonado la partida. Serás redirigido al dashboard.'
-            });
-            
-            // Eliminar partida inmediatamente
-            activeGames.delete(gameCode);
-            continue; // Saltar al siguiente juego
-          }
-          
-          // Si es el host durante el juego, también abandonar partida
-          if (wasHost && game.gameState === 'playing') {
-            console.log(`Host desconectado durante el juego. Partida ${gameCode} abandonada`);
-            
-            // Actualizar estado en la base de datos
-            try {
-              const GameRoom = require('./models/GameRoom');
-              await GameRoom.findOneAndUpdate(
-                { code: gameCode },
-                { status: 'abandoned' },
-                { new: true }
-              );
-              console.log(`Estado de partida ${gameCode} actualizado a 'abandoned' en BD`);
-            } catch (error) {
-              console.error('Error actualizando estado de partida en BD:', error);
-            }
-            
-            // Notificar a todos los jugadores que el host se desconectó
-            io.to(gameCode).emit('host-disconnected', {
               message: 'El host ha abandonado la partida. Serás redirigido al dashboard.'
             });
             

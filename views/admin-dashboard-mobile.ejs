@@ -852,13 +852,13 @@
                         <% if (user && user.profilePicture) { %>
                             <img src="<%= user.profilePicture %>" alt="Avatar"
                                 style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                        <% } else { %>
-                            <span style="color: #000; font-weight: 600; font-size: 0.9rem;">
-                                <%= (user && user.fullname) ?
-                                    user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : 
-                                    '??' %>
-                            </span>
-                        <% } %>
+                            <% } else { %>
+                                <span style="color: #000; font-weight: 600; font-size: 0.9rem;">
+                                    <%= (user && user.fullname) ?
+                                        user.fullname.split(' ').map(function(n){return n[0];}).join('').toUpperCase().slice(0,2) : '
+                                        ??' %>
+                                </span>
+                                <% } %>
                     </div>
                     <div class="user-info">
                         <div class="user-name">
@@ -1274,9 +1274,9 @@
                         <div class="d-flex align-items-center gap-2">
                             <div style="width:32px;height:32px;border-radius:50%;background:#eee;overflow:hidden;display:flex;align-items:center;justify-content:center;">
                                 ${user.profilePicture ?
-                                    `<img src="${user.profilePicture}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` :
-                                    `<span style="font-size:0.8rem;font-weight:600;color:#666;">${user.fullname ? user.fullname.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??'}</span>`
-                                }
+                    `<img src="${user.profilePicture}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` :
+                    (user.fullname ? user.fullname.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '??')
+                }
                             </div>
                             <span>${user.fullname || 'Sin nombre'}</span>
                         </div>
