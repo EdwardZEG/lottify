@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js",
-    "build": "echo 'No build step required'",
+    "setup": "node scripts/setup-directories.js",
+    "railway:build": "npm install",
+    "railway:start": "node index.js",
+    "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["lottery", "game", "socketio", "realtime"],

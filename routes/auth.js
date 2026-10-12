@@ -5,6 +5,13 @@ const crypto = require("crypto");
 const transporter = require("../mailer");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+
+// Crear directorio si no existe
+const uploadDir = 'public/uploads/profiles/';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Configuración de multer para subida de archivos
 const storage = multer.diskStorage({
@@ -476,7 +483,12 @@ router.post("/api/user/profile-picture", upload.single('profilePicture'), async 
       profilePicture: profilePictureUrl 
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: "Error al actualizar la foto de perfil" });
+    console.error("Error al actualizar foto de perfil:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error al actualizar la foto de perfil",
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
