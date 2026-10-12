@@ -9,6 +9,10 @@ const socketIo = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
+
+// Detectar si estamos en Vercel
+const isVercel = process.env.VERCEL === '1';
+
 const io = socketIo(server, {
   cors: {
     origin: process.env.BASE_URL || "http://localhost:5000",
@@ -16,7 +20,17 @@ const io = socketIo(server, {
     credentials: true
   },
   allowEIO3: true,
-  transports: ['websocket', 'polling']
+  // En Vercel, forzar solo polling; en local, permitir ambos
+  transports: isVercel ? ['polling'] : ['websocket', 'polling'],
+  // Configuración adicional para Vercel
+  ...(isVercel && {
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    upgradeTimeout: 30000,
+    allowRequest: (req, fn) => {
+      fn(null, true);
+    }
+  })
 });
 
 // Configurar compartir sesión entre Express y Socket.io
