@@ -1,17 +1,17 @@
 #!/bin/bash
 
-echo "🚀 Iniciando build para Railway..."
+echo "Iniciando build para Railway..."
 
 # Instalar dependencias
-echo "📦 Instalando dependencias..."
+echo "Instalando dependencias..."
 npm install
 
 # Crear directorios necesarios
-echo "📁 Creando directorios..."
+echo "Creando directorios..."
 node scripts/setup-directories.js
 
 # Verificar estructura
-echo "✅ Verificando estructura de directorios..."
+echo "Verificando estructura de directorios..."
 ls -la public/uploads/
 
-echo "🎉 Build completado para Railway!"
+echo "Build completado para Railway!"

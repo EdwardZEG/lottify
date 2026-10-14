@@ -2835,7 +2835,7 @@
             if ('speechSynthesis' in window) {
                 const loadVoices = () => {
                     const voices = speechSynthesis.getVoices();
-                    console.log('🎵 Voces TTS para repaso disponibles:', voices.length);
+                    console.log('Voces TTS para repaso disponibles:', voices.length);
                     voices.forEach(voice => {
                         if (voice.lang.startsWith('en')) {
                             console.log(`  - ${voice.name} (${voice.lang})`);
@@ -2849,7 +2849,7 @@
                     speechSynthesis.addEventListener('voiceschanged', loadVoices);
                 }
             } else {
-                console.warn('⚠️ Text-to-Speech no soportado en este navegador');
+                console.warn('Text-to-Speech no soportado en este navegador');
             }
         }
 
@@ -2880,7 +2880,7 @@
 
                     utterance.voice = googleVoice || femaleVoice || maleVoice || voices.find(voice => voice.lang.startsWith('en'));
 
-                    console.log(`🎵 Pronunciando repaso: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
+                    console.log(`Pronunciando repaso: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
 
                     speechSynthesis.speak(utterance);
 

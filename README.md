@@ -4,13 +4,13 @@ Sistema de lotería multijugador en tiempo real con Node.js, Express, MongoDB y 
 
 ## Características
 
-- ✅ Sistema de autenticación completo (registro, login, recuperación)
-- ✅ Juego de lotería multijugador en tiempo real
-- ✅ Panel de administración
-- ✅ Soporte para móviles y escritorio
-- ✅ Integración con Mercado Pago
-- ✅ Sistema de salas de juego
-- ✅ Subida de fotos de perfil
+- Sistema de autenticación completo (registro, login, recuperación)
+- Juego de lotería multijugador en tiempo real
+- Panel de administración
+- Soporte para móviles y escritorio
+- Integración con Mercado Pago
+- Sistema de salas de juego
+- Subida de fotos de perfil
 
 ## Tecnologías
 
@@ -105,7 +105,7 @@ vercel env add BASE_URL
 
 ## Nota sobre Socket.io en Vercel
 
-⚠️ **Importante**: Vercel tiene limitaciones con WebSockets. Para production se recomienda:
+**Importante**: Vercel tiene limitaciones con WebSockets. Para production se recomienda:
 1. Usar un servicio especializado como Railway, Render o Heroku para el servidor Socket.io
 2. O implementar Socket.io con polling como fallback
 

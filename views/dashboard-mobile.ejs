@@ -2451,7 +2451,7 @@
 
                     utterance.voice = googleVoice || femaleVoice || maleVoice || voices.find(voice => voice.lang.startsWith('en'));
 
-                    console.log(`🎵 Pronunciando repaso móvil: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
+                    console.log(`Pronunciando repaso móvil: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
 
                     speechSynthesis.speak(utterance);
 
