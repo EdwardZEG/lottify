@@ -17,8 +17,8 @@ if (!fs.existsSync(uploadDir)) {
 
 // Logging para Railway
 if (process.env.RAILWAY_ENVIRONMENT) {
-  console.log('🚂 Ejecutándose en Railway');
-  console.log('📁 Verificando directorios...');
+  console.log('Ejecutándose en Railway');
+  console.log('Verificando directorios...');
   console.log('Upload dir exists:', fs.existsSync(uploadDir));
   console.log('Upload dir path:', path.resolve(uploadDir));
 }
@@ -26,9 +26,21 @@ if (process.env.RAILWAY_ENVIRONMENT) {
 const app = express();
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  process.env.BASE_URL,
+  "http://localhost:5000",
+  "http://127.0.0.1:5000",
+].filter(Boolean);
+
 const io = socketIo(server, {
   cors: {
-    origin: process.env.BASE_URL || "http://localhost:5000",
+    origin: (origin, callback) => {
+      // Permitir mismo origen, herramientas sin Origin, y acceso por IP en LAN
+      if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(192\.168\.|10\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, allowedOrigins[0] || true);
+    },
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -86,7 +98,7 @@ io.use((socket, next) => {
 // Conexión a MongoDB Atlas
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("Conectado a MongoDB Atlas"))
+  .then(() => console.log("Conectado a MongoDB"))
   .catch((err) => console.error("Error de conexión:", err));
 
 // Rutas
@@ -722,8 +734,26 @@ io.on('connection', (socket) => {
 
     // Iniciar countdown
     game.gameState = 'starting';
-    
-    io.to(gameCode).emit('countdown-start', { count: 5 });
+
+    // Asegurar cartillas y preparar el mazo YA en el conteo (para precargar imágenes)
+    for (const player of Object.values(game.players)) {
+      if (!player.playerCards || player.playerCards.length === 0) {
+        generatePlayerCards(player);
+      }
+    }
+    initializeNewGameDeck(game);
+    const firstCard = game.availableCards[0];
+
+    // Enviar a cada jugador su cartilla + primera carta para precargar durante 5..1
+    for (const [playerId, player] of Object.entries(game.players)) {
+      if (player.connected === false) continue;
+      io.to(playerId).emit('countdown-start', {
+        count: 5,
+        playerCards: player.playerCards,
+        currentCard: firstCard,
+        index: 0
+      });
+    }
 
     let countdown = 5;
     const countdownInterval = setInterval(() => {
@@ -1384,8 +1414,10 @@ function startNewGameplay(gameCode) {
 
   console.log(`Iniciando gameplay para partida ${gameCode}`);
 
-  // Inicializar el mazo
-  initializeNewGameDeck(game);
+  // Reutilizar mazo ya preparado en el countdown (evita cambiar la primera carta precargada)
+  if (!game.availableCards || game.availableCards.length === 0) {
+    initializeNewGameDeck(game);
+  }
 
   // Obtener la primera carta inmediatamente
   const firstCard = game.availableCards[0];
@@ -1550,6 +1582,13 @@ process.on('SIGINT', () => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
+  const os = require("os");
+  const lanIp = Object.values(os.networkInterfaces())
+    .flat()
+    .find((i) => i && i.family === "IPv4" && !i.internal)?.address;
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  if (lanIp) {
+    console.log(`En el celular (misma Wi‑Fi): http://${lanIp}:${PORT}`);
+  }
 });
