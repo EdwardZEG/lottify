@@ -111,12 +111,38 @@ router.get("/dashboard", async (req, res) => {
   if (user.profile === "administrador") {
     // Admin dashboard: obtener todos los usuarios para la tabla
     const users = await User.find({}, "_id fullname email status profile");
-    return res.render("admin-dashboard", { user, users });
+    if (isMobile(req)) {
+      return res.render("admin-dashboard-mobile", { user, users });
+    } else {
+      return res.render("admin-dashboard", { user, users });
+    }
   }
   if (isMobile(req)) {
     res.render("dashboard-mobile", { user });
   } else {
     res.render("dashboard", { user });
+  }
+});
+
+// Ruta específica para admin dashboard
+router.get("/admin-dashboard", async (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+  
+  const user = await User.findById(req.session.userId);
+  if (!user) return res.redirect("/login");
+  
+  // Verificar que sea administrador
+  if (user.profile !== "administrador") {
+    return res.redirect("/dashboard");
+  }
+  
+  // Obtener todos los usuarios para la tabla
+  const users = await User.find({}, "_id fullname email status profile");
+  
+  if (isMobile(req)) {
+    res.render("admin-dashboard-mobile", { user, users });
+  } else {
+    res.render("admin-dashboard", { user, users });
   }
 });
 
@@ -202,28 +228,53 @@ router.post("/verify-code", async (req, res) => {
 
 // API: Actualizar usuario (nombre/email)
 router.put("/admin/user/:id", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "No autorizado" });
-  const admin = await User.findById(req.session.userId);
+  if (!req.session.userId && !req.session.user) return res.status(401).json({ error: "No autorizado" });
+  
+  let admin;
+  if (req.session.user) {
+    admin = req.session.user;
+  } else {
+    admin = await User.findById(req.session.userId);
+  }
+  
   if (!admin || admin.profile !== "administrador") return res.status(403).json({ error: "Solo el admin puede editar usuarios" });
-  let { fullname, email, profile } = req.body;
+  
+  let { fullname, email, profile, status } = req.body;
   if (profile) profile = profile.toLowerCase();
+  
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, { fullname, email, profile }, { new: true });
+    const user = await User.findByIdAndUpdate(
+      req.params.id, 
+      { fullname, email, profile, status }, 
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     res.json({ success: true, user });
   } catch (err) {
+    console.error("Error al actualizar usuario:", err);
     res.status(500).json({ error: "Error al actualizar usuario" });
   }
 });
 
 // API: Eliminar usuario
 router.delete("/admin/user/:id", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "No autorizado" });
-  const admin = await User.findById(req.session.userId);
+  if (!req.session.userId && !req.session.user) return res.status(401).json({ error: "No autorizado" });
+  
+  let admin;
+  if (req.session.user) {
+    admin = req.session.user;
+  } else {
+    admin = await User.findById(req.session.userId);
+  }
+  
   if (!admin || admin.profile !== "administrador") return res.status(403).json({ error: "Solo el admin puede eliminar usuarios" });
+  
   try {
-    await User.findByIdAndDelete(req.params.id);
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
     res.json({ success: true });
   } catch (err) {
+    console.error("Error al eliminar usuario:", err);
     res.status(500).json({ error: "Error al eliminar usuario" });
   }
 });
@@ -245,32 +296,98 @@ router.patch("/admin/user/:id/status", async (req, res) => {
 
 // API: Obtener todos los usuarios (para panel admin)
 router.get("/admin/users", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "No autorizado" });
-  const admin = await User.findById(req.session.userId);
+  if (!req.session.userId && !req.session.user) return res.status(401).json({ error: "No autorizado" });
+  
+  let admin;
+  if (req.session.user) {
+    admin = req.session.user;
+  } else {
+    admin = await User.findById(req.session.userId);
+  }
+  
   if (!admin || admin.profile !== "administrador") return res.status(403).json({ error: "Solo el admin puede ver usuarios" });
+  
   try {
-    const users = await User.find({}, "_id fullname email status profile");
+    const users = await User.find({}, "_id fullname email status profile profilePicture");
     res.json(users);
   } catch (err) {
+    console.error("Error al obtener usuarios:", err);
     res.status(500).json({ error: "Error al obtener usuarios" });
   }
 });
 
 // API: Crear usuario desde panel admin
-router.post("/admin/users", async (req, res) => {
-  if (!req.session.userId) return res.status(401).json({ error: "No autorizado" });
-  const admin = await User.findById(req.session.userId);
+router.post("/admin/user", async (req, res) => {
+  if (!req.session.userId && !req.session.user) return res.status(401).json({ error: "No autorizado" });
+  
+  let admin;
+  if (req.session.user) {
+    admin = req.session.user;
+  } else {
+    admin = await User.findById(req.session.userId);
+  }
+  
   if (!admin || admin.profile !== "administrador") return res.status(403).json({ error: "Solo el admin puede crear usuarios" });
-  let { fullname, email, profile, password } = req.body;
+  
+  let { fullname, email, profile, password, status } = req.body;
   if (!fullname || !email || !password) return res.status(400).json({ error: "Faltan datos obligatorios" });
   if (profile) profile = profile.toLowerCase();
+  
   try {
     const exists = await User.findOne({ email });
     if (exists) return res.status(409).json({ error: "El correo ya está registrado" });
-    const user = new User({ fullname, email, profile, password });
+    
+    const user = new User({ 
+      fullname, 
+      email, 
+      profile: profile || 'usuario', 
+      password,
+      status: status || 'activo',
+      verified: true // Los usuarios creados por admin están verificados por defecto
+    });
+    
     await user.save();
     res.json({ success: true, user });
   } catch (err) {
+    console.error("Error al crear usuario:", err);
+    res.status(500).json({ error: "Error al crear usuario" });
+  }
+});
+
+// API: Crear usuario desde panel admin (ruta alternativa)
+router.post("/admin/users", async (req, res) => {
+  if (!req.session.userId && !req.session.user) return res.status(401).json({ error: "No autorizado" });
+  
+  let admin;
+  if (req.session.user) {
+    admin = req.session.user;
+  } else {
+    admin = await User.findById(req.session.userId);
+  }
+  
+  if (!admin || admin.profile !== "administrador") return res.status(403).json({ error: "Solo el admin puede crear usuarios" });
+  
+  let { fullname, email, profile, password, status } = req.body;
+  if (!fullname || !email || !password) return res.status(400).json({ error: "Faltan datos obligatorios" });
+  if (profile) profile = profile.toLowerCase();
+  
+  try {
+    const exists = await User.findOne({ email });
+    if (exists) return res.status(409).json({ error: "El correo ya está registrado" });
+    
+    const user = new User({ 
+      fullname, 
+      email, 
+      profile: profile || 'usuario', 
+      password,
+      status: status || 'activo',
+      verified: true // Los usuarios creados por admin están verificados por defecto
+    });
+    
+    await user.save();
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("Error al crear usuario:", err);
     res.status(500).json({ error: "Error al crear usuario" });
   }
 });
@@ -295,7 +412,12 @@ router.get("/config", async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
     if (!user) return res.redirect("/login");
-    res.render("config", { user });
+    
+    if (isMobile(req)) {
+      res.render("config-mobile", { user });
+    } else {
+      res.render("config", { user });
+    }
   } catch (err) {
     res.redirect("/login");
   }
