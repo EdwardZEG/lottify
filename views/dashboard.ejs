@@ -12,6 +12,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Mercado Pago SDK -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -1296,6 +1299,126 @@
             margin: 0 !important;
         }
 
+        /* ===== SECCIÓN SUSCRIPCIÓN ===== */
+        #suscripcion-section {
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+
+        .subscription-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .subscription-header .subscription-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+
+        .subscription-description {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+
+        .current-subscription-status .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        .premium-status i {
+            font-size: 4rem;
+        }
+
+        .free-status i {
+            font-size: 4rem;
+        }
+
+        .premium-card {
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(255, 193, 7, 0.4);
+        }
+
+        .plan-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+
+        .plan-price {
+            margin-bottom: 1.5rem;
+        }
+
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #ffc107;
+        }
+
+        .price-period {
+            font-size: 1.2rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .features-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 1rem;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features-list li {
+            padding: 0.5rem 0;
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        .subscription-note {
+            font-size: 0.9rem;
+        }
+
+        #subscribe-btn {
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            padding: 12px 40px;
+            transition: all 0.3s ease;
+        }
+
+        #subscribe-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+        }
+
+        /* Animación de carga */
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* Animación suave cuando se expande el sidebar */
         .content.expanded #inicio-section .dashboard-card {
             transform: translateX(5px) scale(0.98) !important;
@@ -1381,6 +1504,8 @@
                     class="sidebar-link-text">Unirse a sala</span></a>
             <a href="#" class="sidebar-link" data-section="vocabulario"><i class="bi bi-book me-2"></i> <span
                     class="sidebar-link-text">Estudiar Vocabulario</span></a>
+            <a href="#" class="sidebar-link" data-section="suscripcion"><i class="bi bi-star me-2"></i> <span
+                    class="sidebar-link-text">Suscripción</span></a>
         </div>
         <div class="sidebar-footer">
             <% if (user && user.fullname) { %>
@@ -2265,6 +2390,98 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sección Suscripción -->
+        <div id="suscripcion-section" class="content-section">
+            <div class="subscription-container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="subscription-header text-center mb-5">
+                            <h2 class="subscription-title">
+                                <i class="bi bi-star-fill text-warning me-2"></i>
+                                Suscripción Premium
+                            </h2>
+                            <p class="subscription-description">
+                                Desbloquea todas las funciones y obtén acceso premium a Lottify
+                            </p>
+                        </div>
+
+                        <!-- Estado actual de suscripción -->
+                        <div class="current-subscription-status mb-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <% if (user.subscriptionStatus === 'premium') { %>
+                                        <div class="premium-status">
+                                            <i class="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
+                                            <h4 class="text-success">¡Suscripción Activa!</h4>
+                                            <p class="text-muted">
+                                                Tu suscripción premium está activa hasta: 
+                                                <strong><%= user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('es-ES') : 'N/A' %></strong>
+                                            </p>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="free-status">
+                                            <i class="bi bi-person-circle fs-1 mb-3 text-muted"></i>
+                                            <h4 class="text-muted">Plan Gratuito</h4>
+                                            <p class="text-muted">
+                                                Actualmente tienes acceso a las funciones básicas de Lottify
+                                            </p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Plan Premium -->
+                        <div class="subscription-plan">
+                            <div class="card premium-card">
+                                <div class="card-body">
+                                    <div class="plan-header text-center mb-4">
+                                        <h3 class="plan-title">
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                            Plan Premium
+                                        </h3>
+                                        <div class="plan-price">
+                                            <span class="price-amount">$25</span>
+                                            <span class="price-period">/mes</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="plan-features mb-4">
+                                        <h5 class="features-title">Beneficios incluidos:</h5>
+                                        <ul class="features-list">
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Acceso ilimitado a todos los juegos</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Salas privadas personalizadas</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Estadísticas avanzadas de juego</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Vocabulario premium con niveles avanzados</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Soporte prioritario</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Sin anuncios</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="plan-action text-center">
+                                        <% if (user.subscriptionStatus !== 'premium') { %>
+                                            <button class="btn btn-warning btn-lg px-5" id="subscribe-btn">
+                                                <i class="bi bi-star-fill me-2"></i>
+                                                Suscribirse Ahora
+                                            </button>
+                                            <p class="subscription-note mt-2 text-muted">
+                                                <small>Pago seguro procesado por Mercado Pago</small>
+                                            </p>
+                                        <% } else { %>
+                                            <button class="btn btn-success btn-lg px-5" disabled>
+                                                <i class="bi bi-check-circle-fill me-2"></i>
+                                                Ya Suscrito
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <!-- fin content -->
     <!-- Scripts Bootstrap -->
@@ -2467,6 +2684,13 @@
                 if (sectionName === 'inicio' && !inicioCarousel) {
                     setTimeout(() => {
                         inicioCarousel = new InicioCarousel();
+                    }, 100);
+                }
+
+                // Inicializar sección de suscripción
+                if (sectionName === 'suscripcion') {
+                    setTimeout(() => {
+                        initializeSubscriptionSection();
                     }, 100);
                 }
 
@@ -3086,6 +3310,115 @@
                 this.prevBtn.disabled = this.currentIndex === 0;
                 this.nextBtn.disabled = this.currentIndex === this.totalCards - 1;
             }
+        }
+
+        // Función para inicializar la sección de suscripción
+        function initializeSubscriptionSection() {
+            const subscribeBtn = document.getElementById('subscribe-btn');
+            
+            if (subscribeBtn) {
+                subscribeBtn.addEventListener('click', handleSubscription);
+            }
+
+            // Verificar mensajes de URL (éxito/error)
+            checkSubscriptionMessages();
+        }
+
+        // Manejar proceso de suscripción
+        async function handleSubscription() {
+            const subscribeBtn = document.getElementById('subscribe-btn');
+            
+            try {
+                subscribeBtn.disabled = true;
+                subscribeBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Procesando...';
+                
+                const response = await fetch('/payment/create-subscription-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.id) {
+                    // Crear checkout de Mercado Pago
+                    const mp = new MercadoPago('APP_USR-e143b4eb-a8c6-4a61-bfa1-ede0ed1e3c3e', {
+                        locale: 'es-MX'
+                    });
+
+                    mp.checkout({
+                        preference: {
+                            id: data.id
+                        },
+                        autoOpen: true
+                    });
+                } else {
+                    throw new Error(data.error || 'Error creando preferencia de pago');
+                }
+            } catch (error) {
+                console.error('Error en suscripción:', error);
+                alert('Error al procesar la suscripción: ' + error.message);
+            } finally {
+                subscribeBtn.disabled = false;
+                subscribeBtn.innerHTML = '<i class="bi bi-star-fill me-2"></i>Suscribirse Ahora';
+            }
+        }
+
+        // Verificar mensajes de suscripción en la URL
+        function checkSubscriptionMessages() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            const info = urlParams.get('info');
+
+            if (success === 'subscription-activated') {
+                showNotification('¡Suscripción activada con éxito!', 'success');
+                // Limpiar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // Recargar para mostrar estado actualizado
+                setTimeout(() => location.reload(), 2000);
+            } else if (error) {
+                let message = 'Error en la suscripción';
+                switch (error) {
+                    case 'payment-failed':
+                        message = 'El pago no pudo ser procesado';
+                        break;
+                    case 'subscription-failed':
+                        message = 'Error al activar la suscripción';
+                        break;
+                    case 'user-not-found':
+                        message = 'Usuario no encontrado';
+                        break;
+                    default:
+                        message = 'Error en el proceso de suscripción';
+                }
+                showNotification(message, 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (info === 'payment-pending') {
+                showNotification('Pago pendiente de confirmación', 'info');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // Función para mostrar notificaciones
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-dismiss después de 5 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
         }
 
     </script>
