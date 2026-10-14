@@ -5,14 +5,19 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node index.js",
+    "dev": "node scripts/dev-local.js",
     "setup": "node scripts/setup-directories.js",
     "railway:build": "npm install",
     "railway:start": "node index.js",
     "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["lottery", "game", "socketio", "realtime"],
+  "keywords": [
+    "lottery",
+    "game",
+    "socketio",
+    "realtime"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -32,5 +37,8 @@
     "multer": "^2.0.1",
     "nodemailer": "^7.0.4",
     "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^10.1.4"
   }
 }
