@@ -1954,7 +1954,7 @@
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0" class="game-result-modal victory"
-            x-effect="console.log('🏆 Modal Victoria - showVictoryModal:', showVictoryModal)">
+            x-effect="console.log('Modal Victoria - showVictoryModal:', showVictoryModal)">
             <div class="game-result-content victory">
                 <div class="result-title victory">YOU WON!</div>
                 <button class="result-button" @click="goToDashboardFromResult()">
@@ -1969,7 +1969,7 @@
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0" class="game-result-modal defeat"
-            x-effect="console.log('💔 Modal Derrota - showDefeatModal:', showDefeatModal)">
+            x-effect="console.log('Modal Derrota - showDefeatModal:', showDefeatModal)">
             <div class="game-result-content defeat">
                 <div class="result-title defeat">GAME OVER</div>
                 <button class="result-button" @click="goToDashboardFromResult()">
@@ -2264,7 +2264,7 @@
                 setupSocketEvents() {
                     // Log para verificar todos los eventos que llegan
                     this.socket.onAny((eventName, ...args) => {
-                        console.log('📡 EVENTO RECIBIDO:', eventName, args);
+                        console.log('EVENTO RECIBIDO:', eventName, args);
                     });
 
                     this.socket.on('game-already-started', (data) => {
@@ -2290,6 +2290,12 @@
                         this.players = data.players;
                         this.isHost = data.isHost;
 
+                        if (data.playerCards && data.playerCards.length > 0) {
+                            if (!this.playerCards || this.playerCards.length === 0) {
+                                this.playerCards = data.playerCards;
+                            }
+                        }
+
                         if (data.gameState === 'playing') {
                             this.gameState = 'playing';
                             // CRÍTICO: Solo actualizar la cartilla si no la tenemos o está vacía
@@ -2302,6 +2308,7 @@
                             this.winner = data.winner;
 
                             this.updateSelectedCards();
+                            this.preloadCardImages();
 
                             if (data.timeLeft) {
                                 this.timeLeft = data.timeLeft;
@@ -2312,6 +2319,11 @@
                             this.enterFullscreen();
                         } else if (data.gameState === 'starting') {
                             this.gameState = 'starting';
+                            if (data.currentCard) this.currentCard = data.currentCard;
+                            this.preloadCardImages();
+                        } else {
+                            // En sala de espera: precargar las 54 imágenes del mazo
+                            this.preloadCardImages();
                         }
                     });
 
@@ -2431,11 +2443,11 @@
 
                         // Si no tenemos cartas precargadas, cargarlas ahora
                         if (!this.playerCards || this.playerCards.length === 0) {
-                            console.log('⚠️ Cartas no precargadas, cargando ahora...');
+                            console.log('Cartas no precargadas, cargando ahora...');
                             this.playerCards = data.playerCards;
                             this.preloadCardImages(); // Cargar de forma asíncrona
                         } else {
-                            console.log('✅ Usando cartas ya precargadas');
+                            console.log('Usando cartas ya precargadas');
                         }
 
                         // Configurar carta actual si no está precargada
@@ -2477,20 +2489,17 @@
                         this.countdown = data.count;
                         this.gameState = 'starting';
 
-                        // PRECARGA DE CARTILLAS DURANTE EL CONTEO REGRESIVO
+                        // Recibir cartilla + primera carta y precargar TODO durante 5..1
                         if (data.playerCards && data.playerCards.length > 0) {
-                            console.log('🎴 Precargando cartilla durante conteo regresivo...');
                             this.playerCards = data.playerCards;
-                            this.preloadCardImages();
                             this.updateSelectedCards();
                         }
-
-                        // También precargar la primera carta si está disponible
                         if (data.currentCard) {
-                            console.log('🃏 Precargando carta actual...');
                             this.currentCard = data.currentCard;
                             this.currentCardIndex = data.index || 0;
                         }
+                        console.log('Precargando cartilla y mazo durante conteo...');
+                        this.preloadCardImages();
                     });
 
                     this.socket.on('countdown-update', (count) => {
@@ -2510,7 +2519,7 @@
 
                     // Manejar tanto game-ended como game-finished por si cambia el servidor
                     this.socket.on('game-ended', (data) => {
-                        console.log('🔥🔥🔥 EVENTO GAME-ENDED RECIBIDO 🔥🔥🔥');
+                        console.log('EVENTO GAME-ENDED RECIBIDO ');
                         console.log('Juego terminado:', data);
                         console.log('Winner ID:', data.winner);
                         console.log('Current Player ID:', this.socket.id);
@@ -2519,7 +2528,7 @@
                     });
 
                     this.socket.on('game-finished', (data) => {
-                        console.log('🔥🔥🔥 EVENTO GAME-FINISHED RECIBIDO 🔥🔥🔥');
+                        console.log('EVENTO GAME-FINISHED RECIBIDO ');
                         console.log('Juego terminado:', data);
                         console.log('Winner ID:', data.winner);
                         console.log('Current Player ID:', this.socket.id);
@@ -2573,7 +2582,7 @@
                     // Marcar que los resultados están listos para mostrarse
                     this.gameResultsReady = true;
 
-                    console.log('🎯 VARIABLES DE ESTADO ANTES DE MOSTRAR MODALES:');
+                    console.log('VARIABLES DE ESTADO ANTES DE MOSTRAR MODALES:');
                     console.log('gameFullyInitialized:', this.gameFullyInitialized);
                     console.log('gameResultsReady:', this.gameResultsReady);
                     console.log('gameEnded:', this.gameEnded);
@@ -2584,7 +2593,7 @@
 
                     // Usar setTimeout para asegurar que Alpine.js procese las variables correctamente
                     setTimeout(() => {
-                        console.log('🎯 VARIABLES DE ESTADO DENTRO DEL SETTIMEOUT:');
+                        console.log('VARIABLES DE ESTADO DENTRO DEL SETTIMEOUT:');
                         console.log('gameFullyInitialized:', this.gameFullyInitialized);
                         console.log('gameResultsReady:', this.gameResultsReady);
                         console.log('gameEnded:', this.gameEnded);
@@ -2592,7 +2601,7 @@
 
                         if (data.winner === currentPlayerId) {
                             // El usuario actual ganó
-                            console.log('🏆 INTENTANDO MOSTRAR MODAL DE VICTORIA');
+                            console.log('INTENTANDO MOSTRAR MODAL DE VICTORIA');
                             console.log('Todas las condiciones:', {
                                 gameFullyInitialized: this.gameFullyInitialized,
                                 showVictoryModal: 'será true',
@@ -2604,12 +2613,12 @@
 
                             // Verificar inmediatamente después
                             setTimeout(() => {
-                                console.log('✅ showVictoryModal después de asignar:', this.showVictoryModal);
+                                console.log('showVictoryModal después de asignar:', this.showVictoryModal);
                             }, 10);
 
                         } else {
                             // El usuario actual perdió
-                            console.log('💔 INTENTANDO MOSTRAR MODAL DE DERROTA');
+                            console.log('INTENTANDO MOSTRAR MODAL DE DERROTA');
                             console.log('Todas las condiciones:', {
                                 gameFullyInitialized: this.gameFullyInitialized,
                                 showDefeatModal: 'será true',
@@ -2621,7 +2630,7 @@
 
                             // Verificar inmediatamente después
                             setTimeout(() => {
-                                console.log('✅ showDefeatModal después de asignar:', this.showDefeatModal);
+                                console.log('showDefeatModal después de asignar:', this.showDefeatModal);
                             }, 10);
                         }
                     }, 100);
@@ -2667,23 +2676,23 @@
                 },
 
                 selectCard(index) {
-                    console.log('🎮 selectCard llamada - Index:', index, 'GameEnded:', this.gameEnded);
+                    console.log('selectCard llamada - Index:', index, 'GameEnded:', this.gameEnded);
 
                     if (!this.currentCard || this.gameEnded) {
-                        console.log('🚫 No se puede seleccionar - currentCard:', !!this.currentCard, 'gameEnded:', this.gameEnded);
+                        console.log('No se puede seleccionar - currentCard:', !!this.currentCard, 'gameEnded:', this.gameEnded);
                         return;
                     }
 
                     const card = this.playerCards[index];
-                    console.log('🃏 Carta a seleccionar:', card.name, 'Número:', card.number);
-                    console.log('🃏 Carta actual:', this.currentCard ? this.currentCard.name : 'null', 'Número:', this.currentCard ? this.currentCard.number : 'null');
+                    console.log('Carta a seleccionar:', card.name, 'Número:', card.number);
+                    console.log('Carta actual:', this.currentCard ? this.currentCard.name : 'null', 'Número:', this.currentCard ? this.currentCard.number : 'null');
 
                     if (card.number === this.currentCard.number && !card.selected) {
-                        console.log('✅ Carta válida para seleccionar');
+                        console.log('Carta válida para seleccionar');
                         card.selected = true;
                         this.updateSelectedCards();
 
-                        console.log('📊 Cartas seleccionadas después de actualizar:', this.selectedCards);
+                        console.log('Cartas seleccionadas después de actualizar:', this.selectedCards);
 
                         this.socket.emit('card-selected', {
                             cardIndex: index,
@@ -2695,71 +2704,70 @@
                         }
 
                         // Verificar si ganó
-                        console.log('🏁 Verificando victoria - Cartas seleccionadas:', this.selectedCards);
+                        console.log('Verificando victoria - Cartas seleccionadas:', this.selectedCards);
                         if (this.selectedCards === 16) {
-                            console.log('🎯 JUGADOR COMPLETÓ 16 CARTAS - ENVIANDO player-won');
+                            console.log('JUGADOR COMPLETÓ 16 CARTAS - ENVIANDO player-won');
                             console.log('Socket ID:', this.socket.id);
                             console.log('Cartas seleccionadas:', this.selectedCards);
                             this.socket.emit('player-won');
                         }
                     } else {
-                        console.log('❌ Carta NO válida para seleccionar - Número coincide:', card.number === this.currentCard.number, 'Ya seleccionada:', card.selected);
+                        console.log('Carta NO válida para seleccionar - Número coincide:', card.number === this.currentCard.number, 'Ya seleccionada:', card.selected);
                     }
                 },
 
                 updateSelectedCards() {
                     const previousCount = this.selectedCards;
                     this.selectedCards = this.playerCards.filter(card => card.selected).length;
-                    console.log('📊 updateSelectedCards - Anterior:', previousCount, 'Nuevo:', this.selectedCards);
-                    console.log('📊 Total de cartas:', this.playerCards.length);
-                    console.log('📊 Cartas seleccionadas detalle:', this.playerCards.filter(card => card.selected).map(c => c.name));
+                    console.log('updateSelectedCards - Anterior:', previousCount, 'Nuevo:', this.selectedCards);
+                    console.log('Total de cartas:', this.playerCards.length);
+                    console.log('Cartas seleccionadas detalle:', this.playerCards.filter(card => card.selected).map(c => c.name));
                 },
 
-                // FUNCIÓN PARA PRECARGAR IMÁGENES DE LAS CARTAS
+                // Precarga cartilla + las 54 cartas del mazo (las que van apareciendo)
                 async preloadCardImages() {
-                    console.log('🎴 Iniciando precarga de imágenes...');
-                    const imagePromises = [];
+                    if (this._preloadInFlight) return this._preloadInFlight;
 
-                    // Precargar todas las cartas de la cartilla
-                    this.playerCards.forEach((card, index) => {
-                        const imgPromise = new Promise((resolve, reject) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                console.log(`✅ Carta ${index + 1} precargada: ${card.filename}`);
-                                resolve(img);
-                            };
-                            img.onerror = () => {
-                                console.warn(`⚠️ Error precargando carta ${index + 1}: ${card.filename}`);
-                                resolve(null); // No fallar por una imagen
-                            };
-                            img.src = `/img/partida/${card.filename}`;
-                        });
-                        imagePromises.push(imgPromise);
+                    console.log('Iniciando precarga de imágenes...');
+                    this._preloadedImages = this._preloadedImages || [];
+                    this._preloadedUrls = this._preloadedUrls || new Set();
+
+                    const urls = new Set();
+                    for (let i = 1; i <= 54; i++) {
+                        urls.add(`/img/partida/A1 - ${i}.svg`);
+                    }
+                    (this.playerCards || []).forEach((card) => {
+                        if (card && card.filename) urls.add(`/img/partida/${card.filename}`);
+                    });
+                    if (this.currentCard) {
+                        urls.add(this.currentCard.img || `/img/partida/${this.currentCard.filename}`);
+                    }
+
+                    const pending = [...urls].filter((src) => !this._preloadedUrls.has(src));
+                    if (pending.length === 0) {
+                        console.log('Imágenes ya estaban precargadas');
+                        return;
+                    }
+
+                    this._preloadInFlight = Promise.all(pending.map((src) => new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            this._preloadedUrls.add(src);
+                            resolve();
+                        };
+                        img.onerror = () => {
+                            console.warn(`Error precargando: ${src}`);
+                            resolve();
+                        };
+                        img.src = src;
+                        // Mantener referencia para que el navegador no descarte el cache
+                        this._preloadedImages.push(img);
+                    }))).then(() => {
+                        console.log(`Precarga lista (${this._preloadedUrls.size} imágenes)`);
+                        this._preloadInFlight = null;
                     });
 
-                    // Precargar la carta actual si existe
-                    if (this.currentCard) {
-                        const currentCardPromise = new Promise((resolve, reject) => {
-                            const img = new Image();
-                            img.onload = () => {
-                                console.log(`✅ Carta actual precargada: ${this.currentCard.filename}`);
-                                resolve(img);
-                            };
-                            img.onerror = () => {
-                                console.warn(`⚠️ Error precargando carta actual: ${this.currentCard.filename}`);
-                                resolve(null);
-                            };
-                            img.src = this.currentCard.img || `/img/partida/${this.currentCard.filename}`;
-                        });
-                        imagePromises.push(currentCardPromise);
-                    }
-
-                    try {
-                        await Promise.all(imagePromises);
-                        console.log('🎉 Todas las cartas han sido precargadas exitosamente');
-                    } catch (error) {
-                        console.error('❌ Error en la precarga de cartas:', error);
-                    }
+                    return this._preloadInFlight;
                 },
 
                 startTimer() {
@@ -2844,7 +2852,7 @@
                             // Prioridad: Google > Female > Male > Primera disponible
                             utterance.voice = googleVoice || femaleVoice || maleVoice || voices.find(voice => voice.lang.startsWith('en'));
 
-                            console.log(`🎵 Pronunciando: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
+                            console.log(`Pronunciando: "${textToSpeak}" con voz: ${utterance.voice?.name || 'Default'}`);
 
                             // Reproducir
                             speechSynthesis.speak(utterance);
@@ -2861,7 +2869,7 @@
                         // Cargar las voces disponibles
                         const loadVoices = () => {
                             const voices = speechSynthesis.getVoices();
-                            console.log('🎵 Voces TTS disponibles:', voices.length);
+                            console.log('Voces TTS disponibles:', voices.length);
                             voices.forEach(voice => {
                                 if (voice.lang.startsWith('en')) {
                                     console.log(`  - ${voice.name} (${voice.lang})`);
@@ -2876,7 +2884,7 @@
                             speechSynthesis.addEventListener('voiceschanged', loadVoices);
                         }
                     } else {
-                        console.warn('⚠️ Text-to-Speech no soportado en este navegador');
+                        console.warn('Text-to-Speech no soportado en este navegador');
                     }
                 },
 
