@@ -7,11 +7,11 @@ const directories = [
   'public/uploads/profiles'
 ];
 
-console.log('🔧 Creando directorios necesarios...');
+console.log('Creando directorios necesarios...');
 
 // Información del entorno
 if (process.env.RAILWAY_ENVIRONMENT) {
-  console.log('🚂 Ejecutándose en Railway');
+  console.log('Ejecutándose en Railway');
 }
 
 directories.forEach(dir => {
@@ -26,7 +26,7 @@ directories.forEach(dir => {
       fs.accessSync(fullPath, fs.constants.W_OK);
       console.log(`✓ Permisos de escritura confirmados: ${dir}`);
     } catch (error) {
-      console.error(`❌ Error creando directorio ${dir}:`, error.message);
+      console.error(`Error creando directorio ${dir}:`, error.message);
       process.exit(1);
     }
   } else {
@@ -34,4 +34,4 @@ directories.forEach(dir => {
   }
 });
 
-console.log('🎉 Setup de directorios completado.');
+console.log('Setup de directorios completado.');

@@ -112,7 +112,7 @@ router.post('/create-subscription-preference', async (req, res) => {
       public_key: process.env.MP_PUBLIC_KEY || 'APP_USR-e143b4eb-a8c6-4a61-bfa1-ede0ed1e3c3e' // Fallback temporal
     });
   } catch (err) {
-    console.error('❌ Error creando preferencia de suscripción:', err);
+    console.error('Error creando preferencia de suscripción:', err);
     if (err.cause && err.cause.response) {
       const mpError = await err.cause.response.text();
       console.error('Detalle Mercado Pago:', mpError);
