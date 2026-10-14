@@ -1,0 +1,530 @@
+/* Reset general */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Carrusel partida imagen promocional */
+.carrusel-partida-container {
+    border: 4px solid #000; /* Contorno negro */
+    border-radius: 16px;    /* Esquinas redondeadas */
+    padding: 0;             /* Sin espacio interno */
+    margin: 18px auto 0 auto;
+    max-width: 500px;
+    overflow: hidden;       /* Recorta la imagen a las esquinas redondeadas */
+}
+
+.carrusel-partida-img {
+    display: block;
+    width: 100%;
+    border-radius: 16px;    /* Esquinas redondeadas igual que el contenedor */
+    border: none;
+}
+
+/* Estilos globales */
+body {
+    background-image: url(/Icon/sabías-que-lotería-mexicana.png);
+    background-size: 50%; /* O usa 'cover' o un tamaño específico */
+    color: #333;
+    line-height: 1.6;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Header */
+header {
+    display: flex;  /* Utiliza Flexbox para el diseño del header */
+    justify-content: space-between;  /* Coloca los elementos a ambos lados */
+    align-items: center;  /* Centra los elementos verticalmente */
+    padding: 15px 30px;  /* Añade relleno alrededor del contenido */
+    background-color: black;  /* Establece un color de fondo oscuro */
+    color: white;  /* Define el color del texto como blanco */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Añade sombra sutil */
+    position: relative;  /* Hace que el header tenga un posicionamiento relativo */
+    z-index: 10;  /* Asegura que el header esté por encima de otros elementos */
+}
+
+/* Logo */
+.logo img {
+    max-width: 100%;  /* Hace que el logo no exceda el 100% de su contenedor */
+    height: auto;  /* Mantiene la proporción del logo */
+}
+
+/* Menú y botones */
+nav {
+    display: flex;  /* Utiliza Flexbox para la navegación */
+    align-items: center;  /* Centra verticalmente los elementos */
+}
+
+/* Menú de navegación - Versión de escritorio */
+.menu {
+    margin-top: 15px;
+    list-style: none;  /* Elimina los puntos de lista */
+    display: flex;  /* Utiliza Flexbox para distribuir los elementos horizontalmente */
+    margin-left: 40px;  /* Añade margen a la izquierda */
+    transition: opacity 0.3s ease, transform 0.3s ease;  /* Añade transición a la opacidad y transformación */
+}
+
+.menu li {
+    margin-right: 25px;  /* Añade espacio entre los elementos del menú */
+}
+
+.menu li a {
+    color: rgb(255, 255, 255);  /* Establece el color del texto en blanco */
+    text-decoration: none;  /* Elimina el subrayado de los enlaces */
+    font-size: 16px;  /* Establece el tamaño de la fuente */
+    font-weight: 600;  /* Define el peso de la fuente */
+    position: relative;  /* Posicionamiento relativo para los enlaces */
+    transition: color 0.3s ease;  /* Añade una transición al color del texto */
+}
+
+.menu li a:hover {
+    color: #FF66B2;  /* Cambia el color del texto cuando el usuario pasa el ratón sobre el enlace */
+}
+
+/* Estilos para los botones de sesión */
+.auth-buttons {
+    display: none;  /* Los botones de sesión están ocultos por defecto */
+    flex-direction: column;  /* Organiza los botones verticalmente */
+    align-items: center;  /* Centra los botones */
+    gap: 22px;  /* Espacio entre los botones */
+    position: absolute;  /* Posiciona los botones de manera absoluta */
+    top: 100%;  /* Coloca los botones debajo del contenedor */
+    left: 89%;  /* Ajusta la posición horizontal */
+    width: 11%;  /* Define el ancho de los botones */
+    background-color: white;  /* Establece un fondo blanco */
+    padding: 10px;  /* Añade relleno alrededor de los botones */
+    border-radius: 10px;  /* Redondea las esquinas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  /* Añade sombra a los botones */
+    z-index: 1;  /* Asegura que los botones estén por encima de otros elementos */
+}
+
+.auth-buttons button {
+    background-color: #FF66B2;  /* Establece un fondo rosa para los botones */
+    color: white;  /* Define el color del texto de los botones */
+    border: none;  /* Elimina el borde */
+    padding: 10px 18px;  /* Añade relleno interno a los botones */
+    border-radius: 30px;  /* Hace que los botones tengan bordes redondeados */
+    cursor: pointer;  /* Cambia el cursor cuando se pasa sobre el botón */
+    font-weight: 600;  /* Define un peso de fuente más grueso */
+    transition: background-color 0.3s ease, transform 0.2s ease;  /* Añade transiciones para el color de fondo y la transformación */
+}
+
+.auth-buttons button:hover {
+    background-color: #73cc13;  /* Cambia el color de fondo a verde al pasar el ratón */
+    transform: scale(1.05);  /* Aumenta ligeramente el tamaño del botón */
+}
+
+/* Clase 'show' que hace visibles los botones de autenticación */
+.auth-buttons.show {
+    display: flex !important;  /* Muestra los botones de sesión cuando tienen la clase 'show' */
+}
+
+/* Icono de usuario */
+.user-icon {
+    font-size: 28px;  /* Establece el tamaño del icono */
+    cursor: pointer;  /* Cambia el cursor al pasar sobre el icono */
+    margin-left: 20px;  /* Añade margen a la izquierda */
+    z-index: 2;  /* Asegura que el icono esté por encima de otros elementos */
+    margin-top: 1px;
+}
+
+/* Icono de hamburguesa */
+.menu-icon {
+    display: none;  /* Oculta el icono de hamburguesa por defecto */
+    font-size: 30px;  /* Establece el tamaño del icono */
+    cursor: pointer;  /* Cambia el cursor cuando se pasa sobre el icono */
+    z-index: 2;  /* Asegura que el icono esté por encima de otros elementos */
+    background: none;  /* Elimina el fondo del icono */
+    border: none;  /* Elimina el borde */
+    color: white;  /* Establece el color blanco */
+    font-size: 30px;  /* Ajusta el tamaño del icono */
+}
+
+/* Estilos para móviles */
+@media (max-width: 768px) {
+    body {
+        background-image: url(/Icon/sabías-que-lotería-mexicana.png);
+        background-size: 100%; /* O usa 'cover' o un tamaño específico */
+        color: #333;
+        line-height: 1.6;
+        font-size: 16px;
+        margin: 0;
+    }
+    .boton-practica button {
+        margin-bottom: 25px;
+    }
+    /* Menú oculto inicialmente */
+    .menu {
+        display: none;  /* Oculta el menú en pantallas pequeñas */
+        position: absolute;  /* Posiciona el menú de forma absoluta */
+        top: 80%;  /* Coloca el menú debajo del contenedor */
+        left: 0;  /* Alinea el menú a la izquierda */
+        background-color: #333;  /* Establece un fondo oscuro */
+        width: 100%;  /* Hace que el menú ocupe todo el ancho */
+        flex-direction: column;  /* Organiza los elementos del menú verticalmente */
+        padding: 20px;  /* Añade relleno al menú */
+        border-radius: 10px;  /* Redondea las esquinas */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);  /* Añade sombra */
+        opacity: 0;  /* Hace el menú invisible */
+        transform: translateY(-30px);  /* Mueve el menú hacia arriba */
+        pointer-events: none;  /* Desactiva la interacción con el menú */
+        z-index: 5;  /* Asegura que el menú esté por encima de otros elementos */
+    }
+
+    .menu.active {
+        display: flex;  /* Muestra el menú cuando tiene la clase 'active' */
+        opacity: 1;  /* Hace el menú visible */
+        transform: translateY(0);  /* Mueve el menú a su posición normal */
+        pointer-events: all;  /* Permite interactuar con el menú */
+    }
+
+    /* Mostrar el icono de hamburguesa */
+    .menu-icon {
+        display: block;  /* Muestra el icono de hamburguesa */
+    }
+
+    /* Ajustes a los botones de sesión */
+    .auth-buttons {
+        display: none;  /* Oculta los botones de sesión */
+        position: absolute;  /* Posiciona los botones de forma absoluta */
+        top: 100%;  /* Coloca los botones debajo del contenedor */
+        left: 50%;  /* Centra los botones horizontalmente */
+        width: 50%;  /* Ajusta el ancho de los botones */
+        flex-direction: column;  /* Organiza los botones verticalmente */
+        padding: 13px;  /* Añade relleno */
+        background-color: #fff;  /* Establece el fondo blanco */
+        border-radius: 10px;  /* Redondea las esquinas */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);  /* Añade sombra */
+        z-index: 5;  /* Asegura que los botones estén por encima de otros elementos */
+    }
+
+    .auth-buttons.show {
+        display: flex;  /* Muestra los botones cuando tienen la clase 'show' */
+    }
+
+    .user-icon {
+        font-size: 25px;  /* Establece el tamaño del icono */
+        cursor: pointer;  /* Cambia el cursor al pasar sobre el icono */
+        margin-left: 20px;  /* Añade margen a la izquierda */
+        z-index: 2;  /* Asegura que el icono esté por encima de otros elementos */
+        margin-top: 1px;
+    }
+}
+
+/* Enlaces */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Barra de búsqueda */
+.barra_busqueda {
+    text-align: center;
+    margin: 100px 0;
+}
+
+.input-container {
+    position: relative;
+    width: 80%;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center; /* Centra el contenido verticalmente */
+}
+
+.barra_busqueda input {
+    padding: 12px;
+    width: 100%;
+    border-radius: 50px;
+    border: 2px solid #ddd;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding-right: 50px;  /* Espacio para el botón */
+}
+
+.barra_busqueda button {
+    position: absolute;
+    right: 10px; /* Espacio del borde derecho */
+    top: 50%;
+    transform: translateY(-50%); /* Centrado vertical */
+    width: 40px; /* Tamaño del botón */
+    height: 40px; /* Tamaño del botón */
+    background-color: #3F51B5;
+    color: white;
+    border: none;
+    border-radius: 50%; /* Hacer el botón circular */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.barra_busqueda button:hover {
+    background-color: #ff4081;
+}
+
+.barra_busqueda i {
+    font-size: 18px; /* Tamaño del ícono */
+}
+
+/* Publicidad */
+.publicidad {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.texto-publicidad h1 {
+    font-size: 30px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 15px;
+    max-width: 600px;
+}
+
+.texto-publicidad p {
+    font-size: 18px;
+    color: #555;
+    max-width: 400px;
+}
+
+.boton-practica button {
+    padding: 10px 30px;
+    background-color: #ff4081;
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.boton-practica button:hover {
+    background-color: #3F51B5;
+    transform: scale(1.05);
+}
+
+.imagen-publicidad {
+    display: block;
+    margin: 30px auto;
+    max-width: 240px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.imagen-vocabulario img {
+    max-width: 50%;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 5px solid black;
+}
+
+/* Niveles */
+.texto-niveles {
+    color: black;
+}
+
+.info-niveles {
+    text-align: center;
+    padding: 60px 10%;
+    background-color: #B5CCDA;
+}
+
+.info-niveles h2 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    color: #3F51B5;
+    font-weight: 600;
+}
+
+.niveles-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 40px;
+}
+
+.nivel {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 45%;
+    transition: transform 0.3s ease;
+}
+
+.nivel:hover {
+    transform: translateY(-10px);
+}
+
+.titulo-A1, .titulo-A2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #3F51B5;
+    margin-bottom: 15px;
+}
+
+.texto-A1, .texto-A2 {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.8;
+}
+
+/* Vocabulario */
+.vocabulario {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px;
+    background-color: #fff;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.texto-vocabulario h1 {
+    font-size: 30px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.texto-vocabulario p {
+    font-size: 18px;
+    color: #555;
+    max-width: 400px;
+}
+
+
+/* Footer */
+footer {
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    margin-top: 50px;
+}
+
+.contenedor-principal{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px;
+    font-size: 14px;
+}
+
+.contactanos{
+    text-align: center;
+    flex: 1;
+}
+
+.seccionContacto{
+    text-align: center;
+}
+
+.empresa, .correo, .direccion{
+    font-style: normal;
+}
+
+
+/* Sidebar */
+.sidebar{
+    align-items: center;
+    position: relative;
+    flex: 1;
+    
+}
+.sidebar h3 {
+    color: #3F51B5;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+
+.sidebar ul li a {
+    font-size: 16px;
+    color: #555;
+}
+
+.sidebar ul li a:hover {
+    color: #3F51B5;
+}
+
+
+/* Animaciones */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsividad */
+@media (max-width: 450px) {
+    .barra_busqueda input {
+        width: 100%;
+    }
+
+    .publicidad {
+        flex-direction: column;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .texto-publicidad h1 {
+        font-size: 24px;
+    }
+
+    .texto-publicidad p {
+        font-size: 16px;
+        max-width: 90%;
+    }
+
+    .imagen-publicidad img {
+        max-width: 50%;
+        margin: 10px;
+    }
+
+    .niveles-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nivel {
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    .vocabulario {
+        flex-direction: column;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .texto-vocabulario h1 {
+        font-size: 24px;
+    }
+
+    .texto-vocabulario p {
+        font-size: 16px;
+        max-width: 90%;
+    }
+
+    .imagen-vocabulario img {
+        max-width: 80%;
+        margin-top: 10px;
+    }
+}

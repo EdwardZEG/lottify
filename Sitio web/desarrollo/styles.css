@@ -1,0 +1,131 @@
+/* styles.css */
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #000000, #006ab6);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .development-section {
+    text-align: center;
+    padding: 25px;
+    background: #000000;
+    border: 2px solid #0089cb;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 1s ease-in-out;
+    width: 90%;
+    max-width: 450px;
+  }
+  
+  .icon {
+    font-size: 60px;
+    color: #dbee71;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #0089cb;
+  }
+  
+  .description {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #dbee71;
+  }
+  
+  .spinner {
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    border-top: 5px solid #0089cb;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px auto;
+    animation: spin 1s linear infinite;
+  }
+  
+  .inicio-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    color: #fff;
+    background: #0089cb;
+    border: none;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .inicio-button:hover {
+    background: #006ab6;
+    transform: scale(1.1);
+  }
+  
+  .footer-text {
+    font-size: 0.9rem;
+    color: #dbee71;
+    margin-top: 15px;
+  }
+  
+  /* Animations */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsiveness */
+  @media (max-width: 480px) {
+    .title {
+      font-size: 1.6rem;
+    }
+  
+    .description {
+      font-size: 0.9rem;
+    }
+  
+    .spinner {
+      width: 50px;
+      height: 50px;
+    }
+  
+    .inicio-button {
+      font-size: 0.9rem;
+      padding: 8px 18px;
+    }
+  }
+  
