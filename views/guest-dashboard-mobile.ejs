@@ -4,10 +4,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Panel Invitado - Móvil</title>
+    <title>Lottify - Panel Invitado Móvil</title>
+    <link rel="icon" type="image/svg+xml" href="/img/logo_header.svg">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
     <style>
         body {
             background: #fff;
@@ -59,6 +69,7 @@
             font-size: 2.2rem;
             display: flex;
             align-items: center;
+            transition: all 0.3s ease;
         }
 
         .sidebar {
@@ -435,10 +446,110 @@
         </div>
     </div>
     <div id="content" class="content">
-        <div class="container py-4">
-            <div class="alert alert-info text-center" style="font-size:1.1rem;">
-                Estás usando el panel como <strong>invitado</strong>. Algunas funciones están deshabilitadas.<br>
-                <a href="/login" class="btn btn-primary mt-3">Iniciar sesión</a>
+        <!-- Sección Unirse a partida para invitados -->
+        <div style="position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); z-index: 1000;">
+            <div class="w-full h-full bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center px-4"
+                x-data="{ 
+                codigo: '',
+                copied: false,
+                copiarCodigo() {
+                    navigator.clipboard.writeText(this.codigo || '657-934');
+                    this.copied = true;
+                    setTimeout(() => { this.copied = false; }, 2000);
+                }
+            }">
+
+                <!-- Logo superior -->
+                <div class="mb-8 transform hover:scale-105 transition-all duration-300">
+                    <img src="/img/logo_formularios.svg" alt="Logo"
+                        class="w-24 h-24 mx-auto drop-shadow-xl filter saturate-110">
+                </div>
+
+                <!-- Título -->
+                <div class="mb-8 text-center">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Unirse a Partida</h1>
+                    <p class="text-gray-600 text-sm">Ingresa el código de la sala</p>
+                </div>
+
+                <!-- Campo de código -->
+                <div class="mb-8 w-full max-w-sm">
+                    <div class="relative">
+                        <div class="bg-white rounded-3xl shadow-2xl border-2 border-gray-100 overflow-hidden transition-all duration-500 hover:shadow-3xl focus-within:shadow-3xl focus-within:ring-4 focus-within:ring-blue-100 focus-within:border-blue-300"
+                            style="height: 60px;">
+                            <div class="flex items-center h-full">
+                                <input type="text" x-model="codigo" placeholder="ABC123"
+                                    class="flex-1 px-4 py-3 text-lg font-bold text-center text-gray-800 bg-transparent border-0 focus:outline-none placeholder-gray-400 h-full uppercase"
+                                    maxlength="6" style="letter-spacing: 2px;">
+                                <div class="w-px h-8 bg-gray-200"></div>
+                                <button @click="copiarCodigo()"
+                                    class="group px-3 py-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset h-full flex items-center justify-center"
+                                    style="width: 50px;" :class="{ 'text-green-600 bg-green-50': copied }"
+                                    title="Copiar código de ejemplo">
+                                    <i class="fas text-sm transition-transform duration-300 group-hover:scale-110"
+                                        :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mensaje de copiado -->
+                        <div x-show="copied" x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform translate-y-2 scale-95"
+                            x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+                            x-transition:leave-end="opacity-0 transform translate-y-2 scale-95"
+                            class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold shadow-xl">
+                            <i class="fas fa-check mr-1"></i>¡Copiado!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón principal -->
+                <div class="mb-6 w-full max-w-sm">
+                    <button @click="codigo.length >= 6 ? window.location.href = '/partida/' + codigo : null"
+                        class="group relative w-full px-6 py-3 bg-gray-600 hover:bg-blue-600 disabled:bg-gray-400 text-white font-semibold text-base rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl disabled:scale-100 disabled:shadow-none disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-lg"
+                        :disabled="codigo.length < 6">
+                        <div class="flex items-center justify-center space-x-2">
+                            <i
+                                class="fas fa-rocket text-sm transition-transform duration-300 group-hover:translate-x-1"></i>
+                            <span>Ir a partida</span>
+                        </div>
+
+                        <!-- Efecto de brillo -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 transition-all duration-700 group-hover:translate-x-full rounded-xl">
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Indicador de estado -->
+                <div class="text-center w-full max-w-sm mb-6" x-show="codigo.length > 0 && codigo.length < 6">
+                    <div
+                        class="text-amber-600 text-xs font-medium bg-amber-50/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-amber-200">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        El código debe tener 6 caracteres
+                    </div>
+                </div>
+
+                <!-- Mensaje para invitados -->
+                <div class="text-center w-full max-w-sm">
+                    <div
+                        class="text-blue-600 text-xs font-medium bg-blue-50/90 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-blue-200">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Como invitado solo puedes unirte a partidas. <a href="/register"
+                            class="text-blue-700 font-semibold underline hover:text-blue-800">Regístrate</a> para más
+                        funciones.
+                    </div>
+                </div>
+
+                <!-- Botón de login alternativo -->
+                <div class="mt-6 w-full max-w-sm">
+                    <a href="/login"
+                        class="w-full block text-center px-4 py-2 bg-white text-gray-700 font-medium text-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Iniciar sesión
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>

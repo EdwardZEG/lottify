@@ -74,11 +74,9 @@ const gameRoomSchema = new mongoose.Schema({
     }
 });
 
-// Índices para optimizar las consultas
-gameRoomSchema.index({ code: 1 });
+// Índices para optimizar las consultas (sin duplicar los únicos)
 gameRoomSchema.index({ hostId: 1 });
 gameRoomSchema.index({ status: 1 });
-gameRoomSchema.index({ expiresAt: 1 });
 
 // Middleware para actualizar expiresAt cuando la partida comienza
 gameRoomSchema.pre('save', function(next) {

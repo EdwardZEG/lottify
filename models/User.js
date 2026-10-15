@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   resetTokenExpiration: Date,
   resetCode: String,
   resetCodeExpiration: Date,
+  verified: { type: Boolean, default: false }, // Campo de verificación
   status: { type: String, enum: ["activo", "inactivo"], default: "activo" },
   profile: { type: String, enum: ["administrador", "usuario", "docente"], default: "usuario" },
 });

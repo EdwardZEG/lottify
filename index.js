@@ -58,10 +58,7 @@ io.use((socket, next) => {
 
 // Conexión a MongoDB Atlas
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("Conectado a MongoDB Atlas"))
   .catch((err) => console.error("Error de conexión:", err));
 
@@ -94,6 +91,12 @@ app.get("/api/current-user", (req, res) => {
   });
 });
 
+// Middleware para detectar móvil/tablet
+function isMobile(req) {
+  const ua = req.headers["user-agent"] || "";
+  return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(ua);
+}
+
 // Ruta para la página de juego
 app.get("/jugar", (req, res) => {
   console.log("=== RUTA /jugar ===");
@@ -118,9 +121,60 @@ app.get("/jugar", (req, res) => {
   
   console.log("Room code:", roomCode);
   
-  res.render("jugar", {
-    user: req.session.user,
-    roomCode: roomCode
+  if (isMobile(req)) {
+    res.render("jugar-mobile", {
+      user: req.session.user,
+      roomCode: roomCode
+    });
+  } else {
+    res.render("jugar", {
+      user: req.session.user,
+      roomCode: roomCode
+    });
+  }
+});
+
+// Ruta POST para crear partida desde dashboard
+app.post("/jugar", (req, res) => {
+  console.log("=== POST /jugar - Crear Partida ===");
+  console.log("Session ID:", req.sessionID);
+  console.log("Body:", req.body);
+  
+  // Verificar si el usuario está autenticado
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Usuario no autenticado" });
+  }
+  
+  // Obtener parámetros de la partida
+  const { categoria, nivel, modo } = req.body;
+  
+  // Validar parámetros
+  if (!categoria || !nivel || !modo) {
+    return res.status(400).json({ error: "Faltan parámetros requeridos" });
+  }
+  
+  // Generar código de sala aleatorio de 6 caracteres
+  const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  
+  console.log(`Partida creada: ${categoria} - Nivel ${nivel} - ${modo}`);
+  console.log("Código de sala generado:", roomCode);
+  
+  // Almacenar configuración de la partida (opcional)
+  // Puedes guardar esto en una base de datos o almacenarlo temporalmente
+  const gameConfig = {
+    roomCode,
+    categoria,
+    nivel,
+    modo,
+    createdBy: req.session.user._id,
+    createdAt: new Date()
+  };
+  
+  // Retornar el código de sala al cliente
+  res.json({ 
+    success: true,
+    roomCode: roomCode,
+    gameConfig: gameConfig
   });
 });
 
