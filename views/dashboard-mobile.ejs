@@ -13,6 +13,9 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Mercado Pago SDK -->
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -276,9 +279,14 @@
             display: none;
         }
 
+        #suscripcion-section {
+            display: none;
+        }
+
         #jugar-section.active,
         #unirse-section.active,
-        #vocabulario-section.active {
+        #vocabulario-section.active,
+        #suscripcion-section.active {
             display: flex !important;
             flex-direction: column;
         }
@@ -312,6 +320,76 @@
         .dashboard-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* ===== ESTILOS SUSCRIPCIÓN MÓVIL ===== */
+        .subscription-mobile-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .subscription-title-mobile {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #495057;
+        }
+
+        .subscription-description-mobile {
+            font-size: 1rem;
+        }
+
+        .premium-card-mobile {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-radius: 1rem;
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .price-mobile {
+            margin-bottom: 1rem;
+        }
+
+        .price-amount-mobile {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffc107;
+        }
+
+        .price-period-mobile {
+            font-size: 1rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .benefits-title-mobile {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .benefit-item-mobile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .subscription-note-mobile {
+            font-size: 0.8rem;
+        }
+
+        #subscribe-btn-mobile:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        /* Animación de carga móvil */
+        .spin-mobile {
+            animation: spin-mobile 1s linear infinite;
+        }
+
+        @keyframes spin-mobile {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .card-icon {
@@ -1532,6 +1610,9 @@
             <div class="sidebar-link" @click="showSection('vocabulario')" data-section="vocabulario">
                 <i class="bi bi-book"></i><span>Estudiar Vocabulario</span>
             </div>
+            <div class="sidebar-link" @click="showSection('suscripcion')" data-section="suscripcion">
+                <i class="bi bi-star"></i><span>Suscripción</span>
+            </div>
         </div>
 
         <div class="sidebar-footer">
@@ -2166,6 +2247,101 @@
                 </div>
             </div>
         </div>
+
+        <!-- Sección Suscripción -->
+        <div class="content-section" id="suscripcion-section" style="padding: 1rem;">
+            <div class="subscription-mobile-container">
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <div class="subscription-icon mb-3">
+                        <i class="bi bi-star-fill text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h2 class="subscription-title-mobile mb-2">Suscripción Premium</h2>
+                    <p class="subscription-description-mobile text-muted">
+                        Desbloquea todas las funciones premium
+                    </p>
+                </div>
+
+                <!-- Estado actual -->
+                <div class="current-status-mobile mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center py-3">
+                            <% if (user.subscriptionStatus === 'premium') { %>
+                                <i class="bi bi-check-circle-fill text-success mb-2" style="font-size: 2rem;"></i>
+                                <h5 class="text-success mb-1">¡Suscripción Activa!</h5>
+                                <small class="text-muted">
+                                    Válida hasta: <strong><%= user.subscriptionExpiry ? new Date(user.subscriptionExpiry).toLocaleDateString('es-ES') : 'N/A' %></strong>
+                                </small>
+                            <% } else { %>
+                                <i class="bi bi-person-circle text-muted mb-2" style="font-size: 2rem;"></i>
+                                <h5 class="text-muted mb-1">Plan Gratuito</h5>
+                                <small class="text-muted">Funciones básicas disponibles</small>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Premium -->
+                <div class="premium-plan-mobile">
+                    <div class="card premium-card-mobile border-0">
+                        <div class="card-body p-4">
+                            <!-- Precio -->
+                            <div class="text-center mb-3">
+                                <div class="price-mobile">
+                                    <span class="price-amount-mobile">$25</span>
+                                    <span class="price-period-mobile">/mes</span>
+                                </div>
+                            </div>
+
+                            <!-- Beneficios -->
+                            <div class="benefits-mobile mb-4">
+                                <h6 class="benefits-title-mobile mb-3">Beneficios incluidos:</h6>
+                                <div class="benefits-list-mobile">
+                                    <div class="benefit-item-mobile">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>Acceso ilimitado</span>
+                                    </div>
+                                    <div class="benefit-item-mobile">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>Salas privadas</span>
+                                    </div>
+                                    <div class="benefit-item-mobile">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>Estadísticas avanzadas</span>
+                                    </div>
+                                    <div class="benefit-item-mobile">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>Vocabulario premium</span>
+                                    </div>
+                                    <div class="benefit-item-mobile">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>Sin anuncios</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón de acción -->
+                            <div class="text-center">
+                                <% if (user.subscriptionStatus !== 'premium') { %>
+                                    <button class="btn btn-warning btn-lg w-100 rounded-pill" id="subscribe-btn-mobile" style="font-weight: 600;">
+                                        <i class="bi bi-star-fill me-2"></i>
+                                        Suscribirse Ahora
+                                    </button>
+                                    <p class="subscription-note-mobile mt-2 mb-0">
+                                        <small class="text-muted">Pago seguro con Mercado Pago</small>
+                                    </p>
+                                <% } else { %>
+                                    <button class="btn btn-success btn-lg w-100 rounded-pill" disabled style="font-weight: 600;">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        Ya Suscrito
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -2295,6 +2471,13 @@
                     if (section === 'inicio' && !inicioCarousel) {
                         setTimeout(() => {
                             inicioCarousel = new InicioCarousel();
+                        }, 100);
+                    }
+
+                    // Inicializar sección de suscripción
+                    if (section === 'suscripcion') {
+                        setTimeout(() => {
+                            initializeSubscriptionSectionMobile();
                         }, 100);
                     }
 
@@ -3283,6 +3466,118 @@
                 }
             }, 500);
         });
+
+        // ===== FUNCIONES DE SUSCRIPCIÓN MÓVIL =====
+
+        // Función para inicializar la sección de suscripción móvil
+        function initializeSubscriptionSectionMobile() {
+            const subscribeBtnMobile = document.getElementById('subscribe-btn-mobile');
+            
+            if (subscribeBtnMobile) {
+                subscribeBtnMobile.addEventListener('click', handleSubscriptionMobile);
+            }
+
+            // Verificar mensajes de URL (éxito/error)
+            checkSubscriptionMessagesMobile();
+        }
+
+        // Manejar proceso de suscripción móvil
+        async function handleSubscriptionMobile() {
+            const subscribeBtnMobile = document.getElementById('subscribe-btn-mobile');
+            
+            try {
+                subscribeBtnMobile.disabled = true;
+                subscribeBtnMobile.innerHTML = '<i class="bi bi-arrow-clockwise spin-mobile me-2"></i>Procesando...';
+                
+                const response = await fetch('/payment/create-subscription-preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.id) {
+                    // Crear checkout de Mercado Pago
+                    const mp = new MercadoPago('APP_USR-e143b4eb-a8c6-4a61-bfa1-ede0ed1e3c3e', {
+                        locale: 'es-MX'
+                    });
+
+                    mp.checkout({
+                        preference: {
+                            id: data.id
+                        },
+                        autoOpen: true
+                    });
+                } else {
+                    throw new Error(data.error || 'Error creando preferencia de pago');
+                }
+            } catch (error) {
+                console.error('Error en suscripción móvil:', error);
+                showNotificationMobile('Error al procesar la suscripción: ' + error.message, 'error');
+            } finally {
+                subscribeBtnMobile.disabled = false;
+                subscribeBtnMobile.innerHTML = '<i class="bi bi-star-fill me-2"></i>Suscribirse Ahora';
+            }
+        }
+
+        // Verificar mensajes de suscripción en la URL (móvil)
+        function checkSubscriptionMessagesMobile() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            const info = urlParams.get('info');
+
+            if (success === 'subscription-activated') {
+                showNotificationMobile('¡Suscripción activada con éxito!', 'success');
+                // Limpiar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // Recargar para mostrar estado actualizado
+                setTimeout(() => location.reload(), 2000);
+            } else if (error) {
+                let message = 'Error en la suscripción';
+                switch (error) {
+                    case 'payment-failed':
+                        message = 'El pago no pudo ser procesado';
+                        break;
+                    case 'subscription-failed':
+                        message = 'Error al activar la suscripción';
+                        break;
+                    case 'user-not-found':
+                        message = 'Usuario no encontrado';
+                        break;
+                    default:
+                        message = 'Error en el proceso de suscripción';
+                }
+                showNotificationMobile(message, 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (info === 'payment-pending') {
+                showNotificationMobile('Pago pendiente de confirmación', 'info');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // Función para mostrar notificaciones móvil
+        function showNotificationMobile(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; left: 20px; right: 20px; z-index: 9999; margin: 0 auto; max-width: 350px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-dismiss después de 5 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
     </script>
 </body>
 
