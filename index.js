@@ -64,6 +64,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Permite recibir JSON en el body
 app.use(express.static(path.join(__dirname, "public")));
 
+// Servir sitio web estático
+app.use('/sitio-web', express.static(path.join(__dirname, 'Sitio web'), {
+  index: 'index.html'
+}));
+
 // Configuración específica para Railway - servir archivos upload
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), {
   maxAge: '1d',

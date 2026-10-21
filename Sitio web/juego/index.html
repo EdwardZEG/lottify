@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottify - Juego</title>
+    <!-- Enlace a tu CSS personalizado -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Favicon -->
+    <link rel="icon" href="/img/logo_header.svg" type="image/x-icon">
+    <!-- Enlace a Bootstrap (para diseño responsivo y estilos básicos) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Enlace a Font Awesome (para los iconos) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Fuentes de Google -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&family=Poppins:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <!-- Header replicado de index.html -->
+    <header>
+        <!-- Logo -->
+        <div class="logo">
+            <img src="/img/logo_header.svg" alt="Logo" style="width:40px; height:auto;">
+        </div>
+
+        <!-- Contenedor del menú y los botones -->
+        <nav>
+            <!-- Menú hamburguesa -->
+            <button class="menu-icon" id="menu-icon" aria-label="Abrir menú" aria-expanded="false">
+                &#9776; <!-- Icono de hamburguesa -->
+            </button>
+
+            <!-- Menú de navegación -->
+            <ul id="menu" class="menu" role="navigation">
+                <li><a href="/sitio-web/">Inicio</a></li>
+                <li><a href="/sitio-web/juego/">Juego</a></li>
+                <li><a href="/sitio-web/vocabulario/">Vocabulario</a></li>
+                <li><a href="/sitio-web/nosotros/">Nosotros</a></li>
+            </ul>
+
+            <!-- Icono de usuario que muestra las opciones de iniciar sesión o registrarse -->
+            <div class="user-icon" id="user-icon" aria-label="Opciones de usuario">
+                <i class="fa-solid fa-circle-user" style="color: #ffffff;"></i> <!-- Icono de usuario -->
+            </div>
+
+            <!-- Botones de autenticación -->
+            <div class="auth-buttons" id="auth-buttons" aria-hidden="true">
+                <a href="/login" id="login-btn" aria-label="Iniciar sesión">
+                    <button>Iniciar Sesión</button>
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Sección de Juego -->
+    <section id="juego" class="juego">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="info-cuadro p-4 mb-4 rounded shadow"
+                        style="max-width:1000px; margin:auto; text-align:justify; font-size:17px; line-height:1.7;">
+                        <h2 style="text-align:center; margin-bottom:18px;">¡Juega, Aprende Inglés y Gana con Lottify! <i
+                                class="fas fa-gamepad"></i></h2>
+                        <p><strong>Bienvenido a Lottify</strong>, el juego educativo donde el inglés se aprende de una
+                            manera divertida e interactiva. Diseñado para público en general, nuestro juego de lotería
+                            digital no solo es una forma de disfrutar, sino una herramienta efectiva para mejorar tu
+                            vocabulario y comprensión en inglés mientras compites con otros jugadores.</p>
+                        <h3 style="margin-top:24px; margin-bottom:10px;"><i class="fas fa-question-circle"></i> ¿Cómo se
+                            juega?</h3>
+                        <p>En Lottify, aprender vocabulario en inglés es divertido y dinámico. Cada jugador recibe una
+                            cartilla con imágenes, y una voz en inglés irá diciendo palabras al azar. Tu tarea es
+                            identificar la imagen que corresponde a cada palabra y marcarla. ¡Gana quien complete su
+                            cartilla primero!</p>
+                        <h4 style="margin-top:24px; margin-bottom:10px;"><i class="fas fa-cogs"></i> Características del
+                            Juego:</h4>
+                        <ul style="padding-left:20px;">
+                            <li><strong>Cartillas Interactivas:</strong> Cada jugador recibe una cartilla con imágenes
+                                que representan palabras en inglés. Debes identificar la imagen correcta según lo que
+                                escuchas.</li>
+                            <li><strong>Audio en Inglés:</strong> Las palabras se dicen en voz alta en inglés para
+                                ayudarte a mejorar tu comprensión auditiva y pronunciación.</li>
+                            <li><strong>Aprendizaje Visual y Auditivo:</strong> Combina imágenes y sonido para reforzar
+                                el significado de cada palabra mientras juegas.</li>
+                            <li><strong>Competencia en Tiempo Real:</strong> Juega con otros usuarios en línea e intenta
+                                completar tu cartilla antes que ellos.</li>
+                            <li><strong>Categorías de Vocabulario:</strong> Elige entre temas como animales, objetos,
+                                naturaleza, comida y más para personalizar tu experiencia de aprendizaje.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div style="text-align:center; margin-bottom:32px;">
+                        <img src="Icon/loteria-juego.png" alt="Imagen del juego de lotería" class="img-fluid"
+                            style="max-width:800px; width:100%; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,0.12);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Reglas -->
+            <div class="row reglas-juego">
+                <div class="col-12">
+                    <h3><i class="fas fa-book-open"></i> Reglas del Juego</h3>
+                    <p>Antes de comenzar a jugar, asegúrate de conocer las reglas básicas de nuestra lotería digital.
+                        ¡Es fácil, divertido y perfecto para aprender vocabulario en inglés!</p>
+                    <div class="reglas-container">
+                        <div class="regla">
+                            <h5><i class="fas fa-arrow-right"></i> 1. Elige tu Categoría</h5>
+                            <p>Selecciona el tema del vocabulario que deseas practicar: animales, comida, naturaleza,
+                                objetos del hogar y más. Esto define las imágenes que verás en tu cartilla.</p>
+                        </div>
+                        <div class="regla">
+                            <h5><i class="fas fa-arrow-right"></i> 2. Escucha la Palabra en Inglés</h5>
+                            <p>Durante cada ronda, una voz en inglés dirá una palabra. Tu tarea es encontrar en tu
+                                cartilla la imagen que corresponde a esa palabra y marcarla.</p>
+                        </div>
+                        <div class="regla">
+                            <h5><i class="fas fa-arrow-right"></i> 3. Marca Correctamente</h5>
+                            <p>Si reconoces la palabra y encuentras la imagen correcta, márcala cuanto antes. Debes
+                                actuar rápido y con precisión para completar tu cartilla antes que los demás.</p>
+                        </div>
+                        <div class="regla">
+                            <h5><i class="fas fa-arrow-right"></i> 4. Compite en Tiempo Real</h5>
+                            <p>Juega contra otros usuarios en partidas en vivo. Todos escuchan las mismas palabras y
+                                compiten por ver quién completa su cartilla primero.</p>
+                        </div>
+                        <div class="regla">
+                            <h5><i class="fas fa-arrow-right"></i> 5. Aprende Jugando</h5>
+                            <p>Al final de cada partida, podrás revisar las palabras que acertaste o fallaste, para
+                                reforzar tu aprendizaje. ¡Cada ronda es una oportunidad para mejorar!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Testimonios de Jugadores -->
+            <div class="row testimonios">
+                <div class="col-12">
+                    <h3><i class="fas fa-comments"></i> Testimonios de Jugadores</h3>
+                    <div class="testimonios-slider">
+                        <div class="testimonio">
+                            <p><strong>Laura, Estudiante de Inglés:</strong> "Lottify me ayudó a memorizar vocabulario
+                                de forma visual y divertida. ¡Marcar las imágenes mientras escucho las palabras me hace
+                                recordar mucho mejor!"</p>
+                        </div>
+                        <div class="testimonio">
+                            <p><strong>Juan, Jugador Diario:</strong> "Las partidas en tiempo real con otros jugadores
+                                hacen que el juego sea emocionante. Es como una competencia de velocidad... ¡pero
+                                aprendiendo inglés!"</p>
+                        </div>
+                        <div class="testimonio">
+                            <p><strong>Carlos, Apasionado por los Idiomas:</strong> "La combinación de audio, imágenes y
+                                categorías temáticas hace que aprender nuevas palabras sea más fácil. Lottify me
+                                mantiene motivado todos los días."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Nosotros</h5>
+                    <p align="justify">Aprender vocabulario inglés se convierte en un juego emocionante con nuestra
+                        lotería digital. En Lottify, convertimos el aprendizaje en una experiencia divertida y
+                        social, motivando a los estudiantes de nivel A1 y A2 a aprender mientras juegan.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>Accesos rápidos</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="../index.html">Inicio</a></li>
+                        <li><a href="../juego/index.html">Juego</a></li>
+                        <li><a href="index.html">Vocabulario</a></li>
+                        <li><a href="../nosotros/index.html">Nosotros</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 d-flex flex-column align-items-center justify-content-center">
+                    <div
+                        style="width:100%; display:flex; justify-content:center; align-items:flex-start; margin:8px 0 24px 0;">
+                        <img src="../logo_formularios.svg" alt="Logo Lottify"
+                            style="max-width:64px; width:64px; height:auto; margin:0 auto; display:block; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.10);">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <p>&copy; <span id="year"></span> Lottify | Todos los derechos reservados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="#" class="back-to-top"><i class="fas fa-chevron-up"></i></a>
+    </footer>
+    <script src="script.js"></script>
+
+    <!-- Enlaces a los Scripts de Bootstrap y jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
