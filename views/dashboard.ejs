@@ -2486,13 +2486,10 @@
 
                                     <div class="plan-action text-center">
                                         <% if (user.subscriptionStatus !=='premium' ) { %>
-                                            <button class="btn btn-warning btn-lg px-5" id="subscribe-btn" disabled>
-                                                <i class="bi bi-lock-fill me-2"></i>
+                                            <button class="btn btn-warning btn-lg px-5" id="subscribe-btn" type="button">
+                                                <i class="bi bi-star-fill me-2"></i>
                                                 Suscribirse Ahora
                                             </button>
-                                            <p class="subscription-note mt-2 text-muted">
-                                                <small>Función temporalmente deshabilitada</small>
-                                            </p>
                                             <% } else { %>
                                                 <button class="btn btn-success btn-lg px-5" disabled>
                                                     <i class="bi bi-check-circle-fill me-2"></i>
@@ -3349,6 +3346,39 @@
             checkSubscriptionMessages();
         }
 
+        async function openMercadoPagoCheckout(data) {
+            if (data.checkout === 'modal' && data.public_key && data.id && window.MercadoPago) {
+                let container = document.getElementById('mp-wallet-brick');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'mp-wallet-brick';
+                    document.body.appendChild(container);
+                }
+                const mp = new MercadoPago(data.public_key, { locale: 'es-MX' });
+                await mp.bricks().create('wallet', 'mp-wallet-brick', {
+                    initialization: {
+                        preferenceId: data.id,
+                        redirectMode: 'modal'
+                    },
+                    callbacks: {
+                        onReady: () => {
+                            const button = container.querySelector('button');
+                            if (button) button.click();
+                        },
+                        onError: () => {
+                            if (data.init_point) window.location.assign(data.init_point);
+                        }
+                    }
+                });
+                return;
+            }
+            if (data.init_point) {
+                window.location.assign(data.init_point);
+                return;
+            }
+            throw new Error('No se pudo abrir Mercado Pago');
+        }
+
         // Manejar proceso de suscripción
         async function handleSubscription() {
             const subscribeBtn = document.getElementById('subscribe-btn');
@@ -3364,28 +3394,12 @@
                     }
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Error ${response.status}: ${errorText}`);
-                }
-
                 const data = await response.json();
-
-                if (data.id) {
-                    // Crear checkout de Mercado Pago
-                    const mp = new MercadoPago(data.public_key, {
-                        locale: 'es-MX'
-                    });
-
-                    mp.checkout({
-                        preference: {
-                            id: data.id
-                        },
-                        autoOpen: true
-                    });
-                } else {
-                    throw new Error('No se recibió ID de preferencia');
+                if (!response.ok) {
+                    throw new Error(data.error || 'No se pudo iniciar el pago');
                 }
+
+                await openMercadoPagoCheckout(data);
             } catch (error) {
                 console.error('Error en suscripción:', error);
                 alert('Error al procesar la suscripción: ' + error.message);

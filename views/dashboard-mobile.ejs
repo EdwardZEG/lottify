@@ -2342,13 +2342,10 @@
                             <div class="text-center">
                                 <% if (user.subscriptionStatus !=='premium' ) { %>
                                     <button class="btn btn-warning btn-lg w-100 rounded-pill" id="subscribe-btn-mobile"
-                                        style="font-weight: 600;" disabled>
-                                        <i class="bi bi-lock-fill me-2"></i>
+                                        type="button" style="font-weight: 600;">
+                                        <i class="bi bi-star-fill me-2"></i>
                                         Suscribirse Ahora
                                     </button>
-                                    <p class="subscription-note-mobile mt-2 mb-0">
-                                        <small class="text-muted">Función temporalmente deshabilitada</small>
-                                    </p>
                                     <% } else { %>
                                         <button class="btn btn-success btn-lg w-100 rounded-pill" disabled
                                             style="font-weight: 600;">
@@ -3501,6 +3498,39 @@
             checkSubscriptionMessagesMobile();
         }
 
+        async function openMercadoPagoCheckout(data) {
+            if (data.checkout === 'modal' && data.public_key && data.id && window.MercadoPago) {
+                let container = document.getElementById('mp-wallet-brick');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'mp-wallet-brick';
+                    document.body.appendChild(container);
+                }
+                const mp = new MercadoPago(data.public_key, { locale: 'es-MX' });
+                await mp.bricks().create('wallet', 'mp-wallet-brick', {
+                    initialization: {
+                        preferenceId: data.id,
+                        redirectMode: 'modal'
+                    },
+                    callbacks: {
+                        onReady: () => {
+                            const button = container.querySelector('button');
+                            if (button) button.click();
+                        },
+                        onError: () => {
+                            if (data.init_point) window.location.assign(data.init_point);
+                        }
+                    }
+                });
+                return;
+            }
+            if (data.init_point) {
+                window.location.assign(data.init_point);
+                return;
+            }
+            throw new Error('No se pudo abrir Mercado Pago');
+        }
+
         // Manejar proceso de suscripción móvil
         async function handleSubscriptionMobile() {
             const subscribeBtnMobile = document.getElementById('subscribe-btn-mobile');
@@ -3516,28 +3546,12 @@
                     }
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Error ${response.status}: ${errorText}`);
-                }
-
                 const data = await response.json();
-
-                if (data.id) {
-                    // Crear checkout de Mercado Pago
-                    const mp = new MercadoPago(data.public_key, {
-                        locale: 'es-MX'
-                    });
-
-                    mp.checkout({
-                        preference: {
-                            id: data.id
-                        },
-                        autoOpen: true
-                    });
-                } else {
-                    throw new Error('No se recibió ID de preferencia');
+                if (!response.ok) {
+                    throw new Error(data.error || 'No se pudo iniciar el pago');
                 }
+
+                await openMercadoPagoCheckout(data);
             } catch (error) {
                 console.error('Error en suscripción móvil:', error);
                 showNotificationMobile('Error al procesar la suscripción: ' + error.message, 'error');
