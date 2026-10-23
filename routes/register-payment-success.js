@@ -1,7 +1,12 @@
 const express = require('express');
+const { MercadoPagoConfig, Payment } = require('mercadopago');
 const User = require('../models/User');
 const PendingRegistration = require('../models/PendingRegistration');
 const router = express.Router();
+
+const mercadoPago = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN
+});
 
 // Ruta que se llama desde Mercado Pago al volver con pago exitoso (REGISTRO)
 router.get('/register/payment-success', async (req, res) => {
@@ -32,32 +37,40 @@ router.get('/register/payment-success', async (req, res) => {
 
 // Nueva ruta para éxito de suscripción
 router.get('/subscription/payment-success', async (req, res) => {
-  const { preference_id, external_reference } = req.query;
-  
-  if (!preference_id || !external_reference) {
+  const paymentId = req.query.payment_id || req.query.collection_id;
+  const externalReference = req.query.external_reference;
+
+  if (!paymentId || !externalReference) {
     return res.redirect('/dashboard?error=payment-verification-failed');
   }
 
   try {
-    // Buscar al usuario por el external_reference
-    const user = await User.findById(external_reference);
+    const payment = await new Payment(mercadoPago).get({ id: String(paymentId) });
+    if (!payment || String(payment.external_reference) !== String(externalReference)) {
+      return res.redirect('/dashboard?error=payment-verification-failed');
+    }
+
+    const user = await User.findById(externalReference);
     if (!user) {
       return res.redirect('/dashboard?error=user-not-found');
     }
 
-    // Actualizar el usuario como suscriptor premium
-    await User.findByIdAndUpdate(external_reference, {
-      subscriptionStatus: 'premium',
-      subscriptionDate: new Date(),
-      subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 días
-    });
+    if (payment.status === 'approved') {
+      await User.findByIdAndUpdate(externalReference, {
+        subscriptionStatus: 'premium',
+        subscriptionDate: new Date(),
+        subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      });
+      return res.redirect('/dashboard?success=subscription-activated');
+    }
 
-    console.log(`Suscripción activada para usuario: ${user.email}`);
+    if (payment.status === 'pending' || payment.status === 'in_process') {
+      return res.redirect('/dashboard?info=payment-pending');
+    }
 
-    // Redirigir al dashboard con mensaje de éxito
-    res.redirect('/dashboard?success=subscription-activated');
+    return res.redirect('/dashboard?error=payment-failed');
   } catch (error) {
-    console.error('Error procesando suscripción:', error);
+    console.error('Error procesando suscripción:', error.message);
     res.redirect('/dashboard?error=subscription-failed');
   }
 });
