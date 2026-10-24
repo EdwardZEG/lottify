@@ -1,4 +1,14 @@
 require("dotenv").config();
+const dns = require("dns");
+
+// Node en Windows a veces usa 127.0.0.1 como DNS. Ese resolver rechaza
+// la consulta SRV de mongodb+srv y Atlas nunca llega a conectarse.
+const loopbackDns = new Set(["127.0.0.1", "::1"]);
+const usableDns = dns.getServers().filter((server) => server && !loopbackDns.has(server));
+if (usableDns.length === 0) {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+}
+
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -95,11 +105,27 @@ io.use((socket, next) => {
   sessionMiddleware(socket.request, {}, next);
 });
 
+if (!process.env.MONGO_URI) {
+  console.error("Falta MONGO_URI. La aplicación usa la base de MongoDB Atlas definida en el entorno.");
+  process.exit(1);
+}
+
+function mongoHost(uri) {
+  try {
+    const normalized = uri
+      .replace(/^mongodb\+srv:\/\//, "https://")
+      .replace(/^mongodb:\/\//, "https://");
+    return new URL(normalized).host;
+  } catch {
+    return "Atlas";
+  }
+}
+
 // Conexión a MongoDB Atlas
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("Conectado a MongoDB"))
-  .catch((err) => console.error("Error de conexión:", err));
+  .then(() => console.log("Conectado a MongoDB Atlas (" + mongoHost(process.env.MONGO_URI) + ")"))
+  .catch((err) => console.error("Error de conexión a MongoDB Atlas:", err.message));
 
 // Rutas
 const authRoutes = require("./routes/auth");
