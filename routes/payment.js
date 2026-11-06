@@ -1,5 +1,5 @@
 const express = require('express');
-const { MercadoPagoConfig, Preference } = require('mercadopago');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const PendingRegistration = require('../models/PendingRegistration');
 const User = require('../models/User');
 const router = express.Router();
@@ -160,4 +160,80 @@ router.post('/create-subscription-preference', async (req, res) => {
   }
 });
 
+function paymentResults(payload) {
+  if (!payload) return [];
+  if (Array.isArray(payload.results)) return payload.results;
+  if (payload.body && Array.isArray(payload.body.results)) return payload.body.results;
+  return [];
+}
+
+async function subscriptionPaymentState(user) {
+  const reference = String(user._id);
+  const paymentApi = new Payment(client);
+  const result = await paymentApi.search({
+    options: {
+      external_reference: reference,
+      sort: 'date_created',
+      criteria: 'desc',
+      limit: 10
+    }
+  });
+  const payments = paymentResults(result);
+  if (payments.some((item) => item.status === 'approved')) return 'approved';
+
+  if (process.env.MP_ACCESS_TOKEN) {
+    const response = await fetch(
+      'https://api.mercadopago.com/merchant_orders/search?external_reference=' + encodeURIComponent(reference),
+      { headers: { Authorization: 'Bearer ' + process.env.MP_ACCESS_TOKEN } }
+    );
+    if (response.ok) {
+      const orders = await response.json();
+      const elements = orders.elements || [];
+      const paid = elements.some((order) => {
+        if (order.order_status === 'paid') return true;
+        return Array.isArray(order.payments) && order.payments.some((item) => item.status === 'approved');
+      });
+      if (paid) return 'approved';
+      const pendingOrder = elements.some((order) => {
+        return Array.isArray(order.payments) && order.payments.some((item) => item.status === 'pending' || item.status === 'in_process');
+      });
+      if (pendingOrder) return 'pending';
+    }
+  }
+
+  if (payments.some((item) => item.status === 'pending' || item.status === 'in_process')) return 'pending';
+  return 'none';
+}
+
+async function activatePremium(userId) {
+  await User.findByIdAndUpdate(userId, {
+    subscriptionStatus: 'premium',
+    subscriptionDate: new Date(),
+    subscriptionExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+  });
+}
+
+router.post('/confirm-subscription', async (req, res) => {
+  const userId = req.session.userId || (req.session.user && req.session.user._id);
+  if (!userId) return res.status(401).json({ error: 'Usuario no autenticado' });
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (user.subscriptionStatus === 'premium') return res.json({ status: 'premium' });
+
+    const state = await subscriptionPaymentState(user);
+    if (state === 'approved') {
+      await activatePremium(user._id);
+      return res.json({ status: 'premium' });
+    }
+    return res.json({ status: state });
+  } catch (err) {
+    console.error('Error confirmando suscripción:', err.message);
+    return res.status(500).json({ error: 'No se pudo confirmar el pago' });
+  }
+});
+
 module.exports = router;
+module.exports.subscriptionPaymentState = subscriptionPaymentState;
+module.exports.activatePremium = activatePremium;

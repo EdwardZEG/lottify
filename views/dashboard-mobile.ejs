@@ -354,6 +354,13 @@
             color: #ffc107;
         }
 
+        .price-currency-mobile {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #6c757d;
+            margin-left: 0.3rem;
+        }
+
         .price-period-mobile {
             font-size: 1rem;
             color: #6c757d;
@@ -2307,6 +2314,7 @@
                             <div class="text-center mb-3">
                                 <div class="price-mobile">
                                     <span class="price-amount-mobile">$25</span>
+                                    <span class="price-currency-mobile">MXN</span>
                                     <span class="price-period-mobile">/mes</span>
                                 </div>
                             </div>
@@ -2344,8 +2352,11 @@
                                     <button class="btn btn-warning btn-lg w-100 rounded-pill" id="subscribe-btn-mobile"
                                         type="button" style="font-weight: 600;">
                                         <i class="bi bi-star-fill me-2"></i>
-                                        Suscribirse Ahora
+                                        Suscribirse
                                     </button>
+                                    <p class="small text-muted mt-3 mb-0">
+                                        Pago de prueba para desarrolladores. No pagues con dinero real: en Mercado Pago solo simula el pago.
+                                    </p>
                                     <% } else { %>
                                         <button class="btn btn-success btn-lg w-100 rounded-pill" disabled
                                             style="font-weight: 600;">
@@ -3492,53 +3503,106 @@
 
             if (subscribeBtnMobile) {
                 subscribeBtnMobile.addEventListener('click', handleSubscriptionMobile);
+                confirmSubscriptionAfterCheckout(subscribeBtnMobile, () => restoreSubscribeButtonMobile(subscribeBtnMobile), 1);
             }
 
             // Verificar mensajes de URL (éxito/error)
             checkSubscriptionMessagesMobile();
         }
 
-        async function openMercadoPagoCheckout(data) {
-            if (data.checkout === 'modal' && data.public_key && data.id && window.MercadoPago) {
-                let container = document.getElementById('mp-wallet-brick');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'mp-wallet-brick';
-                    document.body.appendChild(container);
-                }
-                const mp = new MercadoPago(data.public_key, { locale: 'es-MX' });
-                await mp.bricks().create('wallet', 'mp-wallet-brick', {
-                    initialization: {
-                        preferenceId: data.id,
-                        redirectMode: 'modal'
-                    },
-                    callbacks: {
-                        onReady: () => {
-                            const button = container.querySelector('button');
-                            if (button) button.click();
-                        },
-                        onError: () => {
-                            if (data.init_point) window.location.assign(data.init_point);
-                        }
+        const subscribeLabelMobile = '<i class="bi bi-star-fill me-2"></i>Suscribirse';
+        let subscriptionBusyMobile = false;
+
+        function waitForCheckoutModal(timeoutMs) {
+            return new Promise((resolve) => {
+                const started = Date.now();
+                const timer = setInterval(() => {
+                    const modal = document.getElementById('mercadopago-checkout');
+                    if (modal) {
+                        clearInterval(timer);
+                        resolve(modal);
+                    } else if (Date.now() - started >= timeoutMs) {
+                        clearInterval(timer);
+                        resolve(null);
                     }
-                });
-                return;
+                }, 150);
+            });
+        }
+
+        function watchCheckoutModal(button, onClose) {
+            const observer = new MutationObserver(() => {
+                if (!document.getElementById('mercadopago-checkout')) {
+                    observer.disconnect();
+                    onClose();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        async function openMercadoPagoCheckout(data) {
+            if (data.public_key && data.id && window.MercadoPago) {
+                const mp = new MercadoPago(data.public_key, { locale: 'es-MX' });
+                if (typeof mp.checkout === 'function') {
+                    mp.checkout({
+                        preference: { id: data.id },
+                        autoOpen: true
+                    });
+                    const modal = await waitForCheckoutModal(10000);
+                    if (modal) return 'modal';
+                }
             }
             if (data.init_point) {
                 window.location.assign(data.init_point);
-                return;
+                return 'redirect';
             }
             throw new Error('No se pudo abrir Mercado Pago');
+        }
+
+        function restoreSubscribeButtonMobile(button) {
+            subscriptionBusyMobile = false;
+            button.disabled = false;
+            button.innerHTML = subscribeLabelMobile;
+        }
+
+        async function confirmSubscriptionAfterCheckout(button, restore, attempts) {
+            const tries = attempts || 5;
+            const showProgress = tries > 1;
+            if (button && showProgress) {
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Confirmando pago...';
+            }
+            try {
+                for (let attempt = 0; attempt < tries; attempt++) {
+                    const response = await fetch('/payment/confirm-subscription', { method: 'POST' });
+                    const data = await response.json().catch(() => null);
+                    if (data && data.status === 'premium') {
+                        window.location.href = '/dashboard?success=subscription-activated';
+                        return;
+                    }
+                    if (data && data.status === 'pending') {
+                        window.location.href = '/dashboard?info=payment-pending';
+                        return;
+                    }
+                    if (attempt < tries - 1) {
+                        await new Promise((resolve) => setTimeout(resolve, 1500));
+                    }
+                }
+            } catch (error) {
+                console.error('Error confirmando pago:', error);
+            }
+            if (restore && showProgress) restore();
         }
 
         // Manejar proceso de suscripción móvil
         async function handleSubscriptionMobile() {
             const subscribeBtnMobile = document.getElementById('subscribe-btn-mobile');
+            if (!subscribeBtnMobile || subscriptionBusyMobile) return;
+
+            subscriptionBusyMobile = true;
+            subscribeBtnMobile.disabled = true;
+            subscribeBtnMobile.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Abriendo pago...';
 
             try {
-                subscribeBtnMobile.disabled = true;
-                subscribeBtnMobile.innerHTML = '<i class="bi bi-arrow-clockwise spin-mobile me-2"></i>Procesando...';
-
                 const response = await fetch('/payment/create-subscription-preference', {
                     method: 'POST',
                     headers: {
@@ -3551,13 +3615,16 @@
                     throw new Error(data.error || 'No se pudo iniciar el pago');
                 }
 
-                await openMercadoPagoCheckout(data);
+                const mode = await openMercadoPagoCheckout(data);
+                if (mode === 'redirect') return;
+                subscribeBtnMobile.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Pago de prueba abierto';
+                watchCheckoutModal(subscribeBtnMobile, () => {
+                    confirmSubscriptionAfterCheckout(subscribeBtnMobile, () => restoreSubscribeButtonMobile(subscribeBtnMobile));
+                });
             } catch (error) {
                 console.error('Error en suscripción móvil:', error);
                 showNotificationMobile('Error al procesar la suscripción: ' + error.message, 'error');
-            } finally {
-                subscribeBtnMobile.disabled = false;
-                subscribeBtnMobile.innerHTML = '<i class="bi bi-star-fill me-2"></i>Suscribirse Ahora';
+                restoreSubscribeButtonMobile(subscribeBtnMobile);
             }
         }
 

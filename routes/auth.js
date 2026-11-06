@@ -60,31 +60,43 @@ router.post("/register/check-email", async (req, res) => {
 
 // Registro
 router.post("/register", async (req, res) => {
+  const wantsJson = (req.get("accept") || "").includes("application/json");
+  const fail = (status, message) => {
+    if (wantsJson) return res.status(status).json({ error: message });
+    return res.status(status).render("register", { error: message });
+  };
   const { name, email, password, confirmPassword } = req.body;
   if (password !== confirmPassword) {
-    return res.render("register", { error: "Las contraseñas no coinciden." });
+    return fail(400, "Las contraseñas no coinciden.");
   }
   // Validación de contraseña segura
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
   if (!regex.test(password)) {
-    return res.render("register", { error: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo." });
+    return fail(400, "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.");
   }
   try {
     // Generar código de verificación
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const user = new User({ fullname: name, email, password, verificationCode });
     await user.save();
-    // Enviar correo de verificación con diseño personalizado
+    req.session.userId = user._id;
+    req.session.user = user;
     const { sendVerificationEmail } = require("../mailer");
-    await sendVerificationEmail(email, verificationCode, name);
-    res.redirect("/login");
+    sendVerificationEmail(email, verificationCode, name).catch((mailErr) => {
+      console.error("No se pudo enviar el correo de verificación:", mailErr);
+    });
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        return fail(500, "Error al registrar usuario. Intenta de nuevo.");
+      }
+      if (wantsJson) return res.json({ ok: true, redirect: "/dashboard" });
+      return res.redirect("/dashboard");
+    });
   } catch (err) {
     if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-      // Error de email duplicado
-      return res.render("register", { error: "El correo ya está registrado." });
+      return fail(409, "El correo ya está registrado.");
     }
-    // Otro error
-    return res.render("register", { error: "Error al registrar usuario. Intenta de nuevo." });
+    return fail(500, "Error al registrar usuario. Intenta de nuevo.");
   }
 });
 
