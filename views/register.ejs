@@ -31,6 +31,30 @@
             font-family: 'Poppins', Arial, sans-serif !important;
         }
 
+        #passwordBar,
+        #confirmBar {
+            transition: width 0.2s ease, background-color 0.2s ease;
+        }
+
+        .password-rules {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem 0.65rem;
+            padding: 0.45rem 0 0;
+            margin: 0;
+            font-size: 0.72rem;
+        }
+
+        .password-rules li {
+            color: #6c757d;
+        }
+
+        .password-rules li.is-met {
+            color: #198754;
+            font-weight: 600;
+        }
+
         .card {
             border-radius: 1.5rem;
             background: #fff;
@@ -344,10 +368,17 @@
                                     <button type="button" class="btn btn-outline-secondary toggle-password"
                                         tabindex="-1"><i class="bi bi-eye"></i></button>
                                 </div>
-                                <div class="progress mt-1" style="height: 5px;">
-                                    <div id="passwordBar" class="progress-bar" role="progressbar" style="width: 0%;">
-                                    </div>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    <div id="passwordBar" class="progress-bar" role="progressbar" style="width: 0%;"
+                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
                                 </div>
+                                <ul class="password-rules" id="passwordRules">
+                                    <li data-rule="length">8 caracteres</li>
+                                    <li data-rule="lower">Minúscula</li>
+                                    <li data-rule="upper">Mayúscula</li>
+                                    <li data-rule="number">Número</li>
+                                    <li data-rule="symbol">Símbolo</li>
+                                </ul>
                                 <div id="passwordHelp" class="form-text text-danger mt-1" style="display:none;"></div>
                             </div>
                             <div class="mb-3">
@@ -388,48 +419,20 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Soporte para Enter en formularios - Estrategia simplificada
         document.addEventListener('DOMContentLoaded', function () {
-            const registerForm = document.getElementById('registerForm');
-
-            // Agregar atributo para envío con Enter directamente al formulario
-            registerForm.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const submitButton = registerForm.querySelector('button[type="submit"]');
-                    if (submitButton && !submitButton.disabled) {
-                        setTimeout(() => submitButton.click(), 10);
-                    }
-                }
-            });
-
-            // También agregar a cada input individualmente
-            const inputs = registerForm.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const submitButton = registerForm.querySelector('button[type="submit"]');
-                        if (submitButton && !submitButton.disabled) {
-                            setTimeout(() => submitButton.click(), 10);
-                        }
+            document.querySelectorAll('.toggle-password').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const input = this.parentElement.querySelector('input[type="password"], input[type="text"]');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        this.innerHTML = '<i class="bi bi-eye-slash"></i>';
+                        this.classList.add('active');
+                    } else {
+                        input.type = 'password';
+                        this.innerHTML = '<i class="bi bi-eye"></i>';
+                        this.classList.remove('active');
                     }
                 });
-            });
-        });
-
-        document.querySelectorAll('.toggle-password').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const input = this.parentElement.querySelector('input[type="password"], input[type="text"]');
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    this.innerHTML = '<i class="bi bi-eye-slash"></i>';
-                    this.classList.add('active');
-                } else {
-                    input.type = 'password';
-                    this.innerHTML = '<i class="bi bi-eye"></i>';
-                    this.classList.remove('active');
-                }
             });
         });
     </script>
@@ -445,6 +448,8 @@
         const confirmHelp = document.getElementById('confirmHelp');
         const emailError = document.getElementById('emailError');
         const submitBtn = regForm.querySelector('button[type="submit"]');
+        const submitBtnHtml = submitBtn.innerHTML;
+        let registerInFlight = false;
 
         function validateName() {
             const value = nameInput.value.trim();
@@ -470,8 +475,47 @@
             }
         }
 
+        const passwordRuleTests = {
+            length: (value) => value.length >= 8,
+            lower: (value) => /[a-z]/.test(value),
+            upper: (value) => /[A-Z]/.test(value),
+            number: (value) => /\d/.test(value),
+            symbol: (value) => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)
+        };
+
+        function updatePasswordMeter() {
+            const value = passwordInput.value;
+            const bar = document.getElementById('passwordBar');
+            const rules = Object.keys(passwordRuleTests);
+            const met = value ? rules.filter((rule) => passwordRuleTests[rule](value)).length : 0;
+            const percent = rules.length ? Math.round((met / rules.length) * 100) : 0;
+            bar.style.width = percent + '%';
+            bar.setAttribute('aria-valuenow', String(percent));
+            bar.style.backgroundColor = percent === 100 ? '#198754' : percent >= 60 ? '#ffc107' : percent > 0 ? '#dc3545' : 'transparent';
+            rules.forEach((rule) => {
+                const item = document.querySelector('#passwordRules [data-rule="' + rule + '"]');
+                if (item) item.classList.toggle('is-met', !!(value && passwordRuleTests[rule](value)));
+            });
+            return percent === 100;
+        }
+
+        function updateConfirmMeter() {
+            const bar = document.getElementById('confirmBar');
+            if (!confirmInput.value) {
+                bar.style.width = '0%';
+                bar.setAttribute('aria-valuenow', '0');
+                return false;
+            }
+            const matches = confirmInput.value === passwordInput.value;
+            bar.style.width = '100%';
+            bar.setAttribute('aria-valuenow', '100');
+            bar.style.backgroundColor = matches ? '#198754' : '#dc3545';
+            return matches;
+        }
+
         function validatePassword() {
             const value = passwordInput.value;
+            const complete = updatePasswordMeter();
             if (value === '') {
                 passwordHelp.textContent = '';
                 passwordHelp.style.display = 'none';
@@ -479,23 +523,22 @@
                 passwordInput.classList.remove('is-valid');
                 return false;
             }
-            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-            if (!regex.test(value)) {
-                passwordHelp.textContent = 'Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.';
+            if (!complete) {
+                passwordHelp.textContent = 'Completa los requisitos de la contraseña.';
                 passwordHelp.style.display = 'block';
                 passwordInput.classList.add('is-invalid');
                 passwordInput.classList.remove('is-valid');
                 return false;
-            } else {
-                passwordHelp.textContent = '';
-                passwordHelp.style.display = 'none';
-                passwordInput.classList.remove('is-invalid');
-                passwordInput.classList.add('is-valid');
-                return true;
             }
+            passwordHelp.textContent = '';
+            passwordHelp.style.display = 'none';
+            passwordInput.classList.remove('is-invalid');
+            passwordInput.classList.add('is-valid');
+            return true;
         }
 
         function validateConfirm() {
+            const matches = updateConfirmMeter();
             if (confirmInput.value === '') {
                 confirmHelp.textContent = '';
                 confirmHelp.style.display = 'none';
@@ -503,19 +546,18 @@
                 confirmInput.classList.remove('is-valid');
                 return false;
             }
-            if (confirmInput.value !== passwordInput.value) {
+            if (!matches) {
                 confirmHelp.textContent = 'Las contraseñas no coinciden.';
                 confirmHelp.style.display = 'block';
                 confirmInput.classList.add('is-invalid');
                 confirmInput.classList.remove('is-valid');
                 return false;
-            } else {
-                confirmHelp.textContent = '';
-                confirmHelp.style.display = 'none';
-                confirmInput.classList.remove('is-invalid');
-                confirmInput.classList.add('is-valid');
-                return true;
             }
+            confirmHelp.textContent = '';
+            confirmHelp.style.display = 'none';
+            confirmInput.classList.remove('is-invalid');
+            confirmInput.classList.add('is-valid');
+            return true;
         }
 
         let lastEmailChecked = '';
@@ -595,7 +637,9 @@
         }
 
         function updateSubmitState() {
+            if (registerInFlight) return;
             Promise.resolve(validateEmail()).then(emailValid => {
+                if (registerInFlight) return;
                 const valid = validateName() && validatePassword() && validateConfirm() && emailValid;
                 submitBtn.disabled = !valid;
             });
@@ -613,9 +657,21 @@
         // Bloquear enter solo si hay errores críticos (eliminamos este código conflictivo)
         // El formulario ya maneja el enter correctamente arriba
 
+        function showRegisterError(message) {
+            emailError.textContent = message;
+            emailError.style.display = 'block';
+        }
+
+        function releaseRegisterButton() {
+            registerInFlight = false;
+            submitBtn.innerHTML = submitBtnHtml;
+            updateSubmitState();
+        }
+
         // Validación al enviar
         regForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            if (registerInFlight) return;
             let valid = true;
             if (!validateName()) valid = false;
             if (!validatePassword()) valid = false;
@@ -625,16 +681,21 @@
                 submitBtn.disabled = true;
                 return;
             }
-            // Obtener valores
             const name = nameInput.value.trim();
             const email = emailInput.value.trim();
             const password = passwordInput.value;
 
-            // Registro directo sin pago
+            registerInFlight = true;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
             try {
                 const res = await fetch('/register', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
                     body: new URLSearchParams({
                         name: name,
                         email: email,
@@ -643,29 +704,21 @@
                     })
                 });
 
-                if (res.redirected) {
-                    // Si hay redirección, seguirla
-                    window.location.href = res.url;
-                } else {
-                    // Si hay error, mostrar el contenido de la respuesta
-                    const text = await res.text();
-                    if (text.includes('error')) {
-                        // Extraer mensaje de error del HTML
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(text, 'text/html');
-                        const errorElement = doc.querySelector('.alert-danger, .error-message');
-                        const errorMsg = errorElement ? errorElement.textContent.trim() : 'Error en el registro';
-                        emailError.textContent = errorMsg;
-                        emailError.style.display = 'block';
-                    } else {
-                        // Registro exitoso
-                        window.location.href = '/login';
-                    }
+                const data = await res.json().catch(() => null);
+                if (res.ok && data && data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
                 }
+                if (res.redirected) {
+                    window.location.href = res.url;
+                    return;
+                }
+                showRegisterError((data && data.error) || 'Error en el registro');
+                releaseRegisterButton();
             } catch (error) {
                 console.error('Error en registro:', error);
-                emailError.textContent = 'Error de conexión. Intenta de nuevo.';
-                emailError.style.display = 'block';
+                showRegisterError('Error de conexión. Intenta de nuevo.');
+                releaseRegisterButton();
             }
         });
     </script>

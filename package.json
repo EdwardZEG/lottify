@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node scripts/dev-local.js",
+    "dev": "node index.js",
     "setup": "node scripts/setup-directories.js",
     "railway:build": "npm install",
     "railway:start": "node index.js",
@@ -37,8 +37,5 @@
     "multer": "^2.0.1",
     "nodemailer": "^7.0.4",
     "socket.io": "^4.8.1"
-  },
-  "devDependencies": {
-    "mongodb-memory-server": "^10.1.4"
   }
 }

@@ -1369,6 +1369,13 @@
             color: #ffc107;
         }
 
+        .price-currency {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #6c757d;
+            margin-left: 0.35rem;
+        }
+
         .price-period {
             font-size: 1.2rem;
             color: #6c757d;
@@ -2462,6 +2469,7 @@
                                         </h3>
                                         <div class="plan-price">
                                             <span class="price-amount">$25</span>
+                                            <span class="price-currency">MXN</span>
                                             <span class="price-period">/mes</span>
                                         </div>
                                     </div>
@@ -2486,12 +2494,12 @@
 
                                     <div class="plan-action text-center">
                                         <% if (user.subscriptionStatus !=='premium' ) { %>
-                                            <button class="btn btn-warning btn-lg px-5" id="subscribe-btn" disabled>
-                                                <i class="bi bi-lock-fill me-2"></i>
-                                                Suscribirse Ahora
+                                            <button class="btn btn-warning btn-lg px-5" id="subscribe-btn" type="button">
+                                                <i class="bi bi-star-fill me-2"></i>
+                                                Suscribirse
                                             </button>
-                                            <p class="subscription-note mt-2 text-muted">
-                                                <small>Función temporalmente deshabilitada</small>
+                                            <p class="small text-muted mt-3 mb-0">
+                                                Pago de prueba para desarrolladores. No pagues con dinero real: en Mercado Pago solo simula el pago.
                                             </p>
                                             <% } else { %>
                                                 <button class="btn btn-success btn-lg px-5" disabled>
@@ -3343,20 +3351,106 @@
 
             if (subscribeBtn) {
                 subscribeBtn.addEventListener('click', handleSubscription);
+                confirmSubscriptionAfterCheckout(subscribeBtn, () => restoreSubscribeButton(subscribeBtn), 1);
             }
 
             // Verificar mensajes de URL (éxito/error)
             checkSubscriptionMessages();
         }
 
+        const subscribeLabel = '<i class="bi bi-star-fill me-2"></i>Suscribirse';
+        let subscriptionBusy = false;
+
+        function waitForCheckoutModal(timeoutMs) {
+            return new Promise((resolve) => {
+                const started = Date.now();
+                const timer = setInterval(() => {
+                    const modal = document.getElementById('mercadopago-checkout');
+                    if (modal) {
+                        clearInterval(timer);
+                        resolve(modal);
+                    } else if (Date.now() - started >= timeoutMs) {
+                        clearInterval(timer);
+                        resolve(null);
+                    }
+                }, 150);
+            });
+        }
+
+        function watchCheckoutModal(button, onClose) {
+            const observer = new MutationObserver(() => {
+                if (!document.getElementById('mercadopago-checkout')) {
+                    observer.disconnect();
+                    onClose();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        async function openMercadoPagoCheckout(data) {
+            if (data.public_key && data.id && window.MercadoPago) {
+                const mp = new MercadoPago(data.public_key, { locale: 'es-MX' });
+                if (typeof mp.checkout === 'function') {
+                    mp.checkout({
+                        preference: { id: data.id },
+                        autoOpen: true
+                    });
+                    const modal = await waitForCheckoutModal(10000);
+                    if (modal) return 'modal';
+                }
+            }
+            if (data.init_point) {
+                window.location.assign(data.init_point);
+                return 'redirect';
+            }
+            throw new Error('No se pudo abrir Mercado Pago');
+        }
+
+        function restoreSubscribeButton(button) {
+            subscriptionBusy = false;
+            button.disabled = false;
+            button.innerHTML = subscribeLabel;
+        }
+
+        async function confirmSubscriptionAfterCheckout(button, restore, attempts) {
+            const tries = attempts || 5;
+            const showProgress = tries > 1;
+            if (button && showProgress) {
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Confirmando pago...';
+            }
+            try {
+                for (let attempt = 0; attempt < tries; attempt++) {
+                    const response = await fetch('/payment/confirm-subscription', { method: 'POST' });
+                    const data = await response.json().catch(() => null);
+                    if (data && data.status === 'premium') {
+                        window.location.href = '/dashboard?success=subscription-activated';
+                        return;
+                    }
+                    if (data && data.status === 'pending') {
+                        window.location.href = '/dashboard?info=payment-pending';
+                        return;
+                    }
+                    if (attempt < tries - 1) {
+                        await new Promise((resolve) => setTimeout(resolve, 1500));
+                    }
+                }
+            } catch (error) {
+                console.error('Error confirmando pago:', error);
+            }
+            if (restore && showProgress) restore();
+        }
+
         // Manejar proceso de suscripción
         async function handleSubscription() {
             const subscribeBtn = document.getElementById('subscribe-btn');
+            if (!subscribeBtn || subscriptionBusy) return;
+
+            subscriptionBusy = true;
+            subscribeBtn.disabled = true;
+            subscribeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Abriendo pago...';
 
             try {
-                subscribeBtn.disabled = true;
-                subscribeBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Procesando...';
-
                 const response = await fetch('/payment/create-subscription-preference', {
                     method: 'POST',
                     headers: {
@@ -3364,34 +3458,21 @@
                     }
                 });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Error ${response.status}: ${errorText}`);
-                }
-
                 const data = await response.json();
-
-                if (data.id) {
-                    // Crear checkout de Mercado Pago
-                    const mp = new MercadoPago(data.public_key, {
-                        locale: 'es-MX'
-                    });
-
-                    mp.checkout({
-                        preference: {
-                            id: data.id
-                        },
-                        autoOpen: true
-                    });
-                } else {
-                    throw new Error('No se recibió ID de preferencia');
+                if (!response.ok) {
+                    throw new Error(data.error || 'No se pudo iniciar el pago');
                 }
+
+                const mode = await openMercadoPagoCheckout(data);
+                if (mode === 'redirect') return;
+                subscribeBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Pago de prueba abierto';
+                watchCheckoutModal(subscribeBtn, () => {
+                    confirmSubscriptionAfterCheckout(subscribeBtn, () => restoreSubscribeButton(subscribeBtn));
+                });
             } catch (error) {
                 console.error('Error en suscripción:', error);
                 alert('Error al procesar la suscripción: ' + error.message);
-            } finally {
-                subscribeBtn.disabled = false;
-                subscribeBtn.innerHTML = '<i class="bi bi-star-fill me-2"></i>Suscribirse Ahora';
+                restoreSubscribeButton(subscribeBtn);
             }
         }
 
